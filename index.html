@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-[#F0F3F8]">
+<html lang="es" class="h-full bg-[#F4F6F4]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nogadísima — Presupuesto de Receta | Chiles en Nogada</title>
   <meta name="description" content="Motor de costeo unitario y presupuesto de receta para lote base de Chiles en Nogada de temporada.">
 
-  <!-- Google Fonts: Outfit (UI) & Space Grotesk (Numerics & Financial Data) -->
+  <!-- Google Fonts: Outfit (UI), Plus Jakarta Sans (Headings) & Space Grotesk (Numerics) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,21 +20,31 @@
         extend: {
           fontFamily: {
             sans: ['"Outfit"', 'sans-serif'],
+            heading: ['"Plus Jakarta Sans"', 'sans-serif'],
             numeric: ['"Space Grotesk"', 'monospace'],
           },
           colors: {
-            talavera: {
-              50: '#F0F4F9',
-              100: '#D9E3F1',
-              200: '#B4C8E3',
-              300: '#8FAED5',
-              400: '#5B86BE',
-              500: '#2A558C',
-              600: '#1F4270',
-              700: '#1B365D', // Brand Primary Deep Talavera Navy
-              800: '#142947',
-              900: '#0E1C31',
-              dark: '#1B365D',
+            charcoal: {
+              950: '#12141A',
+              900: '#161820',
+              850: '#1A1D24',
+              800: '#1E222B', // Base Smoked Fill
+              700: '#282C37',
+              600: '#333846',
+              500: '#475569',
+            },
+            poblano: {
+              50: '#F2F7F4',
+              100: '#E1EFEA',
+              200: '#C0DED3',
+              300: '#94C3B2',
+              400: '#529E7F',
+              500: '#2D6A4F',
+              600: '#1B4332',
+              700: '#16382C',
+              800: '#112C23',
+              900: '#0A1C16',
+              dark: '#16382C',
             },
             granada: {
               50: '#FDF2F4',
@@ -46,27 +56,9 @@
               800: '#6E1725',
             },
             cream: {
-              50: '#FDFBF7', // Brand Warm Cream Neutral
+              50: '#FDFBF7', // Brand Warm Bone Neutral
               100: '#FAF7F2',
               200: '#F4ECE0',
-            },
-            chile: {
-              50: '#F2F7F4',
-              100: '#E1EFEA',
-              200: '#C0DED3',
-              600: '#1F6B52',
-              700: '#185440',
-              800: '#144333',
-              900: '#103529',
-              dark: '#1B4D3E',
-            },
-            pomegranate: {
-              50: '#FDF2F4',
-              100: '#FCE7EB',
-              500: '#C0392B',
-              600: '#A62639',
-              700: '#8A1E2F',
-              800: '#6E1725',
             },
             amber: {
               50: '#FFFBEB',
@@ -75,201 +67,124 @@
               600: '#D97706',
               700: '#B45309',
             }
-          },
-          boxShadow: {
-            'glass': '0 8px 32px 0 rgba(27, 54, 93, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9)',
-            'glass-lg': '0 16px 40px 0 rgba(27, 54, 93, 0.09), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95)',
-            'glass-card': '0 8px 32px 0 rgba(27, 54, 93, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)',
-            'glass-dark': '0 12px 30px -4px rgba(14, 28, 49, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15)',
-            'soft': '0 2px 15px -3px rgba(27, 54, 93, 0.04), 0 4px 6px -2px rgba(27, 54, 93, 0.02)',
-            'card': '0 8px 30px -4px rgba(27, 54, 93, 0.05), inset 0 1px 1px 0 rgba(255, 255, 255, 0.85)',
-            'elevated': '0 20px 40px -6px rgba(27, 54, 93, 0.10), inset 0 1px 2px 0 rgba(255, 255, 255, 0.95)',
-            'inner-soft': 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.03)',
           }
         }
       }
     }
   </script>
 
-  <style>
-    /* Liquid Glassmorphism & Micro-Interactions */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: rgba(240, 243, 248, 0.5);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(180, 200, 227, 0.6);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(143, 174, 213, 0.9);
-    }
-    .liquid-glass {
-      background: rgba(255, 255, 255, 0.70);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 8px 32px 0 rgba(27, 54, 93, 0.06), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-    }
-    .liquid-glass-subtle {
-      background: rgba(255, 255, 255, 0.45);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.65);
-    }
-    .liquid-glass-dark {
-      background: rgba(27, 54, 93, 0.95);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 12px 30px -4px rgba(14, 28, 49, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
-    }
-    .tab-active-glow {
-      box-shadow: 0 4px 16px 0 rgba(27, 54, 93, 0.25);
-    }
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
-  </style>
+  <!-- Liquid Frosted Glass Design System Stylesheet -->
+  <link rel="stylesheet" href="css/liquid-glass.css">
 </head>
-<body class="h-full bg-[#F0F3F8] text-slate-800 antialiased selection:bg-talavera-100 selection:text-talavera-900 flex flex-col font-sans min-h-screen relative overflow-x-hidden">
+<body class="h-full bg-[#F4F6F4] text-slate-800 antialiased selection:bg-slate-200 selection:text-slate-900 font-sans min-h-screen relative overflow-x-hidden m-0 p-0">
 
-  <!-- ========================================== -->
-  <!-- AMBIENT FLUID BACKGROUND (LIQUID MESH)     -->
-  <!-- ========================================== -->
-  <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
-    <!-- Fluid blur orb 1 (Talavera ice blue, top left) -->
-    <div class="absolute -top-24 -left-24 w-96 h-96 sm:w-[32rem] sm:h-[32rem] rounded-full bg-gradient-to-br from-blue-200/50 to-talavera-100/40 blur-3xl mix-blend-multiply opacity-80"></div>
-    <!-- Fluid blur orb 2 (Warm cream pearl, top right) -->
-    <div class="absolute top-10 right-0 w-80 h-80 sm:w-[28rem] sm:h-[28rem] rounded-full bg-gradient-to-bl from-amber-100/50 via-cream-100/60 to-transparent blur-3xl opacity-90"></div>
-    <!-- Fluid blur orb 3 (Pomegranate blush, center right) -->
-    <div class="absolute top-1/3 -right-20 w-96 h-96 sm:w-[30rem] sm:h-[30rem] rounded-full bg-gradient-to-l from-rose-100/40 via-granada-50/50 to-transparent blur-3xl opacity-75"></div>
-    <!-- Fluid blur orb 4 (Sage pearl, bottom left) -->
-    <div class="absolute bottom-10 left-10 w-80 h-80 sm:w-[26rem] sm:h-[26rem] rounded-full bg-gradient-to-tr from-emerald-100/40 to-teal-50/30 blur-3xl opacity-70"></div>
-  </div>
+  <!-- ============================================================== -->
+  <!-- 1. DYNAMIC AMBIENT LIQUID CANVAS (60FPS FLUID GRADIENT MESH)    -->
+  <!-- ============================================================== -->
+  <canvas id="ambient-liquid-canvas"></canvas>
 
-  <!-- ========================================== -->
-  <!-- TOP NAVIGATION BAR (LIQUID FROSTED GLASS)  -->
-  <!-- ========================================== -->
-  <header class="sticky top-0 z-30 bg-white/70 backdrop-blur-2xl border-b border-white/80 shadow-[0_4px_30px_0_rgba(27,54,93,0.03)] transition-all duration-200">
-    <div class="w-full px-4 sm:px-8 xl:px-12">
-      <div class="flex items-center justify-between h-20">
-        
-        <!-- Brand Identity & Logo ("Nogadísima") -->
-        <div class="flex items-center space-x-3.5">
-          <div class="h-14 w-14 rounded-2xl bg-white/90 p-1 flex items-center justify-center shadow-sm border border-white/90 backdrop-blur-md shrink-0">
-            <img src="Logo.png" alt="Nogadísima — Chiles en Nogada" class="h-12 w-auto object-contain" onerror="this.onerror=null;this.src='logo.png';">
-          </div>
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="text-xl font-extrabold tracking-tight text-talavera-700">Nogadísima</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-talavera-50 text-talavera-700 border border-talavera-200/60 font-numeric">
-                2026
-              </span>
-            </div>
-            <p class="text-xs text-slate-500 font-medium">Chiles en Nogada — Business Command Center</p>
-          </div>
+  <!-- ============================================================== -->
+  <!-- 2. MASTER FLOATING LIQUID GLASS DASHBOARD SHELL                 -->
+  <!-- ============================================================== -->
+  <div class="w-full min-h-screen m-0 p-4 sm:p-6 lg:p-8 xl:p-10 space-y-7 sm:space-y-8 liquid-shell">
+
+    <!-- ========================================== -->
+    <!-- TOP NAVIGATION BAR (GLASS PILLS & BRAND)   -->
+    <!-- ========================================== -->
+    <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/60">
+      
+      <!-- Brand Identity & Logo ("Nogadísima") -->
+      <div class="flex items-center space-x-4">
+        <div class="h-14 w-14 rounded-2xl bg-white/85 p-1.5 flex items-center justify-center shadow-sm border border-white/95 backdrop-blur-xl shrink-0">
+          <img src="Logo.png" alt="Nogadísima — Chiles en Nogada" class="h-11 w-auto object-contain" onerror="this.onerror=null;this.src='logo.png';">
         </div>
-
-        <!-- Center: Tab Switchers (Frosted Glass Pill Bar) -->
-        <nav class="hidden md:flex items-center p-1.5 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]">
-          <button id="tab-presupuesto" onclick="switchTab('presupuesto')" 
-            class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 bg-talavera-700 text-white shadow-md shadow-talavera-900/15 tab-active-glow">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-            </svg>
-            <span>Presupuesto de Receta</span>
-            <span class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          </button>
-
-          <button id="tab-inversion" onclick="switchTab('inversion')" 
-            class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-talavera-700 hover:bg-white/60 transition-all duration-200">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span>Inversión & Gastos</span>
-          </button>
-
-          <button id="tab-pedidos" onclick="switchTab('pedidos')" 
-            class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-talavera-700 hover:bg-white/60 transition-all duration-200">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-            </svg>
-            <span>Control de Pedidos</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-white/70 text-slate-500 border border-slate-200/50">Pronto</span>
-          </button>
-
-          <button id="tab-inventario" onclick="switchTab('inventario')" 
-            class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-talavera-700 hover:bg-white/60 transition-all duration-200">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-            </svg>
-            <span>Inventario</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-white/70 text-slate-500 border border-slate-200/50">Pronto</span>
-          </button>
-        </nav>
-
-        <!-- Right: Actions -->
-        <div class="flex items-center space-x-2 sm:space-x-3">
-          <!-- Sync indicator -->
-          <div class="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md text-[11px] font-medium text-slate-600 border border-white/80 shadow-sm" title="Costos guardados en tiempo real en LocalStorage">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Receta Sincronizada</span>
+        <div>
+          <div class="flex items-center space-x-2.5">
+            <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-heading">Nogadísima</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/70 text-slate-700 border border-white/90 font-numeric shadow-sm">
+              2026
+            </span>
           </div>
-
-          <!-- Export CSV button -->
-          <button onclick="exportRecipeToCsv()" class="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl border border-white/80 bg-white/60 hover:bg-white text-slate-700 text-xs font-semibold backdrop-blur-md transition-all shadow-sm" title="Descargar escandallo en CSV">
-            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-            <span class="hidden sm:inline">Exportar Escandallo</span>
-          </button>
-
-          <!-- Reset Default Recipe Button -->
-          <button onclick="confirmResetRecipe()" class="inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-xl border border-white/80 bg-white/60 hover:bg-white text-slate-600 hover:text-slate-900 text-xs font-medium backdrop-blur-md transition-all shadow-sm" title="Restablecer receta predeterminada de 7 piezas">
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span class="hidden sm:inline">Restablecer</span>
-          </button>
+          <p class="text-xs text-slate-500 font-medium">Chiles en Nogada — Business Command Center</p>
         </div>
-
       </div>
 
-      <!-- Mobile Tab Bar -->
-      <div class="flex md:hidden overflow-x-auto py-2.5 space-x-2 border-t border-slate-200/40 no-scrollbar">
-        <button onclick="switchTab('presupuesto')" id="mob-tab-presupuesto" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold bg-talavera-700 text-white font-numeric">Presupuesto</button>
-        <button onclick="switchTab('inversion')" id="mob-tab-inversion" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-white/70 text-slate-600 font-numeric">Inversión</button>
-        <button onclick="switchTab('pedidos')" id="mob-tab-pedidos" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-white/70 text-slate-600 font-numeric">Pedidos</button>
-        <button onclick="switchTab('inventario')" id="mob-tab-inventario" class="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-white/70 text-slate-600 font-numeric">Inventario</button>
-      </div>
-    </div>
-  </header>
+      <!-- Center: Tab Switchers (Frosted Glass Pill Bar) -->
+      <nav class="flex items-center p-1.5 liquid-pill overflow-x-auto no-scrollbar max-w-full">
+        <button id="tab-presupuesto" onclick="switchTab('presupuesto')" 
+          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 liquid-pill-active">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          <span class="whitespace-nowrap">Presupuesto de Receta</span>
+          <span class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse"></span>
+        </button>
 
-  <!-- ========================================== -->
-  <!-- MAIN WORKSPACE CONTAINER (FLUID FULL WIDTH)-->
-  <!-- ========================================== -->
-  <main class="w-full min-h-screen px-4 sm:px-8 xl:px-12 py-6 space-y-7">
+        <button id="tab-inversion" onclick="switchTab('inversion')" 
+          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="whitespace-nowrap">Inversión & Gastos</span>
+        </button>
+
+        <button id="tab-pedidos" onclick="switchTab('pedidos')" 
+          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <span class="whitespace-nowrap">Control de Pedidos</span>
+          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/70 text-slate-500 border border-white/80">Pronto</span>
+        </button>
+
+        <button id="tab-inventario" onclick="switchTab('inventario')" 
+          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+          <span class="whitespace-nowrap">Inventario</span>
+          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/70 text-slate-500 border border-white/80">Pronto</span>
+        </button>
+      </nav>
+
+      <!-- Right: Action Pills -->
+      <div class="flex items-center space-x-2.5">
+        <!-- Live Sync Pill -->
+        <div class="hidden sm:flex items-center space-x-2 px-3.5 py-2 liquid-pill text-[11px] font-semibold text-slate-600" title="Costos guardados en tiempo real en LocalStorage">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-glass-pulse"></span>
+          <span>Receta Sincronizada</span>
+        </div>
+
+        <!-- Export CSV Pill -->
+        <button onclick="exportRecipeToCsv()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-700 text-xs font-semibold" title="Descargar escandallo en CSV">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Exportar</span>
+        </button>
+
+        <!-- Reset Default Recipe Pill -->
+        <button onclick="confirmResetRecipe()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-600 hover:text-slate-900 text-xs font-medium" title="Restablecer receta predeterminada de 7 piezas">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span class="hidden sm:inline">Restablecer</span>
+        </button>
+      </div>
+
+    </header>
 
     <!-- ========================================== -->
     <!-- TAB 1: PRESUPUESTO (RECIPE VIEW)           -->
     <!-- ========================================== -->
     <div id="panel-presupuesto" class="space-y-7 transition-all duration-300">
 
-      <!-- Header with Subtitle and Formula Notice -->
+      <!-- View Title & Active Indicator Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <div class="flex items-center space-x-2.5">
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Presupuesto de Receta</h1>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-talavera-50 text-talavera-700 border border-talavera-200/60 font-numeric">
+          <div class="flex items-center space-x-3">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Presupuesto de Receta</h1>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 text-slate-700 border border-white/90 font-numeric shadow-sm">
               Lote Base: 7 Piezas
             </span>
           </div>
@@ -278,84 +193,82 @@
           </p>
         </div>
         
-        <!-- Batch Meta Pill -->
-        <div class="flex items-center space-x-3 text-xs text-slate-500 bg-white/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/80 shadow-[0_4px_16px_0_rgba(27,54,93,0.04)]">
-          <div class="flex items-center space-x-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="font-medium text-slate-700">Fórmula de conversión activa</span>
-          </div>
+        <!-- Formula Active Pill -->
+        <div class="flex items-center space-x-2.5 text-xs text-slate-600 liquid-pill px-4 py-2 self-start md:self-auto">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-glass-pulse"></span>
+          <span class="font-medium text-slate-700">Fórmula de conversión activa</span>
         </div>
       </div>
 
       <!-- ---------------------------------------- -->
-      <!-- A. TOP KPI CARDS (LIQUID FROSTED GLASS)  -->
+      <!-- A. TOP KPI CARDS (LIQUID GLASS)          -->
       <!-- ---------------------------------------- -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         
         <!-- KPI 1: Costo por Chile (Hero Metric) -->
-        <div class="bg-gradient-to-br from-white/90 via-white/70 to-talavera-50/40 rounded-3xl p-5 border border-talavera-200/60 shadow-[0_8px_32px_0_rgba(27,54,93,0.07),inset_0_1px_1px_rgba(255,255,255,0.95)] backdrop-blur-2xl hover:shadow-[0_16px_40px_0_rgba(27,54,93,0.11)] transition-all group">
+        <div class="liquid-card p-5 group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-talavera-700">Costo por Chile (Unitario)</span>
-            <div class="w-8 h-8 rounded-xl bg-talavera-50 text-talavera-700 border border-talavera-200/60 flex items-center justify-center shadow-inner-soft">
-              <svg class="w-4 h-4 text-talavera-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Costo por Chile (Unitario)</span>
+            <div class="w-9 h-9 rounded-2xl bg-white/80 text-slate-700 border border-white/90 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.5 2 2 6.5 2 12c0 3.8 2.1 7.1 5.3 8.8.4.2.9.2 1.2-.1.5-.4.8-1 .9-1.7.3-1.6.9-3.2 2-4.5.6-.7 1.3-1.4 2.1-2 .7-.5 1.5-1 2.2-1.7 1.2-1.1 2.3-2.6 2.3-4.8 0-3.3-2.7-6-6-6z"/>
               </svg>
             </div>
           </div>
-          <div class="mt-3">
-            <div id="kpi-unit-cost" class="text-3xl sm:text-4xl font-extrabold text-talavera-700 tracking-tight font-numeric">$85.77</div>
+          <div class="mt-3.5">
+            <div id="kpi-unit-cost" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-numeric">$85.77</div>
             <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
               <span>Porción individual completa</span>
-              <span class="font-semibold text-talavera-700 bg-talavera-100/70 px-2 py-0.5 rounded-full text-[10px]">Alimento + Empaque</span>
+              <span class="font-semibold text-slate-700 bg-white/70 px-2 py-0.5 rounded-full text-[10px] border border-white/80">Alimento + Empaque</span>
             </div>
           </div>
           <!-- Component distribution line -->
-          <div class="w-full bg-slate-200/60 h-2 rounded-full mt-3 overflow-hidden flex" title="Distribución de costo">
+          <div class="w-full bg-slate-200/50 h-2 rounded-full mt-3.5 overflow-hidden flex" title="Distribución de costo">
             <div id="bar-nogada" class="bg-amber-400 h-full" style="width: 29.4%" title="Nogada"></div>
             <div id="bar-relleno" class="bg-granada-600 h-full" style="width: 33.3%" title="Relleno"></div>
-            <div id="bar-extras" class="bg-talavera-700 h-full" style="width: 23.1%" title="Poblano y Montaje"></div>
-            <div id="bar-empaque" class="bg-sky-500 h-full" style="width: 14.2%" title="Empaque"></div>
+            <div id="bar-extras" class="bg-slate-700 h-full" style="width: 23.1%" title="Poblano y Montaje"></div>
+            <div id="bar-empaque" class="bg-amber-600 h-full" style="width: 14.2%" title="Empaque"></div>
           </div>
         </div>
 
         <!-- KPI 2: Costo Total del Lote -->
-        <div class="bg-white/70 backdrop-blur-2xl rounded-3xl p-5 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-lg transition-all">
+        <div class="liquid-card p-5">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Costo Total del Lote</span>
-            <div class="w-8 h-8 rounded-xl bg-white/80 border border-slate-200/50 text-slate-600 flex items-center justify-center shadow-inner-soft">
+            <div class="w-9 h-9 rounded-2xl bg-white/80 border border-white/90 text-slate-600 flex items-center justify-center shadow-sm">
               <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
             </div>
           </div>
-          <div class="mt-3">
+          <div class="mt-3.5">
             <div id="kpi-batch-cost" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-numeric">$557.49</div>
             <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
               <span id="kpi-total-ingredients-count" class="font-numeric">32 ingredientes & insumos</span>
               <span class="font-medium text-slate-700">Lote base (7 pzas)</span>
             </div>
           </div>
-          <div class="w-full bg-slate-200/60 h-2 rounded-full mt-3 overflow-hidden">
-            <div class="bg-talavera-700 h-full rounded-full" style="width: 100%"></div>
+          <div class="w-full bg-slate-200/50 h-2 rounded-full mt-3.5 overflow-hidden">
+            <div class="bg-[#1E222B] h-full rounded-full" style="width: 100%"></div>
           </div>
         </div>
 
         <!-- KPI 3: Rendimiento Real (Interactive Stepper) -->
-        <div class="bg-white/70 backdrop-blur-2xl rounded-3xl p-5 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-lg transition-all">
+        <div class="liquid-card p-5">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Rendimiento Real (Porciones)</span>
-            <div class="w-8 h-8 rounded-xl bg-amber-50/80 text-amber-700 border border-amber-200/60 flex items-center justify-center shadow-inner-soft">
+            <div class="w-9 h-9 rounded-2xl bg-amber-50/80 text-amber-700 border border-amber-200/60 flex items-center justify-center shadow-sm">
               <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
               </svg>
             </div>
           </div>
-          <div class="mt-3">
+          <div class="mt-3.5">
             <div class="flex items-center space-x-2">
               <input type="number" step="0.1" min="1" max="50" id="recipe-yield-input" value="6.5"
                 oninput="handleYieldChange(this.value)"
                 onchange="handleYieldChange(this.value)"
-                class="w-24 text-3xl sm:text-4xl font-extrabold text-slate-900 bg-white/50 border border-slate-200/60 rounded-xl px-2 py-0.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-talavera-500/20 focus:border-talavera-700/60 tracking-tight font-numeric transition-all">
+                class="w-24 text-3xl sm:text-4xl font-extrabold text-slate-900 liquid-input px-2.5 py-0.5 tracking-tight font-numeric">
               <span class="text-xs font-semibold text-slate-500">chiles reales</span>
             </div>
             <div class="mt-1 flex items-center justify-between text-xs text-slate-400">
@@ -363,29 +276,29 @@
               <span class="font-medium text-amber-700">Base receta: 7</span>
             </div>
           </div>
-          <div class="w-full bg-amber-100/60 h-2 rounded-full mt-3 overflow-hidden">
+          <div class="w-full bg-amber-100/50 h-2 rounded-full mt-3.5 overflow-hidden">
             <div class="bg-amber-500 h-full rounded-full" style="width: 92.8%"></div>
           </div>
         </div>
 
         <!-- KPI 4: Food Cost Ratio (Indicador Gastronómico) -->
-        <div class="bg-white/70 backdrop-blur-2xl rounded-3xl p-5 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)] hover:shadow-lg transition-all">
+        <div class="liquid-card p-5">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Food Cost Ratio</span>
-            <div class="w-8 h-8 rounded-xl bg-emerald-50/80 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shadow-inner-soft">
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50/80 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shadow-sm">
               <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
               </svg>
             </div>
           </div>
-          <div class="mt-3">
+          <div class="mt-3.5">
             <div id="kpi-food-cost" class="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight font-numeric">30.6%</div>
             <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
-              <span id="kpi-food-cost-status" class="font-medium text-emerald-600">Rango óptimo (&lt; 32%)</span>
+              <span id="kpi-food-cost-status" class="font-medium text-emerald-600">Rango gourmet óptimo (&lt; 32%)</span>
               <span class="text-[10px] text-slate-400 font-numeric">vs Venta $280</span>
             </div>
           </div>
-          <div class="w-full bg-emerald-100/60 h-2 rounded-full mt-3 overflow-hidden">
+          <div class="w-full bg-emerald-100/50 h-2 rounded-full mt-3.5 overflow-hidden">
             <div id="kpi-food-cost-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 30.6%"></div>
           </div>
         </div>
@@ -393,18 +306,18 @@
       </section>
 
       <!-- ---------------------------------------- -->
-      <!-- SIMULADOR DE MARGEN Y PRECIO SUGERIDO    -->
+      <!-- SIMULADOR COMERCIAL & ELEVATED DARK CARD -->
       <!-- ---------------------------------------- -->
-      <section class="bg-white/70 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)]">
+      <section class="liquid-card p-6 sm:p-7">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
           <!-- Left: Pricing Controls -->
           <div class="flex-1 space-y-3">
             <div class="flex items-center space-x-2">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Simulador Comercial</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-talavera-50 text-talavera-700 border border-talavera-200/50">Proyección de Rentabilidad</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white/70 text-slate-700 border border-white/90 shadow-sm">Proyección de Rentabilidad</span>
             </div>
-            <h2 class="text-lg font-bold text-slate-900">Precio Sugerido de Venta al Público (PVP)</h2>
+            <h2 class="text-lg font-bold text-slate-900 font-heading">Precio Sugerido de Venta al Público (PVP)</h2>
             <p class="text-xs text-slate-500">
               Ajusta el precio por chile para proyectar el margen bruto, la ganancia neta por pieza y el retorno por lote.
             </p>
@@ -416,48 +329,48 @@
                 <input type="number" id="sale-price-input" step="5" min="50" max="1000" value="280"
                   onchange="handleSalePriceChange(this.value)"
                   oninput="handleSalePriceChange(this.value)"
-                  class="w-full pl-7 pr-12 py-2.5 text-lg font-extrabold text-slate-900 bg-white/60 border border-slate-200/60 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-talavera-500/20 focus:border-talavera-700/60 font-numeric shadow-sm transition-all">
+                  class="w-full pl-7 pr-12 py-2.5 text-lg font-extrabold text-slate-900 liquid-input font-numeric">
                 <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-bold text-slate-400">MXN</span>
               </div>
 
-              <!-- Quick price presets -->
+              <!-- Quick price presets (Interactive Apple Control Center Capsules) -->
               <div class="flex items-center space-x-1.5 text-xs">
                 <span class="text-slate-400 text-[11px] mr-1">Precios comunes:</span>
-                <button onclick="setSalePrice(220)" class="px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white border border-slate-200/50 font-semibold text-slate-700 transition-all font-numeric shadow-sm">220</button>
-                <button onclick="setSalePrice(250)" class="px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white border border-slate-200/50 font-semibold text-slate-700 transition-all font-numeric shadow-sm">250</button>
-                <button onclick="setSalePrice(280)" class="px-3 py-1.5 rounded-xl bg-talavera-700 text-white font-bold border border-talavera-800 shadow-md shadow-talavera-900/15 transition-all font-numeric">280</button>
-                <button onclick="setSalePrice(320)" class="px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white border border-slate-200/50 font-semibold text-slate-700 transition-all font-numeric shadow-sm">320</button>
+                <button type="button" data-preset-price="220" onclick="setSalePrice(220)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$220</button>
+                <button type="button" data-preset-price="250" onclick="setSalePrice(250)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$250</button>
+                <button type="button" data-preset-price="280" onclick="setSalePrice(280)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill liquid-pill-active font-bold font-numeric">$280</button>
+                <button type="button" data-preset-price="320" onclick="setSalePrice(320)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$320</button>
               </div>
             </div>
           </div>
 
-          <!-- Right: Elevated Dark Talavera Card (Glossy UI Contrast) -->
-          <div class="bg-gradient-to-br from-talavera-900 via-talavera-800 to-slate-900 text-white rounded-3xl p-5 border border-white/20 shadow-xl backdrop-blur-xl min-w-[320px] sm:min-w-[380px]">
+          <!-- Right: Elevated Dark Smoked Charcoal Glass Card (Apple Control Center Inspired) -->
+          <div class="liquid-dark-card p-6 min-w-[320px] sm:min-w-[390px]">
             <div class="grid grid-cols-2 gap-4 pb-4 border-b border-white/10">
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Ganancia Neta / Chile</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Ganancia Neta / Chile</span>
                 <div id="sim-profit-per-chile" class="text-2xl font-extrabold text-emerald-400 mt-0.5 font-numeric">$194.23</div>
-                <span class="text-[11px] text-slate-300">Utilidad limpia por pieza</span>
+                <span class="text-[11px] text-[#94A3B8]">Utilidad limpia por pieza</span>
               </div>
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Margen Bruto</span>
-                <div id="sim-gross-margin" class="text-2xl font-extrabold text-white mt-0.5 font-numeric">69.4%</div>
-                <span class="text-[11px] text-slate-300">Sobre precio de venta</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Margen Bruto</span>
+                <div id="sim-gross-margin" class="text-2xl font-extrabold text-[#F8FAFC] mt-0.5 font-numeric">69.4%</div>
+                <span class="text-[11px] text-[#94A3B8]">Sobre precio de venta</span>
               </div>
             </div>
 
             <div class="pt-3 flex items-center justify-between text-xs">
-              <span class="text-slate-300 font-medium">Ganancia proyectada por lote (6.5 pzas):</span>
-              <strong id="sim-batch-profit" class="text-sm font-extrabold text-emerald-300 font-numeric">$1,262.50 MXN</strong>
+              <span class="text-[#94A3B8] font-medium">Ganancia proyectada por lote (6.5 pzas):</span>
+              <strong id="sim-batch-profit" class="text-sm font-extrabold text-emerald-300 font-numeric">$1,262.51 MXN</strong>
             </div>
 
             <!-- Profit bar split -->
             <div class="w-full bg-white/15 h-2 rounded-full mt-3 overflow-hidden flex">
-              <div id="sim-bar-cost" class="bg-slate-400 h-full" style="width: 30.6%" title="Costo Unitario"></div>
+              <div id="sim-bar-cost" class="bg-slate-500 h-full" style="width: 30.6%" title="Costo Unitario"></div>
               <div id="sim-bar-profit" class="bg-emerald-400 h-full" style="width: 69.4%" title="Ganancia Neta"></div>
             </div>
-            <div class="flex justify-between items-center text-[10px] text-slate-300 mt-1.5">
-              <span>Costo: <strong id="sim-cost-label" class="text-white font-numeric">$85.77</strong></span>
+            <div class="flex justify-between items-center text-[10px] text-[#94A3B8] mt-1.5">
+              <span>Costo: <strong id="sim-cost-label" class="text-[#F8FAFC] font-numeric">$85.77</strong></span>
               <span>Ganancia: <strong id="sim-profit-label" class="text-emerald-400 font-numeric">$194.23</strong></span>
             </div>
 
@@ -473,18 +386,18 @@
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Desglose de Costos por Sección de Receta</h2>
+            <h2 class="text-xl font-extrabold text-slate-900 tracking-tight font-heading">Desglose de Costos por Sección de Receta</h2>
             <p class="text-xs text-slate-500">Edita directamente en la tabla. Puedes usar gramos, mililitros, tazas o cucharadas; las fórmulas de costeo calculan la proporción automáticamente.</p>
           </div>
           <div class="flex items-center space-x-2 text-xs">
-            <button onclick="expandAllCategories()" class="px-3 py-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 text-slate-700 hover:bg-white hover:text-slate-900 transition-all font-medium shadow-sm">Expandir todo</button>
-            <button onclick="collapseAllCategories()" class="px-3 py-1.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 text-slate-700 hover:bg-white hover:text-slate-900 transition-all font-medium shadow-sm">Colapsar todo</button>
+            <button onclick="expandAllCategories()" class="px-3.5 py-1.5 rounded-full liquid-pill text-slate-700 font-medium">Expandir todo</button>
+            <button onclick="collapseAllCategories()" class="px-3.5 py-1.5 rounded-full liquid-pill text-slate-700 font-medium">Colapsar todo</button>
           </div>
         </div>
 
         <!-- Container where the 4 Category Cards will be dynamically injected -->
         <div id="recipe-categories-container" class="space-y-5">
-          <!-- Dynamically populated by renderRecipeCards() -->
+          <!-- Dynamically populated by renderRecipeCards() in js/app.js -->
         </div>
 
       </section>
@@ -499,21 +412,21 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Inversión Real & Flujo de Caja</h1>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Inversión Real & Flujo de Caja</h1>
           <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Seguimiento de compras en tiendas, tickets y desembolsos reales de la temporada.</p>
         </div>
         <div class="flex items-center space-x-2">
-          <span class="px-3 py-1 rounded-xl bg-white/70 backdrop-blur-md text-slate-700 text-xs font-bold border border-white/80 font-numeric shadow-sm">
+          <span class="px-3.5 py-1.5 rounded-full liquid-pill text-slate-700 text-xs font-bold font-numeric">
             Total Inversión Inicial: $6,094.50 MXN
           </span>
         </div>
       </div>
 
       <!-- Financial Milestones Tracker -->
-      <section class="bg-white/70 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)]">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-200/40">
+      <section class="liquid-card p-6 sm:p-7">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-white/60">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">Hitos de Pago Programados (Compras Escalonadas)</h2>
+            <h2 class="text-lg font-bold text-slate-900 font-heading">Hitos de Pago Programados (Compras Escalonadas)</h2>
             <p class="text-xs text-slate-500 mt-0.5">Calendario de amortización y compras mayores para la temporada.</p>
           </div>
         </div>
@@ -523,7 +436,7 @@
           <div class="rounded-2xl p-5 border bg-emerald-50/40 border-emerald-200/60 backdrop-blur-md shadow-sm">
             <div class="flex items-start justify-between">
               <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 1</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 font-numeric">PAGADO</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 font-numeric">PAGADO</span>
             </div>
             <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de agosto</h3>
             <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$3,892.50</div>
@@ -536,7 +449,7 @@
           <div class="rounded-2xl p-5 border bg-amber-50/40 border-amber-200/60 backdrop-blur-md shadow-sm">
             <div class="flex items-start justify-between">
               <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 2</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
             </div>
             <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de septiembre</h3>
             <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$5,523.00</div>
@@ -549,7 +462,7 @@
           <div class="rounded-2xl p-5 border bg-amber-50/40 border-amber-200/60 backdrop-blur-md shadow-sm">
             <div class="flex items-start justify-between">
               <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 3</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
             </div>
             <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de octubre</h3>
             <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$2,626.00</div>
@@ -563,8 +476,8 @@
       </section>
 
       <!-- Store Purchases Summary Table Preview -->
-      <section class="bg-white/70 backdrop-blur-2xl rounded-3xl border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)] p-6">
-        <h3 class="text-base font-bold text-slate-900 mb-4">Registro Consolidado de Proveedores</h3>
+      <section class="liquid-card p-6">
+        <h3 class="text-base font-bold text-slate-900 mb-4 font-heading">Registro Consolidado de Proveedores</h3>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div class="p-4 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
             <span class="text-slate-400 font-semibold">Tlalnepantla (Frutos Secos)</span>
@@ -591,18 +504,18 @@
     <!-- TAB 3: CONTROL DE PEDIDOS (PLACEHOLDER)    -->
     <!-- ========================================== -->
     <div id="panel-pedidos" class="hidden space-y-6 transition-all duration-300">
-      <div class="bg-white/70 backdrop-blur-2xl rounded-3xl p-8 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)]">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200/40">
+      <div class="liquid-card p-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/60">
           <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-100/70 text-blue-800 text-xs font-bold mb-2">
-              <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-100/80 text-blue-800 text-xs font-bold mb-2">
+              <span class="w-2 h-2 rounded-full bg-blue-600 animate-glass-pulse"></span>
               <span>Sprint 2</span>
             </div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Control de Pedidos & Logística</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Pedidos & Logística</h2>
             <p class="text-sm text-slate-500 mt-1">Gestión de comandas, fechas de entrega, pagos vía Revolut/Efectivo y asignación de cocina.</p>
           </div>
           <div>
-            <span class="px-3.5 py-1.5 rounded-xl bg-amber-50/80 text-amber-800 border border-amber-200/60 text-xs font-bold font-numeric shadow-sm">
+            <span class="px-4 py-2 rounded-full liquid-pill text-amber-800 text-xs font-bold font-numeric">
               13 Chiles por Preparar
             </span>
           </div>
@@ -610,21 +523,21 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Pipeline de Entregas</h3>
             <p class="text-xs text-slate-500 mt-1.5">Monitoreo de pedidos por lotes: Producción vs. Fechas de entrega en CDMX y Toluca.</p>
           </div>
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Reconciliación de Pagos</h3>
             <p class="text-xs text-slate-500 mt-1.5">Seguimiento de transferencias Revolut y efectivo contra entrega de comensales.</p>
           </div>
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">División Socios (Diego & Angy)</h3>
@@ -638,18 +551,18 @@
     <!-- TAB 4: INVENTARIO (PLACEHOLDER)            -->
     <!-- ========================================== -->
     <div id="panel-inventario" class="hidden space-y-6 transition-all duration-300">
-      <div class="bg-white/70 backdrop-blur-2xl rounded-3xl p-8 border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)]">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200/40">
+      <div class="liquid-card p-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/60">
           <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100/70 text-emerald-800 text-xs font-bold mb-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold mb-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-600 animate-glass-pulse"></span>
               <span>Sprint 2</span>
             </div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Control de Stock e Insumos Críticos</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Stock e Insumos Críticos</h2>
             <p class="text-sm text-slate-500 mt-1">Existencias físicas de empaques, frutos secos, chiles poblanos y rendimiento de nogada.</p>
           </div>
           <div>
-            <span class="px-3.5 py-1.5 rounded-xl bg-white/70 backdrop-blur-md text-slate-700 border border-white/80 text-xs font-bold font-numeric shadow-sm">
+            <span class="px-4 py-2 rounded-full liquid-pill text-slate-700 text-xs font-bold font-numeric">
               34 Insumos Controlados
             </span>
           </div>
@@ -657,21 +570,21 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Frutos Secos en Gramos</h3>
             <p class="text-xs text-slate-500 mt-1.5 font-numeric">Control de Nuez (1,521g), Piñón (494g), Almendra (854g) y Acitrón (900g).</p>
           </div>
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-talavera-50 text-talavera-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-poblano-50 text-poblano-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Empaques & Presentación</h3>
             <p class="text-xs text-slate-500 mt-1.5 font-numeric">Stock de bolsas blancas (61 pzas), papel encerado (112 pzas) y envases (117 pzas).</p>
           </div>
           <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-9 h-9 rounded-xl bg-granada-100 text-granada-700 flex items-center justify-center font-bold mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-granada-100 text-granada-700 flex items-center justify-center font-bold mb-4">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
             <h3 class="text-base font-bold text-slate-800">Perecederos & Carnes</h3>
@@ -681,20 +594,20 @@
       </div>
     </div>
 
-  </main>
+  </div>
 
   <!-- ========================================== -->
   <!-- MODAL: CONFIRM RESET RECIPE (FROSTED GLASS)-->
   <!-- ========================================== -->
-  <div id="reset-recipe-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md hidden">
-    <div class="bg-white/90 backdrop-blur-2xl rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/90 text-center">
+  <div id="reset-recipe-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-7 max-w-sm w-full text-center">
       <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
       </div>
-      <h3 class="text-base font-bold text-slate-900">¿Restablecer Receta Predeterminada?</h3>
+      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restablecer Receta Predeterminada?</h3>
       <p class="text-xs text-slate-500 mt-1.5">Se restaurarán las cantidades y precios estándar del lote de 7 piezas ($85.77/chile).</p>
       <div class="flex items-center justify-center space-x-3 mt-6">
-        <button onclick="closeResetRecipeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+        <button onclick="closeResetRecipeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
           Cancelar
         </button>
         <button onclick="executeResetRecipe()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
@@ -705,697 +618,13 @@
   </div>
 
   <!-- Toast Notification Container -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
-
-  <!-- ========================================== -->
-  <!-- JAVASCRIPT APPLICATION CORE LOGIC          -->
-  <!-- ========================================== -->
-  <script>
-    /**
-     * NOGADÍSIMA - MULTI-UNIT RECIPE COSTING ENGINE
-     * Clean Vanilla ES6+ State & Conversions
-     */
-
-    // 1. Initial Standard Seed Recipe
-    const DEFAULT_RECIPE_DATA = {
-      batchPieces: 7,
-      yieldPortions: 6.5,
-      salePrice: 280.00,
-      categories: [
-        {
-          id: 'nogada',
-          title: 'Nogada (Salsa / Cobertura)',
-          description: 'Salsa tradicional a base de nuez de Castilla fresca, queso de cabra y jerez.',
-          color: 'amber',
-          items: [
-            { id: 'nog-1', name: 'Queso Philadelphia', qty: 140, unit: 'gr', packageSize: 420, generalPrice: 93.00, finalCost: 31.00, store: 'Walmart' },
-            { id: 'nog-2', name: 'Crema', qty: 225, unit: 'ml', packageSize: 800, generalPrice: 76.00, finalCost: 21.38, store: 'Walmart' },
-            { id: 'nog-3', name: 'Acitrón', qty: 100, unit: 'gr', packageSize: 1200, generalPrice: 120.00, finalCost: 10.00, store: 'Tlalne' },
-            { id: 'nog-4', name: 'Queso de cabra', qty: 70, unit: 'gr', packageSize: 280, generalPrice: 92.00, finalCost: 23.00, store: 'Chedraui' },
-            { id: 'nog-5', name: 'Nuez de Castilla', qty: 250, unit: 'gr', packageSize: 1000, generalPrice: 280.00, finalCost: 70.00, store: 'Tlalne' },
-            { id: 'nog-6', name: 'Leche evaporada', qty: 120, unit: 'gr', packageSize: 1000, generalPrice: 42.00, finalCost: 5.04, store: 'Chedraui' },
-            { id: 'nog-7', name: 'Jerez', qty: 60, unit: 'ml', packageSize: 4000, generalPrice: 244.00, finalCost: 3.66, store: 'Chedraui' },
-            { id: 'nog-8', name: 'Canela en polvo', qty: 1, unit: 'cda', packageSize: 50, generalPrice: 15.00, finalCost: 0.00, store: 'Alacena' },
-            { id: 'nog-9', name: 'Almíbar de durazno', qty: 50, unit: 'ml', packageSize: 1000, generalPrice: 20.00, finalCost: 0.00, store: 'Alacena' },
-            { id: 'nog-10', name: 'Sal y pimienta blanca', qty: 1, unit: 'cda', packageSize: 50, generalPrice: 10.00, finalCost: 0.00, store: 'Alacena' }
-          ]
-        },
-        {
-          id: 'relleno',
-          title: 'Relleno (Picadillo Poblano)',
-          description: 'Carne picada de res y cerdo con manzana panochera, durazno, frutos secos y especias.',
-          color: 'pomegranate',
-          items: [
-            { id: 'rel-1', name: 'Azúcar blanca', qty: 50, unit: 'gr', packageSize: 1000, generalPrice: 19.00, finalCost: 0.95, store: 'Tlalne' },
-            { id: 'rel-2', name: 'Carne de res molida', qty: 200, unit: 'gr', packageSize: 1000, generalPrice: 152.00, finalCost: 30.40, store: 'Costco' },
-            { id: 'rel-3', name: 'Carne de puerco molida', qty: 200, unit: 'gr', packageSize: 1000, generalPrice: 110.00, finalCost: 22.00, store: 'Cuadro' },
-            { id: 'rel-4', name: 'Manzana panochera', qty: 1, unit: 'pza', packageSize: 5, generalPrice: 54.00, finalCost: 10.80, store: 'Mercado' },
-            { id: 'rel-5', name: 'Durazno criollo', qty: 3, unit: 'pza', packageSize: 8, generalPrice: 65.00, finalCost: 24.38, store: 'Mercado' },
-            { id: 'rel-6', name: 'Acitrón picado', qty: 100, unit: 'gr', packageSize: 1200, generalPrice: 144.00, finalCost: 12.00, store: 'Tlalne' },
-            { id: 'rel-7', name: 'Nuez picada', qty: 100, unit: 'gr', packageSize: 1000, generalPrice: 280.00, finalCost: 28.00, store: 'Tlalne' },
-            { id: 'rel-8', name: 'Almendra fileteada', qty: 50, unit: 'gr', packageSize: 1000, generalPrice: 215.00, finalCost: 10.75, store: 'Tlalne' },
-            { id: 'rel-9', name: 'Piñón rosa', qty: 50, unit: 'gr', packageSize: 1000, generalPrice: 570.00, finalCost: 28.50, store: 'Tlalne' },
-            { id: 'rel-10', name: 'Cebolla blanca', qty: 200, unit: 'gr', packageSize: 1000, generalPrice: 35.00, finalCost: 7.00, store: 'Mercado' },
-            { id: 'rel-11', name: 'Diente de ajo', qty: 1, unit: 'pza', packageSize: 20.5, generalPrice: 41.00, finalCost: 2.00, store: 'Mercado' },
-            { id: 'rel-12', name: 'Puré de tomate', qty: 170, unit: 'ml', packageSize: 340, generalPrice: 18.30, finalCost: 9.15, store: 'Walmart' },
-            { id: 'rel-13', name: 'Especias (canela, clavo, nuez moscada, aceite)', qty: 1, unit: 'cda', packageSize: 50, generalPrice: 30.00, finalCost: 0.00, store: 'Alacena' }
-          ]
-        },
-        {
-          id: 'extras',
-          title: 'Extras & Montaje',
-          description: 'Chiles poblanos seleccionados, granada roja y perejil fresco de adorno.',
-          color: 'chile',
-          items: [
-            { id: 'ext-1', name: 'Chiles poblanos seleccionados', qty: 7, unit: 'pza', packageSize: 7, generalPrice: 107.00, finalCost: 107.00, store: 'Chedraui' },
-            { id: 'ext-2', name: 'Granada roja desgranada', qty: 300, unit: 'gr', packageSize: 1000, generalPrice: 70.00, finalCost: 21.00, store: 'Mercado' },
-            { id: 'ext-3', name: 'Perejil liso fresco', qty: 1, unit: 'cda', packageSize: 2, generalPrice: 1.00, finalCost: 0.50, store: 'Mercado' }
-          ]
-        },
-        {
-          id: 'empaque',
-          title: 'Costeo de Empaque y Presentación',
-          description: 'Cajas, envases termoformados, bolsas blancas y etiquetas corporativas proporcionales.',
-          color: 'blue',
-          items: [
-            { id: 'pkg-1', name: 'Papel encerado', qty: 7, unit: 'pza', packageSize: 100, generalPrice: 130.00, finalCost: 9.10, store: 'Mercado Libre' },
-            { id: 'pkg-2', name: 'Bolsas blancas de entrega', qty: 7, unit: 'pza', packageSize: 58.24, generalPrice: 208.00, finalCost: 25.00, store: 'Mercado Libre' },
-            { id: 'pkg-3', name: 'Envases termoformados (Marce)', qty: 7, unit: 'pza', packageSize: 350, generalPrice: 250.00, finalCost: 5.00, store: 'Goplas' },
-            { id: 'pkg-4', name: 'Sticker decorativo chile', qty: 7, unit: 'pza', packageSize: 210, generalPrice: 65.00, finalCost: 2.17, store: 'Goplas' },
-            { id: 'pkg-5', name: 'Sticker de sello bolsa', qty: 7, unit: 'pza', packageSize: 46.6, generalPrice: 65.00, finalCost: 9.75, store: 'Goplas' },
-            { id: 'pkg-6', name: 'Tarjetas de agradecimiento / presentación', qty: 7, unit: 'pza', packageSize: 70, generalPrice: 280.50, finalCost: 28.00, store: 'Lumen' }
-          ]
-        }
-      ]
-    };
-
-    const STORAGE_KEY_RECIPE = 'nogadisima_recipe_engine_v3';
-
-    // Application State
-    const RecipeApp = {
-      data: null,
-      collapsedCards: new Set()
-    };
-
-    // 2. Storage Helpers
-    function loadRecipeState() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY_RECIPE);
-        if (stored) {
-          RecipeApp.data = JSON.parse(stored);
-        } else {
-          RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
-        }
-      } catch (e) {
-        console.error('Error loading recipe state', e);
-        RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
-      }
-    }
-
-    function saveRecipeState() {
-      try {
-        localStorage.setItem(STORAGE_KEY_RECIPE, JSON.stringify(RecipeApp.data));
-      } catch (e) {
-        console.error('Error saving recipe state', e);
-      }
-    }
-
-    // 3. Formatting Utilities
-    const currencyFormatter = new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-    function formatCurrency(amount) {
-      const num = Number(amount) || 0;
-      return currencyFormatter.format(num);
-    }
-
-    function safeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text !== undefined && text !== null ? text.toString() : '';
-      return div.innerHTML;
-    }
-
-    // 4. Culinary Multi-Unit Conversion Engine
-    function convertToMetricEquivalent(qty, unit, name = '') {
-      const lower = (name || '').toLowerCase();
-      const n = Number(qty) || 0;
-
-      if (unit === 'gr' || unit === 'ml') {
-        return n;
-      }
-      if (unit === 'taza') {
-        // Nuts, chopped fruit, flour, sugar: ~100-110g per cup
-        if (lower.includes('nuez') || lower.includes('almendra') || lower.includes('piñón') || lower.includes('azúcar')) {
-          return n * 100;
-        }
-        // Liquids, creams, purees, oils, syrups: ~240g/ml per cup
-        return n * 240;
-      }
-      if (unit === 'cda') {
-        // Standard tablespoon: 15g / 15ml
-        return n * 15;
-      }
-      // Pieces or other direct unit items
-      return n;
-    }
-
-    function recalculateItemCost(item) {
-      const qty = Number(item.qty) || 0;
-      const genPrice = Number(item.generalPrice) || 0;
-      if (qty <= 0 || genPrice <= 0) {
-        item.finalCost = 0;
-        return;
-      }
-
-      if (item.unit === 'pza') {
-        const pkgSize = Number(item.packageSize) || 1;
-        item.finalCost = (qty / pkgSize) * genPrice;
-      } else {
-        const effectiveMetric = convertToMetricEquivalent(qty, item.unit, item.name);
-        const pkgMetric = Number(item.packageSize) || 1000;
-        item.finalCost = (effectiveMetric / pkgMetric) * genPrice;
-      }
-    }
-
-    // 5. Tab Navigation
-    function switchTab(tabId) {
-      const panels = ['presupuesto', 'inversion', 'pedidos', 'inventario'];
-      panels.forEach(id => {
-        const panelEl = document.getElementById(`panel-${id}`);
-        const desktopBtn = document.getElementById(`tab-${id}`);
-        const mobileBtn = document.getElementById(`mob-tab-${id}`);
-
-        if (id === tabId) {
-          if (panelEl) panelEl.classList.remove('hidden');
-          if (desktopBtn) {
-            desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 bg-talavera-700 text-white shadow-md shadow-talavera-900/15 tab-active-glow';
-          }
-          if (mobileBtn) {
-            mobileBtn.className = 'whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-bold bg-talavera-700 text-white font-numeric';
-          }
-        } else {
-          if (panelEl) panelEl.classList.add('hidden');
-          if (desktopBtn) {
-            desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-talavera-700 hover:bg-white/60 transition-all duration-200';
-          }
-          if (mobileBtn) {
-            mobileBtn.className = 'whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-white/70 text-slate-600 font-numeric';
-          }
-        }
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // 6. Reactive Formula Engine
-    function recalculateAll() {
-      if (!RecipeApp.data) return;
-
-      let batchTotal = 0;
-      let totalItemCount = 0;
-      const categoryTotals = {};
-
-      RecipeApp.data.categories.forEach(cat => {
-        const catSubtotal = cat.items.reduce((sum, item) => sum + (Number(item.finalCost) || 0), 0);
-        categoryTotals[cat.id] = catSubtotal;
-        batchTotal += catSubtotal;
-        totalItemCount += cat.items.length;
-      });
-
-      const yieldPortions = Number(RecipeApp.data.yieldPortions) || 6.5;
-      const unitCost = yieldPortions > 0 ? (batchTotal / yieldPortions) : 0;
-
-      const salePrice = Number(RecipeApp.data.salePrice) || 280.00;
-      const profitPerChile = salePrice - unitCost;
-      const grossMargin = salePrice > 0 ? Math.max(0, (profitPerChile / salePrice) * 100) : 0;
-      const foodCostRatio = salePrice > 0 ? Math.min(100, (unitCost / salePrice) * 100) : 0;
-      const batchProfit = profitPerChile * yieldPortions;
-
-      // Update KPI DOM Elements
-      document.getElementById('kpi-unit-cost').textContent = formatCurrency(unitCost);
-      document.getElementById('kpi-batch-cost').textContent = formatCurrency(batchTotal);
-      document.getElementById('kpi-total-ingredients-count').textContent = `${totalItemCount} ingredientes & insumos`;
-      document.getElementById('recipe-yield-input').value = yieldPortions;
-
-      document.getElementById('kpi-food-cost').textContent = `${foodCostRatio.toFixed(1)}%`;
-      document.getElementById('kpi-food-cost-bar').style.width = `${Math.min(100, foodCostRatio)}%`;
-      
-      const foodCostStatusEl = document.getElementById('kpi-food-cost-status');
-      if (foodCostRatio <= 32) {
-        foodCostStatusEl.textContent = 'Rango gourmet óptimo (< 32%)';
-        foodCostStatusEl.className = 'font-medium text-emerald-600';
-      } else if (foodCostRatio <= 40) {
-        foodCostStatusEl.textContent = 'Rango estándar (32% - 40%)';
-        foodCostStatusEl.className = 'font-medium text-amber-600';
-      } else {
-        foodCostStatusEl.textContent = 'Alerta de costo elevado (> 40%)';
-        foodCostStatusEl.className = 'font-medium text-granada-600';
-      }
-
-      // Update Mini Cost Share Bars
-      if (batchTotal > 0) {
-        const nogadaPct = ((categoryTotals['nogada'] || 0) / batchTotal) * 100;
-        const rellenoPct = ((categoryTotals['relleno'] || 0) / batchTotal) * 100;
-        const extrasPct = ((categoryTotals['extras'] || 0) / batchTotal) * 100;
-        const empaquePct = ((categoryTotals['empaque'] || 0) / batchTotal) * 100;
-
-        document.getElementById('bar-nogada').style.width = `${nogadaPct}%`;
-        document.getElementById('bar-relleno').style.width = `${rellenoPct}%`;
-        document.getElementById('bar-extras').style.width = `${extrasPct}%`;
-        document.getElementById('bar-empaque').style.width = `${empaquePct}%`;
-      }
-
-      // Update Simulator DOM Elements
-      document.getElementById('sale-price-input').value = salePrice;
-      document.getElementById('sim-profit-per-chile').textContent = formatCurrency(profitPerChile);
-      document.getElementById('sim-gross-margin').textContent = `${grossMargin.toFixed(1)}%`;
-      document.getElementById('sim-batch-profit').textContent = `${formatCurrency(batchProfit)} MXN`;
-      document.getElementById('sim-cost-label').textContent = formatCurrency(unitCost);
-      document.getElementById('sim-profit-label').textContent = formatCurrency(profitPerChile);
-
-      document.getElementById('sim-bar-cost').style.width = `${Math.min(100, foodCostRatio)}%`;
-      document.getElementById('sim-bar-profit').style.width = `${Math.max(0, 100 - foodCostRatio)}%`;
-
-      // Update Subtotals in Category Headers
-      RecipeApp.data.categories.forEach(cat => {
-        const subtotalEl = document.getElementById(`subtotal-${cat.id}`);
-        const shareEl = document.getElementById(`share-${cat.id}`);
-        const countEl = document.getElementById(`count-${cat.id}`);
-        const subtotal = categoryTotals[cat.id] || 0;
-        const sharePct = batchTotal > 0 ? ((subtotal / batchTotal) * 100).toFixed(1) : 0;
-
-        if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
-        if (shareEl) shareEl.textContent = `${sharePct}% del lote`;
-        if (countEl) countEl.textContent = `${cat.items.length} insumos`;
-      });
-    }
-
-    // 7. Render Recipe Accordion Cards (Liquid Frosted Glass & Minimalist Iconography)
-    function renderRecipeCards() {
-      const container = document.getElementById('recipe-categories-container');
-      container.innerHTML = '';
-
-      RecipeApp.data.categories.forEach((cat) => {
-        const isCollapsed = RecipeApp.collapsedCards.has(cat.id);
-        const card = document.createElement('div');
-        card.className = 'bg-white/70 backdrop-blur-2xl rounded-3xl border border-white/80 shadow-[0_8px_32px_0_rgba(27,54,93,0.06),inset_0_1px_1px_rgba(255,255,255,0.9)] overflow-hidden transition-all duration-200';
-        card.id = `card-${cat.id}`;
-
-        // Header
-        const header = document.createElement('div');
-        header.className = 'p-5 sm:p-6 bg-white/40 backdrop-blur-md cursor-pointer select-none border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/70 transition-colors';
-        header.onclick = (e) => {
-          if (e.target.closest('button')) return;
-          toggleCardCollapse(cat.id);
-        };
-
-        // Minimalist Monochromatic Line Icon per Category
-        let categorySvgIcon = '';
-        if (cat.id === 'nogada') {
-          categorySvgIcon = '<svg class="w-5 h-5 text-talavera-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>';
-        } else if (cat.id === 'relleno') {
-          categorySvgIcon = '<svg class="w-5 h-5 text-granada-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>';
-        } else if (cat.id === 'extras') {
-          categorySvgIcon = '<svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>';
-        } else {
-          categorySvgIcon = '<svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>';
-        }
-
-        header.innerHTML = `
-          <div class="flex items-center space-x-3.5">
-            <div class="w-10 h-10 rounded-2xl bg-white/80 flex items-center justify-center shrink-0 border border-white/80 shadow-sm backdrop-blur-md">
-              ${categorySvgIcon}
-            </div>
-            <div>
-              <div class="flex items-center space-x-2">
-                <h3 class="text-base sm:text-lg font-bold text-slate-900">${safeHtml(cat.title)}</h3>
-                <span id="count-${cat.id}" class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/60 text-slate-600 border border-slate-200/50 font-numeric shadow-sm">
-                  ${cat.items.length} insumos
-                </span>
-              </div>
-              <p class="text-xs text-slate-500 mt-0.5">${safeHtml(cat.description)}</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-3 self-end sm:self-center">
-            <!-- Dynamic Subtotal Badge -->
-            <div class="text-right">
-              <div id="subtotal-${cat.id}" class="text-base sm:text-lg font-extrabold text-slate-900 font-numeric">$0.00</div>
-              <div id="share-${cat.id}" class="text-[10px] font-semibold text-talavera-700 font-numeric">0% del lote</div>
-            </div>
-
-            <!-- Quick Add Button inside header -->
-            <button onclick="addNewIngredientRow('${cat.id}'); event.stopPropagation();" 
-              class="inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-xl bg-talavera-700 hover:bg-talavera-800 text-white text-xs font-semibold transition-all shadow-md shadow-talavera-900/15">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-              <span>+ Añadir</span>
-            </button>
-
-            <!-- Chevron Collapse Toggle -->
-            <div class="p-1 text-slate-400 hover:text-slate-600 transition-transform ${isCollapsed ? '-rotate-90' : 'rotate-0'}" id="chevron-${cat.id}">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </div>
-        `;
-
-        // Body Content (Full In-Table Editing)
-        const body = document.createElement('div');
-        body.id = `body-${cat.id}`;
-        body.className = `${isCollapsed ? 'hidden' : 'block'} overflow-x-auto transition-all`;
-
-        let rowsHtml = '';
-        cat.items.forEach(item => {
-          rowsHtml += `
-            <tr id="row-${item.id}" class="hover:bg-white/60 transition-colors group">
-              <!-- 1. Ingrediente / Insumo -->
-              <td class="py-2.5 px-4 font-semibold text-slate-800 text-xs sm:text-sm">
-                <input type="text" id="name-${item.id}" value="${safeHtml(item.name)}" 
-                  oninput="updateIngredientField('${cat.id}', '${item.id}', 'name', this.value)"
-                  onblur="updateIngredientField('${cat.id}', '${item.id}', 'name', this.value)"
-                  onkeydown="if(event.key === 'Enter') this.blur()"
-                  class="w-full bg-white/30 hover:bg-white/80 focus:bg-white px-2.5 py-1.5 rounded-xl text-slate-900 font-semibold border border-transparent hover:border-slate-200/60 focus:border-talavera-500/50 focus:ring-2 focus:ring-talavera-500/20 transition-all duration-200">
-              </td>
-
-              <!-- 2. Cantidad Receta -->
-              <td class="py-2.5 px-2 text-right w-28">
-                <input type="number" step="any" min="0" value="${item.qty}"
-                  oninput="updateIngredientField('${cat.id}', '${item.id}', 'qty', this.value)"
-                  onblur="updateIngredientField('${cat.id}', '${item.id}', 'qty', this.value)"
-                  onkeydown="if(event.key === 'Enter') this.blur()"
-                  class="w-full text-right bg-white/30 hover:bg-white/80 focus:bg-white px-2 py-1.5 rounded-xl text-slate-800 font-extrabold border border-transparent hover:border-slate-200/60 focus:border-talavera-500/50 focus:ring-2 focus:ring-talavera-500/20 transition-all duration-200 text-xs sm:text-sm font-numeric">
-              </td>
-
-              <!-- 3. Unidad (Multi-Unit Selector: gr, ml, taza, cda, pza) -->
-              <td class="py-2.5 px-2 w-32">
-                <select onchange="updateIngredientField('${cat.id}', '${item.id}', 'unit', this.value)"
-                  class="w-full bg-white/50 hover:bg-white/80 focus:bg-white px-2.5 py-1.5 rounded-xl text-slate-700 font-semibold border border-slate-200/50 focus:border-talavera-500/50 focus:ring-2 focus:ring-talavera-500/20 cursor-pointer transition-all duration-200 text-xs shadow-sm">
-                  <option value="gr" ${item.unit === 'gr' ? 'selected' : ''}>gr (gramos)</option>
-                  <option value="ml" ${item.unit === 'ml' ? 'selected' : ''}>ml (mililitros)</option>
-                  <option value="taza" ${item.unit === 'taza' ? 'selected' : ''}>taza (tazas)</option>
-                  <option value="cda" ${item.unit === 'cda' ? 'selected' : ''}>cda (cucharadas)</option>
-                  <option value="pza" ${item.unit === 'pza' ? 'selected' : ''}>pza (piezas)</option>
-                </select>
-              </td>
-
-              <!-- 4. Precio Gral (Paquete / Mercado) -->
-              <td class="py-2.5 px-2 text-right w-36">
-                <div class="relative flex items-center justify-end">
-                  <span class="text-slate-400 text-xs font-medium mr-1">$</span>
-                  <input type="number" step="0.5" min="0" value="${Number(item.generalPrice).toFixed(2)}"
-                    oninput="updateIngredientField('${cat.id}', '${item.id}', 'generalPrice', this.value)"
-                    onblur="updateIngredientField('${cat.id}', '${item.id}', 'generalPrice', this.value)"
-                    onkeydown="if(event.key === 'Enter') this.blur()"
-                    class="w-24 text-right bg-white/30 hover:bg-white/80 focus:bg-white px-2 py-1.5 rounded-xl text-slate-700 font-bold border border-transparent hover:border-slate-200/60 focus:border-talavera-500/50 focus:ring-2 focus:ring-talavera-500/20 transition-all duration-200 text-xs sm:text-sm font-numeric">
-                </div>
-              </td>
-
-              <!-- 5. Costo Receta (Calculado / Editable) -->
-              <td class="py-2.5 px-2 text-right w-36">
-                <div class="relative flex items-center justify-end">
-                  <span class="text-emerald-600 font-bold text-xs mr-1">$</span>
-                  <input type="number" step="0.01" min="0" id="cost-${item.id}" value="${Number(item.finalCost).toFixed(2)}"
-                    oninput="updateIngredientField('${cat.id}', '${item.id}', 'finalCost', this.value)"
-                    onblur="updateIngredientField('${cat.id}', '${item.id}', 'finalCost', this.value)"
-                    onkeydown="if(event.key === 'Enter') this.blur()"
-                    class="w-24 text-right bg-white/30 hover:bg-white/80 focus:bg-white px-2 py-1.5 rounded-xl text-emerald-800 font-extrabold border border-transparent hover:border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-xs sm:text-sm font-numeric">
-                </div>
-              </td>
-
-              <!-- 6. Proveedor / Tienda -->
-              <td class="py-2.5 px-2 w-36">
-                <input type="text" value="${safeHtml(item.store || '')}" placeholder="Proveedor"
-                  oninput="updateIngredientField('${cat.id}', '${item.id}', 'store', this.value)"
-                  onblur="updateIngredientField('${cat.id}', '${item.id}', 'store', this.value)"
-                  onkeydown="if(event.key === 'Enter') this.blur()"
-                  class="w-full bg-white/30 hover:bg-white/80 focus:bg-white px-2.5 py-1.5 rounded-xl text-slate-600 font-medium text-xs border border-transparent hover:border-slate-200/60 focus:border-talavera-500/50 focus:ring-2 focus:ring-talavera-500/20 transition-all duration-200">
-              </td>
-
-              <!-- Acciones -->
-              <td class="py-2.5 pr-4 pl-2 text-right w-14">
-                <button onclick="deleteIngredient('${cat.id}', '${item.id}')" title="Eliminar ingrediente"
-                  class="p-1.5 text-slate-400 hover:text-granada-600 hover:bg-granada-50/80 rounded-xl transition-all">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-
-        body.innerHTML = `
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-white/30 border-y border-slate-200/40 text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
-                <th class="py-3 px-4">Ingrediente / Insumo</th>
-                <th class="py-3 px-2 text-right">Cantidad Receta</th>
-                <th class="py-3 px-2">Unidad</th>
-                <th class="py-3 px-2 text-right">Precio Gral (Paquete)</th>
-                <th class="py-3 px-2 text-right">Costo Receta ($ MXN)</th>
-                <th class="py-3 px-2">Proveedor / Tienda</th>
-                <th class="py-3 pr-4 pl-2 text-right">Acción</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200/40">
-              ${rowsHtml}
-            </tbody>
-          </table>
-
-          <!-- Card Bottom Action Bar -->
-          <div class="p-3 sm:p-4 bg-white/30 backdrop-blur-md border-t border-slate-200/40 flex items-center justify-between text-xs">
-            <span class="text-slate-400 text-[11px]">
-              Soporta gramos, mililitros, tazas y cucharadas. El conversor ajusta densidades de frutos secos y líquidos.
-            </span>
-            <button onclick="addNewIngredientRow('${cat.id}')" 
-              class="inline-flex items-center space-x-1.5 text-talavera-700 hover:text-talavera-900 font-bold transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-              <span>+ Añadir a ${safeHtml(cat.title.split(' ')[0])}</span>
-            </button>
-          </div>
-        `;
-
-        card.appendChild(header);
-        card.appendChild(body);
-        container.appendChild(card);
-      });
-
-      recalculateAll();
-    }
-
-    // 8. Real-Time Interactive Handlers
-    function toggleCardCollapse(categoryId) {
-      if (RecipeApp.collapsedCards.has(categoryId)) {
-        RecipeApp.collapsedCards.delete(categoryId);
-      } else {
-        RecipeApp.collapsedCards.add(categoryId);
-      }
-      const body = document.getElementById(`body-${categoryId}`);
-      const chevron = document.getElementById(`chevron-${categoryId}`);
-      if (body && chevron) {
-        if (RecipeApp.collapsedCards.has(categoryId)) {
-          body.classList.add('hidden');
-          chevron.classList.add('-rotate-90');
-          chevron.classList.remove('rotate-0');
-        } else {
-          body.classList.remove('hidden');
-          chevron.classList.remove('-rotate-90');
-          chevron.classList.add('rotate-0');
-        }
-      }
-    }
-
-    function expandAllCategories() {
-      RecipeApp.collapsedCards.clear();
-      renderRecipeCards();
-    }
-
-    function collapseAllCategories() {
-      RecipeApp.data.categories.forEach(c => RecipeApp.collapsedCards.add(c.id));
-      renderRecipeCards();
-    }
-
-    function updateIngredientField(categoryId, itemId, field, value) {
-      const category = RecipeApp.data.categories.find(c => c.id === categoryId);
-      if (!category) return;
-      const item = category.items.find(i => i.id === itemId);
-      if (!item) return;
-
-      if (field === 'qty' || field === 'generalPrice') {
-        const num = parseFloat(value) || 0;
-        item[field] = Math.max(0, num);
-        recalculateItemCost(item);
-        const costInput = document.getElementById(`cost-${item.id}`);
-        if (costInput) {
-          costInput.value = Number(item.finalCost).toFixed(2);
-        }
-      } else if (field === 'finalCost') {
-        const num = parseFloat(value) || 0;
-        item.finalCost = Math.max(0, num);
-        if (item.qty > 0 && item.generalPrice > 0) {
-          const effectiveMetric = convertToMetricEquivalent(item.qty, item.unit, item.name);
-          item.packageSize = (effectiveMetric * item.generalPrice) / item.finalCost;
-        }
-      } else if (field === 'unit') {
-        item.unit = value;
-        recalculateItemCost(item);
-        const costInput = document.getElementById(`cost-${item.id}`);
-        if (costInput) {
-          costInput.value = Number(item.finalCost).toFixed(2);
-        }
-      } else {
-        item[field] = value.trim ? value.trim() : value;
-      }
-
-      saveRecipeState();
-      recalculateAll();
-    }
-
-    function addNewIngredientRow(categoryId) {
-      const category = RecipeApp.data.categories.find(c => c.id === categoryId);
-      if (!category) return;
-
-      const newItem = {
-        id: 'item-' + Date.now(),
-        name: 'Nuevo Insumo',
-        qty: 100,
-        unit: 'gr',
-        packageSize: 1000,
-        generalPrice: 50.00,
-        finalCost: 5.00,
-        store: 'Mercado'
-      };
-
-      category.items.push(newItem);
-      saveRecipeState();
-      
-      RecipeApp.collapsedCards.delete(categoryId);
-      renderRecipeCards();
-
-      setTimeout(() => {
-        const input = document.getElementById(`name-${newItem.id}`);
-        if (input) {
-          input.focus();
-          input.select();
-        }
-      }, 50);
-
-      showToast('Nuevo insumo agregado a la receta', 'success');
-    }
-
-    function deleteIngredient(categoryId, itemId) {
-      const category = RecipeApp.data.categories.find(c => c.id === categoryId);
-      if (!category) return;
-      category.items = category.items.filter(i => i.id !== itemId);
-      saveRecipeState();
-      renderRecipeCards();
-      showToast('Ingrediente eliminado', 'info');
-    }
-
-    function handleYieldChange(value) {
-      const num = parseFloat(value) || 6.5;
-      RecipeApp.data.yieldPortions = Math.max(0.1, num);
-      saveRecipeState();
-      recalculateAll();
-    }
-
-    function handleSalePriceChange(value) {
-      const num = parseFloat(value) || 280;
-      RecipeApp.data.salePrice = Math.max(1, num);
-      saveRecipeState();
-      recalculateAll();
-    }
-
-    function setSalePrice(price) {
-      document.getElementById('sale-price-input').value = price;
-      handleSalePriceChange(price);
-    }
-
-    // 9. Reset Recipe to Default
-    function confirmResetRecipe() {
-      document.getElementById('reset-recipe-modal').classList.remove('hidden');
-    }
-
-    function closeResetRecipeModal() {
-      document.getElementById('reset-recipe-modal').classList.add('hidden');
-    }
-
-    function executeResetRecipe() {
-      localStorage.removeItem(STORAGE_KEY_RECIPE);
-      RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
-      saveRecipeState();
-      renderRecipeCards();
-      closeResetRecipeModal();
-      showToast('Receta restablecida a los valores estándar', 'info');
-    }
-
-    // 10. Export Recipe to CSV
-    function exportRecipeToCsv() {
-      const rows = [];
-      rows.push(['Sección', 'Ingrediente / Insumo', 'Cantidad Receta', 'Unidad', 'Precio General Paquete (MXN)', 'Costo en Receta (MXN)', 'Proveedor']);
-
-      RecipeApp.data.categories.forEach(cat => {
-        cat.items.forEach(item => {
-          rows.push([
-            `"${cat.title}"`,
-            `"${item.name}"`,
-            item.qty,
-            `"${item.unit}"`,
-            item.generalPrice,
-            item.finalCost,
-            `"${item.store || ''}"`
-          ]);
-        });
-      });
-
-      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + rows.map(r => r.join(',')).join('\n');
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `Presupuesto_Nogadisima_Lote7_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      showToast('Escandallo exportado en CSV', 'success');
-    }
-
-    // 11. Toast Notifications (Liquid Frosted Glass)
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      
-      let bg = 'bg-talavera-900/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-      let icon = '<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>';
-      
-      if (type === 'error') {
-        bg = 'bg-granada-700/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-        icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>';
-      } else if (type === 'warning') {
-        bg = 'bg-amber-600/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-        icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"></path></svg>';
-      }
-
-      toast.className = `${bg} px-4 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2 text-xs font-semibold transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
-      toast.innerHTML = `${icon}<span>${message}</span>`;
-      
-      container.appendChild(toast);
-      
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 2400);
-    }
-
-    // 12. Initialize App
-    document.addEventListener('DOMContentLoaded', () => {
-      loadRecipeState();
-      renderRecipeCards();
-    });
-  </script>
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- ============================================================== -->
+  <!-- APPLICATION SCRIPTS (MODULAR ARCHITECTURE)                      -->
+  <!-- ============================================================== -->
+  <script src="js/background-canvas.js"></script>
+  <script src="js/recipe-engine.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
