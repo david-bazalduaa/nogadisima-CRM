@@ -868,9 +868,123 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ==========================================
-// 9. Initialize Application
+// 9. Apple Minimalist Security & Lock Screen Engine
+// ==========================================
+const APP_AUTH_KEY = 'nogadisima_authenticated';
+const APP_ACCESS_PASSWORD = 'NogadisimaDA2001';
+
+window.isAppAuthenticated = function() {
+  try {
+    return sessionStorage.getItem(APP_AUTH_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+};
+
+window.handleLockLogin = function(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById('lock-password-input');
+  const card = document.getElementById('lock-card');
+  const errorMsg = document.getElementById('lock-error-msg');
+  const lockScreen = document.getElementById('lock-screen');
+  const dashboard = document.getElementById('app-dashboard');
+
+  if (!input) return;
+
+  const enteredPassword = input.value;
+
+  if (enteredPassword === APP_ACCESS_PASSWORD) {
+    // 1. Persist authenticated session
+    try {
+      sessionStorage.setItem(APP_AUTH_KEY, 'true');
+    } catch (e) {}
+
+    // 2. Hide error message
+    if (errorMsg) errorMsg.classList.add('hidden');
+
+    // 3. Smooth fade-out of lock screen revealing dashboard
+    if (dashboard) {
+      dashboard.style.display = 'block';
+    }
+
+    if (lockScreen) {
+      lockScreen.classList.add('opacity-0');
+      setTimeout(() => {
+        document.documentElement.classList.add('is-authenticated');
+        lockScreen.classList.add('hidden');
+        if (dashboard) dashboard.style.display = '';
+        input.value = '';
+        window.dispatchEvent(new Event('resize'));
+      }, 300);
+    } else {
+      document.documentElement.classList.add('is-authenticated');
+    }
+  } else {
+    // 4. Authentication Failure: Authentic iOS shake & discreet error label
+    if (card) {
+      card.classList.remove('animate-apple-shake');
+      void card.offsetWidth; // Force DOM reflow to replay keyframe
+      card.classList.add('animate-apple-shake');
+    }
+    if (errorMsg) {
+      errorMsg.classList.remove('hidden');
+    }
+    input.value = '';
+    input.focus();
+  }
+};
+
+window.lockAppSession = function() {
+  try {
+    sessionStorage.removeItem(APP_AUTH_KEY);
+  } catch (e) {}
+
+  document.documentElement.classList.remove('is-authenticated');
+
+  const lockScreen = document.getElementById('lock-screen');
+  const input = document.getElementById('lock-password-input');
+  const errorMsg = document.getElementById('lock-error-msg');
+  const card = document.getElementById('lock-card');
+
+  if (card) card.classList.remove('animate-apple-shake');
+  if (errorMsg) errorMsg.classList.add('hidden');
+
+  if (lockScreen) {
+    lockScreen.classList.remove('hidden', 'opacity-0');
+  }
+
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 80);
+  }
+};
+
+window.checkAuthState = function() {
+  const isAuth = window.isAppAuthenticated();
+  const lockScreen = document.getElementById('lock-screen');
+  const input = document.getElementById('lock-password-input');
+
+  if (isAuth) {
+    document.documentElement.classList.add('is-authenticated');
+    if (lockScreen) lockScreen.classList.add('hidden');
+  } else {
+    document.documentElement.classList.remove('is-authenticated');
+    if (lockScreen) {
+      lockScreen.classList.remove('hidden', 'opacity-0');
+      if (input) {
+        setTimeout(() => input.focus(), 120);
+      }
+    }
+  }
+};
+
+// ==========================================
+// 10. Initialize Application
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Check session security gate immediately
+  window.checkAuthState();
+
   if (window.NogaStore && typeof window.NogaStore.init === 'function') {
     window.NogaStore.init();
   }
@@ -894,3 +1008,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.NogaStore.updateYearDependentFormElements();
   }
 });
+
