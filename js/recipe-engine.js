@@ -70,7 +70,7 @@ const DEFAULT_RECIPE_DATA = {
         { id: 'pkg-4', name: 'Sticker decorativo chile', qty: 7, unit: 'pza', packageSize: 210, generalPrice: 65.00, finalCost: 2.17, store: 'Goplas' },
         { id: 'pkg-5', name: 'Sticker de sello bolsa', qty: 7, unit: 'pza', packageSize: 46.6, generalPrice: 65.00, finalCost: 9.75, store: 'Goplas' },
         { id: 'pkg-6', name: 'Tarjetas de agradecimiento / presentación', qty: 7, unit: 'pza', packageSize: 70, generalPrice: 280.50, finalCost: 28.00, store: 'Lumen' },
-        { id: 'pkg-7', name: 'listón', qty: 7, unit: 'pza', packageSize: 50, generalPrice: 140.00, finalCost: 19.60, store: 'Amazon' },
+        { id: 'pkg-7', name: 'listón', qty: 7, unit: 'pza', packageSize: 50, generalPrice: 140.00, finalCost: 19.60, store: 'Amazon', url: 'https://www.amazon.com.mx/dp/B0FGNJ78YG?ref=ppx_yo2ov_dt_b_fed_asin_title' },
         { id: 'pkg-8', name: 'Envases Chiles', qty: 7, unit: 'pza', packageSize: 50, generalPrice: 100.00, finalCost: 14.00, store: 'Goplas' }
       ]
     }

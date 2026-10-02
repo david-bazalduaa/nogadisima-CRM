@@ -111,6 +111,7 @@
       packageSize: 50,
       packagePrice: 140.00,
       store: 'Amazon',
+      url: 'https://www.amazon.com.mx/dp/B0FGNJ78YG?ref=ppx_yo2ov_dt_b_fed_asin_title',
       isCustom: false
     },
     {
@@ -1095,9 +1096,18 @@
 
             <!-- 7. Proveedor Habitual -->
             <td class="py-3 px-2 text-left text-slate-600">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-white/70 border border-slate-200 text-xs text-slate-700 font-medium">
-                ${escapeHtml(item.store || 'Proveedor')}
-              </span>
+              ${(item.store === 'Amazon' && (item.url || (item.name || '').toLowerCase().includes('liston'))) ? `
+                <a href="${item.url || 'https://www.amazon.com.mx/dp/B0FGNJ78YG?ref=ppx_yo2ov_dt_b_fed_asin_title'}" target="_blank" rel="noopener noreferrer"
+                  title="Abrir listón comprado en Amazon México"
+                  class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-amber-50 hover:bg-amber-100 border border-amber-300 text-xs text-amber-900 font-semibold hover:text-amber-950 shadow-2xs transition-all">
+                  <span>${escapeHtml(item.store)}</span>
+                  <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                </a>
+              ` : `
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-white/70 border border-slate-200 text-xs text-slate-700 font-medium">
+                  ${escapeHtml(item.store || 'Proveedor')}
+                </span>
+              `}
             </td>
 
             <!-- 8. Costo Estimado ($ MXN) & Estatus -->

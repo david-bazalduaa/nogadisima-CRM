@@ -9,7 +9,7 @@
 
 ---
 
-## 🌐 Live Application
+## Live Application
 
 - **Production URL**: [https://david-bazalduaa.github.io/nogadisima-CRM/](https://david-bazalduaa.github.io/nogadisima-CRM/)
 - **Hosting Infrastructure**: Static GitHub Pages (`main` branch root).
@@ -17,7 +17,7 @@
 
 ---
 
-## 📌 Executive Summary & Problem Space
+## Executive Summary & Problem Space
 
 Seasonal gourmet culinary production (*Chiles en Nogada*) presents high-stakes operational and financial constraints:
 1. **Volatile Spot Commodity Pricing**: Key ingredients (Castile walnuts, pomegranate, aged cheese, poblano chiles) fluctuate significantly throughout the harvest season.
@@ -29,7 +29,7 @@ Seasonal gourmet culinary production (*Chiles en Nogada*) presents high-stakes o
 
 ---
 
-## ⚡ Key Engineering Highlights
+## Key Engineering Highlights
 
 ### 1. Zero-Dependency Vanilla JS Architecture
 - **Framework-Free Performance**: 100% vanilla ECMAScript (ES6+) with zero build step, zero Node.js runtime requirement, and zero npm bundle overhead.
@@ -39,9 +39,9 @@ Seasonal gourmet culinary production (*Chiles en Nogada*) presents high-stakes o
 ### 2. Multi-User Real-Time Cloud Synchronization (Firebase Realtime Database)
 - **Bi-directional Reactive Store (`js/global-store.js`)**: Connects to Firebase Realtime Database via CDN-loaded compat modules with optimistic local updates.
 - **Live Connection Jewel**: Interactive visual indicator showing instant status transitions:
-  - 🟢 **En vivo (Sincronizado)**: Active WebSocket listener syncing changes across multiple remote computers in real time.
-  - 🟡 **Sincronizando...**: In-flight payload write with automatic debounce to throttle network requests.
-  - ⚪ **Modo local**: Graceful fallback to `localStorage` when offline or disconnected.
+  - **En vivo (Sincronizado)**: Active WebSocket listener syncing changes across multiple remote computers in real time.
+  - **Sincronizando...**: In-flight payload write with automatic debounce to throttle network requests.
+  - **Modo local**: Graceful fallback to `localStorage` when offline or disconnected.
 - **Conflict-Resistant State Isolation**: Multi-year namespace isolation (`/nogadisima_crm/{year}`) allowing concurrent multi-season auditing without cross-year state pollution.
 
 ### 3. Greedy Tiered Packaging Pricing Engine (`js/orders-engine.js`)
@@ -70,7 +70,7 @@ Seasonal gourmet culinary production (*Chiles en Nogada*) presents high-stakes o
 
 ---
 
-## 📂 Project Architecture
+## Project Architecture
 
 ```text
 nogadisima-CRM/
@@ -96,7 +96,7 @@ nogadisima-CRM/
 
 ---
 
-## 🛠️ Functional Modules
+## Functional Modules
 
 ### 1. Presupuesto de Receta (Recipe Budgeting & Costing)
 - Standardized ingredient costing for Picadillo, Nogada Sauce, Garnish, and Premium Packaging.
@@ -130,7 +130,7 @@ nogadisima-CRM/
 
 ---
 
-## 🔒 Security & Client Session Gate
+## Security & Client Session Gate
 
 - **Session Gate**: Built-in Apple-inspired frosted lock screen requiring credential authentication.
 - **Zero-Flicker Session Persistence**: Authenticated sessions are preserved in `sessionStorage` with instant unlock on page refresh.
@@ -138,7 +138,7 @@ nogadisima-CRM/
 
 ---
 
-## 🚀 Getting Started & Local Development
+## Getting Started & Local Development
 
 No package manager, compiler, or build tooling is required. Simply clone and serve statically:
 
@@ -163,7 +163,7 @@ open http://localhost:8080/index.html
 
 ---
 
-## 🚢 Deployment to GitHub Pages
+## Deployment to GitHub Pages
 
 This repository is optimized for out-of-the-box static hosting:
 1. Push all code to the `main` branch:
@@ -181,7 +181,7 @@ This repository is optimized for out-of-the-box static hosting:
 
 ---
 
-## 👨‍💻 Author & Engineering Profile
+## Author & Engineering Profile
 
 **David Bazaldúa Méndez**  
 *Full-Stack Engineer & Frontend Architect*
