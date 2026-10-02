@@ -199,7 +199,7 @@ window.renderRecipeCards = function() {
           </td>
 
           <!-- 6. Proveedor / Tienda -->
-          <td class="py-2.5 px-2 w-36">
+          <td class="py-2.5 px-2 w-32">
             <input type="text" value="${safeHtml(item.store || '')}" placeholder="Proveedor"
               oninput="updateIngredientField('${cat.id}', '${item.id}', 'store', this.value)"
               onblur="updateIngredientField('${cat.id}', '${item.id}', 'store', this.value)"
@@ -207,10 +207,22 @@ window.renderRecipeCards = function() {
               class="w-full liquid-input px-2.5 py-1.5 text-slate-600 font-medium text-xs">
           </td>
 
+          <!-- 7. Dónde Comprar (Quick Store Price Search) -->
+          <td class="py-2.5 px-2 text-center whitespace-nowrap w-36">
+            <button type="button" onclick="openStoreSearchPopover(event, '${item.id}')"
+              title="Cotizar ${safeHtml(item.name)} en tiendas mexicanas"
+              class="store-search-btn inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-white/70 hover:bg-white text-slate-700 hover:text-slate-900 border border-white/90 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer active:scale-97">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+              </svg>
+              <span class="text-[11px] font-semibold">Dónde Comprar</span>
+            </button>
+          </td>
+
           <!-- Acciones -->
           <td class="py-2.5 pr-4 pl-2 text-right w-14">
             <button onclick="deleteIngredient('${cat.id}', '${item.id}')" title="Eliminar ingrediente"
-              class="p-1.5 text-slate-400 hover:text-granada-600 hover:bg-granada-50/80 rounded-xl transition-all">
+              class="p-1.5 text-slate-400 hover:text-granada-600 hover:bg-granada-50/80 rounded-xl transition-all cursor-pointer">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
           </td>
@@ -228,6 +240,7 @@ window.renderRecipeCards = function() {
             <th class="py-3.5 px-2 text-right">Precio Gral (Paquete)</th>
             <th class="py-3.5 px-2 text-right">Costo Receta ($ MXN)</th>
             <th class="py-3.5 px-2">Proveedor / Tienda</th>
+            <th class="py-3.5 px-2 text-center whitespace-nowrap">Dónde Comprar</th>
             <th class="py-3.5 pr-4 pl-2 text-right">Acción</th>
           </tr>
         </thead>
@@ -741,7 +754,121 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ==========================================
-// 8. Initialize Application
+// 8. Interactive Store Price Search (Dónde Comprar)
+// ==========================================
+window._currentSearchIngredient = '';
+
+function generateStoreSearchUrl(storeKey, ingredientName) {
+  const cleanName = (ingredientName || '').trim();
+  const query = encodeURIComponent(cleanName);
+  const slug = encodeURIComponent(cleanName.toLowerCase().replace(/[\s/]+/g, '-'));
+
+  switch (storeKey) {
+    case 'walmart':
+      return `https://www.walmart.com.mx/search?q=${query}`;
+    case 'bodega':
+      return `https://www.bodegaaurrera.com.mx/search?q=${query}`;
+    case 'lacomer':
+      return `https://www.lacomer.com.mx/lacomer/#!/item-search/287/${query}/true?p=1&t=0`;
+    case 'amazon':
+      return `https://www.amazon.com.mx/s?k=${query}`;
+    case 'mercadolibre':
+      return `https://listado.mercadolibre.com.mx/${slug}`;
+    default:
+      return `https://www.google.com/search?q=${query}`;
+  }
+}
+window.generateStoreSearchUrl = generateStoreSearchUrl;
+
+window.openStoreSearchPopover = function(event, itemId) {
+  if (event) event.stopPropagation();
+  const btn = event.currentTarget || (event.target ? event.target.closest('button') : null);
+  const popover = document.getElementById('store-search-popover');
+  if (!popover || !btn) return;
+
+  // Retrieve current ingredient name from live DOM input or data store
+  let ingredientName = '';
+  const inputEl = document.getElementById(`name-${itemId}`);
+  if (inputEl && inputEl.value) {
+    ingredientName = inputEl.value.trim();
+  } else if (window.RecipeApp && window.RecipeApp.data && window.RecipeApp.data.categories) {
+    for (const cat of window.RecipeApp.data.categories) {
+      const it = cat.items.find(i => i.id === itemId);
+      if (it) {
+        ingredientName = it.name.trim();
+        break;
+      }
+    }
+  }
+
+  if (!ingredientName) ingredientName = 'Insumo';
+  window._currentSearchIngredient = ingredientName;
+
+  const titleEl = document.getElementById('popover-ingredient-name');
+  if (titleEl) {
+    titleEl.textContent = `"${ingredientName}"`;
+  }
+
+  // Display popover and compute smart floating position
+  popover.classList.remove('hidden');
+
+  const rect = btn.getBoundingClientRect();
+  const popoverWidth = popover.offsetWidth || 480;
+  const popoverHeight = popover.offsetHeight || 100;
+  const margin = 16;
+
+  // Horizontal centering
+  let left = rect.left + (rect.width / 2) - (popoverWidth / 2);
+  if (left < margin) left = margin;
+  if (left + popoverWidth > window.innerWidth - margin) {
+    left = window.innerWidth - popoverWidth - margin;
+  }
+
+  // Vertical anchoring: prefer below, flip above if near screen bottom
+  let top = rect.bottom + 8;
+  if (top + popoverHeight > window.innerHeight - margin) {
+    top = Math.max(margin, rect.top - popoverHeight - 8);
+  }
+
+  popover.style.left = `${Math.round(left)}px`;
+  popover.style.top = `${Math.round(top)}px`;
+};
+
+window.closeStoreSearchPopover = function() {
+  const popover = document.getElementById('store-search-popover');
+  if (popover && !popover.classList.contains('hidden')) {
+    popover.classList.add('hidden');
+  }
+};
+
+window.onSelectStoreSearch = function(storeKey) {
+  const ingredient = window._currentSearchIngredient || '';
+  if (!ingredient) return;
+
+  const url = generateStoreSearchUrl(storeKey, ingredient);
+  window.open(url, '_blank', 'noopener,noreferrer');
+  window.closeStoreSearchPopover();
+};
+
+// Global click outside listener to close store search popover
+document.addEventListener('click', (e) => {
+  const popover = document.getElementById('store-search-popover');
+  if (popover && !popover.classList.contains('hidden')) {
+    if (!popover.contains(e.target) && !e.target.closest('.store-search-btn')) {
+      window.closeStoreSearchPopover();
+    }
+  }
+});
+
+// Close store popover on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    window.closeStoreSearchPopover();
+  }
+});
+
+// ==========================================
+// 9. Initialize Application
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   if (window.NogaStore && typeof window.NogaStore.init === 'function') {
