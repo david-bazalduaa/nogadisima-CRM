@@ -127,6 +127,10 @@
     { id: 3, concept: "Ninja", amount: 270.00 }
   ];
 
+  // Expose seed datasets for unified database initialization
+  window.INITIAL_ORDERS = INITIAL_ORDERS;
+  window.INITIAL_PROFIT_EXPENSES = INITIAL_PROFIT_EXPENSES;
+
   // Financial baseline constants
   const INSUMOS_COST = 24983.50; // Inversión en Insumos oficial
 
@@ -203,6 +207,13 @@
 
     loadFromStorage: function () {
       try {
+        if (window.NogaStore) {
+          const stored = window.NogaStore.getOrders();
+          if (Array.isArray(stored)) {
+            this.orders = stored;
+            return;
+          }
+        }
         const stored = localStorage.getItem(STORAGE_KEY_ORDERS);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -220,9 +231,10 @@
 
     saveToStorage: function (notify = true) {
       try {
-        localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(this.orders));
         if (window.NogaStore) {
           window.NogaStore.setOrders(this.orders, 'orders-module', notify);
+        } else {
+          localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(this.orders));
         }
       } catch (e) {
         console.warn('OrdersApp: error saving orders to localStorage', e);
@@ -231,6 +243,13 @@
 
     loadProfitExpensesFromStorage: function () {
       try {
+        if (window.NogaStore) {
+          const stored = window.NogaStore.getProfitDraws();
+          if (Array.isArray(stored)) {
+            this.profitExpenses = stored;
+            return;
+          }
+        }
         const stored = localStorage.getItem(STORAGE_KEY_PROFIT_EXP);
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -248,9 +267,10 @@
 
     saveProfitExpensesToStorage: function (notify = true) {
       try {
-        localStorage.setItem(STORAGE_KEY_PROFIT_EXP, JSON.stringify(this.profitExpenses));
         if (window.NogaStore) {
           window.NogaStore.setProfitDraws(this.profitExpenses, 'orders-module', notify);
+        } else {
+          localStorage.setItem(STORAGE_KEY_PROFIT_EXP, JSON.stringify(this.profitExpenses));
         }
       } catch (e) {
         console.warn('OrdersApp: error saving profit expenses to localStorage', e);
@@ -732,28 +752,43 @@
       }
 
       if (itemsToDisplay.length === 0) {
-        let emptyTitle = 'No se encontraron comandas';
-        let emptyDesc = 'Ajusta los filtros o busca por nombre de cliente.';
-        if (this.filters.activeQuickFilter === 'unprepped') {
-          emptyTitle = '¡Todo preparado en cocina!';
-          emptyDesc = 'No hay pedidos pendientes de elaboración.';
-        } else if (this.filters.activeQuickFilter === 'undelivered') {
-          emptyTitle = '¡Todo entregado en ruta!';
-          emptyDesc = 'No hay comandas pendientes de despacho.';
-        } else if (this.filters.activeQuickFilter === 'unpaid') {
-          emptyTitle = '¡Cobranza 100% al día!';
-          emptyDesc = 'No hay comandas pendientes de cobro.';
+        const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+        const isSeasonEmpty = (this.orders.length === 0);
+
+        let emptyTitle = isSeasonEmpty 
+          ? `No hay pedidos registrados para la temporada ${activeYear}`
+          : 'No se encontraron comandas';
+        let emptyDesc = isSeasonEmpty
+          ? `No hay pedidos registrados para la temporada ${activeYear}. Registra el primer pedido para activar la producción.`
+          : 'Ajusta los filtros o busca por nombre de cliente.';
+        let emptyAction = isSeasonEmpty
+          ? `<button onclick="openNewOrderModal()" class="mt-3 px-4 py-2 text-xs font-semibold liquid-btn-dark shadow-sm">
+               + Registrar Pedido
+             </button>`
+          : `<button onclick="OrdersApp.quickFilter('all')" class="mt-2 px-4 py-2 text-xs font-semibold liquid-btn-dark shadow-sm">
+               Ver todas las comandas (${this.orders.length})
+             </button>`;
+
+        if (!isSeasonEmpty) {
+          if (this.filters.activeQuickFilter === 'unprepped') {
+            emptyTitle = '¡Todo preparado en cocina!';
+            emptyDesc = 'No hay pedidos pendientes de elaboración.';
+          } else if (this.filters.activeQuickFilter === 'undelivered') {
+            emptyTitle = '¡Todo entregado en ruta!';
+            emptyDesc = 'No hay comandas pendientes de despacho.';
+          } else if (this.filters.activeQuickFilter === 'unpaid') {
+            emptyTitle = '¡Cobranza 100% al día!';
+            emptyDesc = 'No hay comandas pendientes de cobro.';
+          }
         }
 
         container.innerHTML = `
           <tr>
             <td colspan="12" class="py-12 text-center text-slate-500">
-              <div class="max-w-xs mx-auto space-y-2">
+              <div class="max-w-md mx-auto space-y-2">
                 <p class="font-bold text-slate-800 text-sm">${emptyTitle}</p>
-                <p class="text-xs text-slate-400">${emptyDesc}</p>
-                <button onclick="OrdersApp.quickFilter('all')" class="mt-2 px-4 py-2 text-xs font-semibold liquid-btn-dark shadow-sm">
-                  Ver todas las comandas (95)
-                </button>
+                <p class="text-xs text-slate-500 leading-relaxed">${emptyDesc}</p>
+                ${emptyAction}
               </div>
             </td>
           </tr>

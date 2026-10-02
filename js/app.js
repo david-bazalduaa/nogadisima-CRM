@@ -290,7 +290,12 @@ window.showToast = function(message, type = 'info') {
 // 4. Inversión & Gastos Modal Controllers
 window.openNewExpenseModal = function() {
   const modal = document.getElementById('new-expense-modal');
-  if (modal) modal.classList.remove('hidden');
+  if (modal) {
+    if (window.NogaStore) {
+      window.NogaStore.updateYearDependentFormElements();
+    }
+    modal.classList.remove('hidden');
+  }
 };
 
 window.toggleContributorField = function(sourceValue) {
@@ -362,12 +367,16 @@ window.handleNewExpenseSubmit = function(e) {
 window.openNewOrderModal = function() {
   const modal = document.getElementById('new-order-modal');
   if (modal) {
+    if (window.NogaStore) {
+      window.NogaStore.updateYearDependentFormElements();
+    }
     modal.classList.remove('hidden');
-    const today = new Date().toISOString().slice(0, 10);
+    const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+    const defaultDate = `${activeYear}-09-15`;
     const dateInput = document.getElementById('new-ord-date');
     const delivInput = document.getElementById('new-ord-delivery');
-    if (dateInput && !dateInput.value) dateInput.value = today;
-    if (delivInput && !delivInput.value) delivInput.value = today;
+    if (dateInput && (!dateInput.value || !dateInput.value.startsWith(activeYear))) dateInput.value = defaultDate;
+    if (delivInput && (!delivInput.value || !delivInput.value.startsWith(activeYear))) delivInput.value = `${activeYear}-09-16`;
     const custInput = document.getElementById('new-ord-customer');
     if (custInput) custInput.focus();
   }
@@ -676,7 +685,16 @@ window.handleAllocateExpenseStockSubmit = function() {
 };
 
 // ==========================================
-// 7. Initialize Application
+// 7. Multi-Year Season Management Controller
+// ==========================================
+window.setAppYear = function(year) {
+  if (window.NogaStore && typeof window.NogaStore.setYear === 'function') {
+    window.NogaStore.setYear(year);
+  }
+};
+
+// ==========================================
+// 8. Initialize Application
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   if (window.NogaStore && typeof window.NogaStore.init === 'function') {
@@ -693,5 +711,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (window.InventoryApp && typeof window.InventoryApp.init === 'function') {
     window.InventoryApp.init();
+  }
+
+  // Ensure initial season pill visual state and form elements match active year
+  if (window.NogaStore) {
+    window.NogaStore.ensureSeedData();
+    window.NogaStore.updateYearSelectorUI();
+    window.NogaStore.updateYearDependentFormElements();
   }
 });

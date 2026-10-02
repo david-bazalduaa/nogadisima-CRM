@@ -114,11 +114,19 @@
       <div class="flex items-center space-x-3.5 sm:space-x-4">
         <img src="Logo.png" alt="Nogadísima" class="h-14 sm:h-16 w-auto object-contain shrink-0 mix-blend-multiply" style="mix-blend-mode: multiply;" onerror="this.onerror=null;this.src='logo.png';">
         <div>
-          <div class="flex items-center space-x-2.5">
+          <div class="flex items-center space-x-3">
             <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-heading">Nogadísima</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/70 text-slate-700 border border-white/90 font-numeric shadow-sm">
-              2026
-            </span>
+            <!-- Apple Liquid Glass Segmented Season Selector [ 2026 | 2027 ] -->
+            <div id="season-selector-container" class="inline-flex items-center p-0.5 rounded-xl liquid-pill shadow-xs border border-white/80" role="group" aria-label="Selector de temporada">
+              <button id="season-btn-2026" type="button" onclick="setAppYear('2026')"
+                class="bg-white text-slate-900 shadow-sm font-bold px-3 py-1 rounded-lg transition-all duration-200 text-xs font-numeric cursor-pointer">
+                2026
+              </button>
+              <button id="season-btn-2027" type="button" onclick="setAppYear('2027')"
+                class="text-slate-500 hover:text-slate-800 px-3 py-1 font-semibold transition-all duration-200 text-xs font-numeric cursor-pointer">
+                2027
+              </button>
+            </div>
           </div>
           <p class="text-sm font-medium text-slate-500 tracking-wide">Digs y Angy</p>
         </div>

@@ -77,6 +77,9 @@ const DEFAULT_RECIPE_DATA = {
   ]
 };
 
+// Expose default recipe baseline for multi-year initialization
+window.DEFAULT_RECIPE_DATA = DEFAULT_RECIPE_DATA;
+
 const STORAGE_KEY_RECIPE = 'nogadisima_recipe_engine_v5';
 
 // Application State Container
@@ -87,22 +90,28 @@ window.RecipeApp = {
 
 function loadRecipeState() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY_RECIPE);
-    if (stored) {
-      window.RecipeApp.data = JSON.parse(stored);
-      // Ensure the 8 official packaging items are present
-      const empaqueCat = window.RecipeApp.data.categories.find(c => c.id === 'empaque');
-      const defEmpaque = DEFAULT_RECIPE_DATA.categories.find(c => c.id === 'empaque');
-      if (empaqueCat && defEmpaque) {
-        defEmpaque.items.forEach(defItem => {
-          const exists = empaqueCat.items.some(i => i.id === defItem.id || i.name.toLowerCase() === defItem.name.toLowerCase());
-          if (!exists) {
-            empaqueCat.items.push(JSON.parse(JSON.stringify(defItem)));
-          }
-        });
+    if (window.NogaStore) {
+      window.RecipeApp.data = window.NogaStore.getRecipe();
+    }
+    if (!window.RecipeApp.data) {
+      const stored = localStorage.getItem(STORAGE_KEY_RECIPE);
+      if (stored) {
+        window.RecipeApp.data = JSON.parse(stored);
+      } else {
+        window.RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
       }
-    } else {
-      window.RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
+    }
+
+    // Ensure the 8 official packaging items are present
+    const empaqueCat = window.RecipeApp.data.categories.find(c => c.id === 'empaque');
+    const defEmpaque = DEFAULT_RECIPE_DATA.categories.find(c => c.id === 'empaque');
+    if (empaqueCat && defEmpaque) {
+      defEmpaque.items.forEach(defItem => {
+        const exists = empaqueCat.items.some(i => i.id === defItem.id || i.name.toLowerCase() === defItem.name.toLowerCase());
+        if (!exists) {
+          empaqueCat.items.push(JSON.parse(JSON.stringify(defItem)));
+        }
+      });
     }
   } catch (e) {
     console.error('Error loading recipe state', e);
@@ -116,9 +125,10 @@ function loadRecipeState() {
 
 function saveRecipeState(notify = false) {
   try {
-    localStorage.setItem(STORAGE_KEY_RECIPE, JSON.stringify(window.RecipeApp.data));
     if (window.NogaStore) {
       window.NogaStore.setRecipe(window.RecipeApp.data, 'recipe-module', notify);
+    } else {
+      localStorage.setItem(STORAGE_KEY_RECIPE, JSON.stringify(window.RecipeApp.data));
     }
   } catch (e) {
     console.error('Error saving recipe state', e);

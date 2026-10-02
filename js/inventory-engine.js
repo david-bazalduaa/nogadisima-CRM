@@ -437,6 +437,9 @@
       .replace(/'/g, '&#039;');
   }
 
+  // Expose seed inventory for unified database initialization
+  window.INITIAL_INVENTORY_ITEMS = INITIAL_INVENTORY_ITEMS;
+
   // =========================================================================
   // 2. INVENTORY APP CONTROLLER & ENGINE
   // =========================================================================
@@ -485,27 +488,42 @@
              norm.includes('envases chile');
     },
 
+    // Sanitize and filter custody stock numbers
+    sanitizeAndFilterInventory: function () {
+      if (!Array.isArray(this.items)) this.items = [];
+      this.items = this.items.map(item => {
+        const d = item.stockDiego !== undefined ? Number(item.stockDiego) : (Number(item.stockActual) || 0);
+        const a = item.stockAngy !== undefined ? Number(item.stockAngy) : 0;
+        return {
+          ...item,
+          stockDiego: d,
+          stockAngy: a,
+          stockActual: d + a
+        };
+      });
+      // Purge deprecated packaging items immediately
+      this.items = this.items.filter(item => {
+        if (item.category !== 'empaque') return true;
+        return this.isAllowedPackagingName(item.name);
+      });
+    },
+
     loadFromStorage: function () {
       try {
+        if (window.NogaStore) {
+          const stored = window.NogaStore.getInventory();
+          if (Array.isArray(stored)) {
+            this.items = stored;
+            this.sanitizeAndFilterInventory();
+            return;
+          }
+        }
         const stored = localStorage.getItem(STORAGE_KEY_INVENTORY);
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            this.items = parsed.map(item => {
-              const d = item.stockDiego !== undefined ? Number(item.stockDiego) : (Number(item.stockActual) || 0);
-              const a = item.stockAngy !== undefined ? Number(item.stockAngy) : 0;
-              return {
-                ...item,
-                stockDiego: d,
-                stockAngy: a,
-                stockActual: d + a
-              };
-            });
-            // Purge deprecated packaging items immediately
-            this.items = this.items.filter(item => {
-              if (item.category !== 'empaque') return true;
-              return this.isAllowedPackagingName(item.name);
-            });
+            this.items = parsed;
+            this.sanitizeAndFilterInventory();
             return;
           }
         }
@@ -513,14 +531,16 @@
         console.warn('InventoryApp: Error reading inventory from localStorage', e);
       }
       this.items = JSON.parse(JSON.stringify(INITIAL_INVENTORY_ITEMS));
+      this.sanitizeAndFilterInventory();
       this.saveToStorage(false);
     },
 
     saveToStorage: function (notify = true) {
       try {
-        localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(this.items));
-        if (notify && window.NogaStore) {
-          window.NogaStore.emit('inventory:changed', { items: this.items });
+        if (window.NogaStore) {
+          window.NogaStore.setInventory(this.items, 'inventory-module', notify);
+        } else {
+          localStorage.setItem(STORAGE_KEY_INVENTORY, JSON.stringify(this.items));
         }
       } catch (e) {
         console.warn('InventoryApp: Error saving inventory to localStorage', e);
@@ -558,10 +578,11 @@
       recipeIngredients.forEach(({ recItem, catId }) => {
         let existing = this.items.find(i => i.id === recItem.id || (i.category === catId && normalize(i.name) === normalize(recItem.name)));
         if (!existing) {
-          // Look up baseline seed stock if it exists
+          // Look up baseline seed stock if it exists (only for 2026; for 2027 all items must start at 0)
+          const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
           const seedMatch = INITIAL_INVENTORY_ITEMS.find(s => s.id === recItem.id || normalize(s.name) === normalize(recItem.name));
-          const stockDiego = seedMatch ? (Number(seedMatch.stockDiego) || 0) : 0;
-          const stockAngy = seedMatch ? (Number(seedMatch.stockAngy) || 0) : 0;
+          const stockDiego = (activeYear === '2026' && seedMatch) ? (Number(seedMatch.stockDiego) || 0) : 0;
+          const stockAngy = (activeYear === '2026' && seedMatch) ? (Number(seedMatch.stockAngy) || 0) : 0;
           const minStock = seedMatch ? (Number(seedMatch.minStock) || 0) : Math.ceil((Number(recItem.qty) || 1) * 1.5);
 
           this.items.push({
@@ -1626,7 +1647,10 @@
             }
           }
           if (statusSelect) statusSelect.value = 'Pagado';
-          if (monthSelect) monthSelect.value = 'Septiembre 2026';
+          const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+          if (monthSelect) monthSelect.value = `Septiembre ${activeYear}`;
+          const dateInput = document.getElementById('new-exp-date');
+          if (dateInput) dateInput.value = `${activeYear}-09-30`;
         }
 
         if (window.showToast) {

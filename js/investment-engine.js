@@ -156,6 +156,9 @@
     return '$' + num.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  // Expose seed data for unified database initialization
+  window.INITIAL_INVESTMENTS = INITIAL_INVESTMENTS;
+
   // =========================================================================
   // 2. INVESTMENT APP STATE & CONTROLLER
   // =========================================================================
@@ -192,6 +195,15 @@
 
     loadFromStorage: function () {
       try {
+        if (window.NogaStore) {
+          const stored = window.NogaStore.getInvestments();
+          this.cutoffDay = window.NogaStore.getCutoffDay();
+          if (Array.isArray(stored)) {
+            this.items = stored;
+            return;
+          }
+        }
+
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -225,9 +237,10 @@
 
     saveToStorage: function (notify = true) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
         if (window.NogaStore) {
           window.NogaStore.setInvestments(this.items, 'investment-module', notify);
+        } else {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
         }
       } catch (e) {
         console.error('Error saving investments to localStorage:', e);
@@ -236,7 +249,11 @@
 
     saveCutoffDay: function (day) {
       this.cutoffDay = parseInt(day, 10) || 30;
-      localStorage.setItem(CUTOFF_DAY_STORAGE_KEY, this.cutoffDay.toString());
+      if (window.NogaStore) {
+        window.NogaStore.setCutoffDay(this.cutoffDay, 'investment-module');
+      } else {
+        localStorage.setItem(CUTOFF_DAY_STORAGE_KEY, this.cutoffDay.toString());
+      }
     },
 
     // Financial Analysis & Calculations Engine (4 Sources: Nogadísima, Digs, Angy, Otros)
@@ -402,26 +419,32 @@
       if (!container) return;
 
       const metrics = this.getMetrics();
-      const monthKeys = ['Agosto 2026', 'Septiembre 2026', 'Octubre 2026'];
+      const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+      const monthKeys = [`Agosto ${activeYear}`, `Septiembre ${activeYear}`, `Octubre ${activeYear}`];
 
       let html = '';
       monthKeys.forEach(mKey => {
         const data = metrics.months[mKey] || { Digs: 0, Angy: 0, 'Nogadísima': 0, Otros: 0, total: 0, paid: 0, pending: 0 };
         const isCurrentFilter = (this.filters.cutoffMonth === mKey);
         const isFullyPaid = data.pending === 0 && data.total > 0;
-        const statusBadge = isFullyPaid 
-          ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 font-numeric">
+        let statusBadge = '';
+        if (data.total === 0) {
+          statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 font-numeric">SIN GASTOS</span>`;
+        } else if (isFullyPaid) {
+          statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 font-numeric">
                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>PAGADO
-             </span>`
-          : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100/90 text-amber-800 border border-amber-300 font-numeric">
+             </span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100/90 text-amber-800 border border-amber-300 font-numeric">
                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>PENDIENTE
              </span>`;
+        }
 
         // Format formatted due date string
-        let formattedDate = '30 de mes';
-        if (mKey === 'Agosto 2026') formattedDate = `${this.cutoffDay} de agosto, 2026`;
-        if (mKey === 'Septiembre 2026') formattedDate = `${this.cutoffDay} de septiembre, 2026`;
-        if (mKey === 'Octubre 2026') formattedDate = `${this.cutoffDay} de octubre, 2026`;
+        let formattedDate = `${this.cutoffDay} de mes`;
+        if (mKey.includes('Agosto')) formattedDate = `${this.cutoffDay} de agosto, ${activeYear}`;
+        if (mKey.includes('Septiembre')) formattedDate = `${this.cutoffDay} de septiembre, ${activeYear}`;
+        if (mKey.includes('Octubre')) formattedDate = `${this.cutoffDay} de octubre, ${activeYear}`;
 
         html += `
           <tr class="liquid-table-row cursor-pointer transition-all duration-150 ${isCurrentFilter ? 'bg-white/80 ring-2 ring-slate-800/20' : 'hover:bg-white/60'}" 
@@ -500,15 +523,29 @@
       }
 
       if (itemsToDisplay.length === 0) {
+        const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+        const isSeasonEmpty = (this.items.length === 0);
+        const emptyTitle = isSeasonEmpty
+          ? `Sin compras registradas para la temporada ${activeYear}`
+          : 'No se encontraron registros';
+        const emptyDesc = isSeasonEmpty
+          ? `Sin compras registradas para la temporada ${activeYear}. Haz clic en "+ Registrar Gasto" para iniciar.`
+          : 'Prueba ajustando los filtros de búsqueda, mes o fuente de fondos.';
+        const emptyAction = isSeasonEmpty
+          ? `<button onclick="openNewExpenseModal()" class="mt-3 px-4 py-2 text-xs font-semibold liquid-btn-dark shadow-sm">
+               + Registrar Gasto
+             </button>`
+          : `<button onclick="InvestmentApp.resetFilters()" class="mt-2 px-3 py-1.5 text-xs font-semibold liquid-pill text-slate-700">
+               Limpiar Filtros
+             </button>`;
+
         container.innerHTML = `
           <tr>
             <td colspan="8" class="py-12 text-center text-slate-500">
-              <div class="max-w-xs mx-auto space-y-2">
-                <p class="font-bold text-slate-700 text-sm">No se encontraron registros</p>
-                <p class="text-xs text-slate-400">Prueba ajustando los filtros de búsqueda, mes o fuente de fondos.</p>
-                <button onclick="InvestmentApp.resetFilters()" class="mt-2 px-3 py-1.5 text-xs font-semibold liquid-pill text-slate-700">
-                  Limpiar Filtros
-                </button>
+              <div class="max-w-md mx-auto space-y-2">
+                <p class="font-bold text-slate-800 text-sm">${emptyTitle}</p>
+                <p class="text-xs text-slate-500 leading-relaxed">${emptyDesc}</p>
+                ${emptyAction}
               </div>
             </td>
           </tr>
@@ -589,9 +626,9 @@
             <td class="py-2 px-2 text-center whitespace-nowrap">
               <select onchange="InvestmentApp.updateField(${item.id}, 'cutoffMonth', this.value)"
                 class="liquid-input px-2 py-1 text-xs font-medium text-slate-700 cursor-pointer">
-                <option value="Agosto 2026" ${item.cutoffMonth === 'Agosto 2026' ? 'selected' : ''}>Agosto 2026</option>
-                <option value="Septiembre 2026" ${item.cutoffMonth === 'Septiembre 2026' ? 'selected' : ''}>Septiembre 2026</option>
-                <option value="Octubre 2026" ${item.cutoffMonth === 'Octubre 2026' ? 'selected' : ''}>Octubre 2026</option>
+                <option value="Agosto ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}" ${item.cutoffMonth && item.cutoffMonth.startsWith('Agosto') ? 'selected' : ''}>Agosto ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}</option>
+                <option value="Septiembre ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}" ${item.cutoffMonth && item.cutoffMonth.startsWith('Septiembre') ? 'selected' : ''}>Septiembre ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}</option>
+                <option value="Octubre ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}" ${item.cutoffMonth && item.cutoffMonth.startsWith('Octubre') ? 'selected' : ''}>Octubre ${item.cutoffMonth && item.cutoffMonth.includes('2027') ? '2027' : '2026'}</option>
               </select>
             </td>
 
@@ -684,7 +721,8 @@
       }
 
       // Cutoff Month Pills
-      const monthList = ['Todos', 'Agosto 2026', 'Septiembre 2026', 'Octubre 2026'];
+      const activeYear = (window.NogaStore ? window.NogaStore.getActiveYear() : '2026');
+      const monthList = ['Todos', `Agosto ${activeYear}`, `Septiembre ${activeYear}`, `Octubre ${activeYear}`];
       const monthContainer = document.getElementById('filter-pills-month');
       if (monthContainer) {
         monthContainer.innerHTML = monthList.map(m => {
