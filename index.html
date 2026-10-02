@@ -94,10 +94,8 @@
     <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/60">
       
       <!-- Brand Identity & Logo ("Nogadísima") -->
-      <div class="flex items-center space-x-4">
-        <div class="h-14 w-14 rounded-2xl bg-white/85 p-1.5 flex items-center justify-center shadow-sm border border-white/95 backdrop-blur-xl shrink-0">
-          <img src="Logo.png" alt="Nogadísima — Chiles en Nogada" class="h-11 w-auto object-contain" onerror="this.onerror=null;this.src='logo.png';">
-        </div>
+      <div class="flex items-center space-x-3.5 sm:space-x-4">
+        <img src="Logo.png" alt="Nogadísima" class="h-14 sm:h-16 w-auto object-contain shrink-0 mix-blend-multiply" style="mix-blend-mode: multiply;" onerror="this.onerror=null;this.src='logo.png';">
         <div>
           <div class="flex items-center space-x-2.5">
             <span class="text-2xl font-extrabold tracking-tight text-slate-900 font-heading">Nogadísima</span>
@@ -105,7 +103,7 @@
               2026
             </span>
           </div>
-          <p class="text-xs text-slate-500 font-medium">Chiles en Nogada — Business Command Center</p>
+          <p class="text-sm font-medium text-slate-500 tracking-wide">Digs y Angy</p>
         </div>
       </div>
 
@@ -117,7 +115,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
           </svg>
           <span class="whitespace-nowrap">Presupuesto de Receta</span>
-          <span class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse"></span>
+          <span id="tab-pulse-presupuesto" class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse"></span>
         </button>
 
         <button id="tab-inversion" onclick="switchTab('inversion')" 
@@ -126,6 +124,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <span class="whitespace-nowrap">Inversión & Gastos</span>
+          <span id="tab-pulse-inversion" class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse hidden"></span>
         </button>
 
         <button id="tab-pedidos" onclick="switchTab('pedidos')" 
@@ -134,7 +133,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
           <span class="whitespace-nowrap">Control de Pedidos</span>
-          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/70 text-slate-500 border border-white/80">Pronto</span>
+          <span id="tab-pulse-pedidos" class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse hidden"></span>
         </button>
 
         <button id="tab-inventario" onclick="switchTab('inventario')" 
@@ -150,9 +149,9 @@
       <!-- Right: Action Pills -->
       <div class="flex items-center space-x-2.5">
         <!-- Live Sync Pill -->
-        <div class="hidden sm:flex items-center space-x-2 px-3.5 py-2 liquid-pill text-[11px] font-semibold text-slate-600" title="Costos guardados en tiempo real en LocalStorage">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-glass-pulse"></span>
-          <span>Receta Sincronizada</span>
+        <div id="global-sync-badge" class="hidden sm:flex items-center space-x-2 px-3.5 py-2 liquid-pill text-[11px] font-semibold text-slate-700 transition-all duration-300 backdrop-blur-md shadow-xs" title="Almacén de estado unificado sincronizado en tiempo real">
+          <span id="global-sync-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-glass-pulse"></span>
+          <span id="global-sync-text">Sistema Sincronizado</span>
         </div>
 
         <!-- Export CSV Pill -->
@@ -409,142 +408,725 @@
     <!-- ========================================== -->
     <div id="panel-inversion" class="hidden space-y-7 transition-all duration-300">
       
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- Top Action Bar & Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Inversión Real & Flujo de Caja</h1>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Seguimiento de compras en tiendas, tickets y desembolsos reales de la temporada.</p>
+          <div class="flex items-center space-x-2.5">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Inversión Real & Flujo de Caja</h1>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+              108 Compras
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Conciliación de compras, calendario de pagos por corte de tarjeta y aportaciones de socios.</p>
         </div>
-        <div class="flex items-center space-x-2">
-          <span class="px-3.5 py-1.5 rounded-full liquid-pill text-slate-700 text-xs font-bold font-numeric">
-            Total Inversión Inicial: $6,094.50 MXN
-          </span>
+
+        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <button onclick="openNewExpenseModal()" 
+            class="liquid-btn-dark px-4 py-2 text-xs font-semibold space-x-2">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+            <span>Registrar Gasto</span>
+          </button>
+
+          <button onclick="InvestmentApp.exportCsv()" 
+            class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Exportar CSV</span>
+          </button>
+
+          <button onclick="openResetInvestmentsModal()" 
+            class="p-2 text-slate-400 hover:text-amber-600 rounded-xl hover:bg-white/60 transition-colors" title="Restaurar datos base">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
         </div>
       </div>
 
-      <!-- Financial Milestones Tracker -->
-      <section class="liquid-card p-6 sm:p-7">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-white/60">
+      <!-- Section A: Top KPI Summary Cards (Liquid Glass Cards) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- KPI 1: Inversión Total -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
           <div>
-            <h2 class="text-lg font-bold text-slate-900 font-heading">Hitos de Pago Programados (Compras Escalonadas)</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Calendario de amortización y compras mayores para la temporada.</p>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Inversión Total</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 font-numeric">100% Conciliado</span>
+            </div>
+            <div id="inv-kpi-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$26,579.75</div>
+            <p id="inv-kpi-total-sub" class="text-[11px] text-slate-500 mt-1">108 adquisiciones auditadas</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60">
+            <div class="flex justify-between text-[11px] font-numeric mb-1">
+              <span class="text-emerald-700 font-bold">Liquidado</span>
+              <span class="text-slate-500">Amortización</span>
+            </div>
+            <div class="w-full bg-slate-200/60 h-2 rounded-full overflow-hidden">
+              <div id="inv-kpi-total-progress" class="bg-emerald-500 h-full transition-all duration-500" style="width: 57.2%;"></div>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-5">
-          
-          <div class="rounded-2xl p-5 border bg-emerald-50/40 border-emerald-200/60 backdrop-blur-md shadow-sm">
-            <div class="flex items-start justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 1</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 font-numeric">PAGADO</span>
+        <!-- KPI 2: Aporte Digs -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aporte Digs</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-900/10 text-sky-800 border border-sky-200 font-numeric">Socio</span>
             </div>
-            <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de agosto</h3>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$3,892.50</div>
-            <div class="w-full bg-slate-200/60 h-2 rounded-full mt-3 overflow-hidden">
-              <div class="bg-emerald-500 h-full w-full"></div>
+            <div id="inv-kpi-digs" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$12,041.50</div>
+            <div class="mt-2.5 flex flex-wrap gap-1.5 text-[11px] font-numeric">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-100/90 text-emerald-800 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span><span id="inv-kpi-digs-paid">$3,892.50</span> Pagado
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100/90 text-amber-800 border border-amber-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span><span id="inv-kpi-digs-pend">$8,149.00</span> Pendiente
+              </span>
             </div>
-            <div class="mt-2 text-[11px] text-slate-500">Compras iniciales secos y empaque</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span id="inv-kpi-digs-share" class="font-numeric font-semibold text-slate-700">45.3% del capital total</span>
+            <span class="font-medium text-slate-400">Tarjetas & Contado</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Aporte Angy -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aporte Angy</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-granada-700/10 text-granada-700 border border-granada-200 font-numeric">Socia</span>
+            </div>
+            <div id="inv-kpi-angy" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$6,847.50</div>
+            <div class="mt-2.5 flex flex-wrap gap-1.5 text-[11px] font-numeric">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-100/90 text-emerald-800 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span><span id="inv-kpi-angy-paid">$3,617.50</span> Pagado
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100/90 text-amber-800 border border-amber-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span><span id="inv-kpi-angy-pend">$3,230.00</span> Pendiente
+              </span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span id="inv-kpi-angy-share" class="font-numeric font-semibold text-slate-700">25.8% del capital total</span>
+            <span class="font-medium text-slate-400">Insumos & Empaques</span>
+          </div>
+        </div>
+
+        <!-- KPI 4: Caja Nogadísima & Aportes Externos (Otros) -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Caja Nogadísima</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white font-numeric">Negocio</span>
+            </div>
+            <div id="inv-kpi-caja" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$6,094.50</div>
+            <div class="mt-2 text-[11px] text-emerald-800 font-semibold flex items-center space-x-1">
+              <svg class="w-3.5 h-3.5 text-emerald-600 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+              <span>100% Pagado (Capital Semilla)</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px]">
+            <span class="text-slate-500">Aporte Otros:</span>
+            <span class="font-numeric font-bold text-slate-800"><span id="inv-kpi-otros">$1,596.25</span> (Pagado)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section B: Monthly Credit Card Settlement Matrix (Matriz de Liquidación por Corte) -->
+      <section class="liquid-card p-5 sm:p-7">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/60">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-lg sm:text-xl font-bold text-slate-900 font-heading">Matriz de Liquidación por Corte de Tarjeta</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">Ciclos Mensuales</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Programación y vencimiento de compras mayores. Haz clic en cualquier mes para filtrar las compras en la tabla inferior.</p>
           </div>
 
-          <div class="rounded-2xl p-5 border bg-amber-50/40 border-amber-200/60 backdrop-blur-md shadow-sm">
-            <div class="flex items-start justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 2</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
-            </div>
-            <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de septiembre</h3>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$5,523.00</div>
-            <div class="w-full bg-slate-200/60 h-2 rounded-full mt-3 overflow-hidden">
-              <div class="bg-amber-500 h-full w-1/3"></div>
-            </div>
-            <div class="mt-2 text-[11px] text-slate-500">Pico de producción y carnes frescas</div>
+          <!-- Cutoff Day Engine Controls -->
+          <div class="flex items-center space-x-2 bg-white/50 backdrop-blur-md p-1.5 rounded-xl border border-white/80 shrink-0">
+            <label for="cutoff-day-select" class="text-xs font-semibold text-slate-600 pl-2">Día de Corte / Pago:</label>
+            <select id="cutoff-day-select" onchange="InvestmentApp.changeCutoffDaySetting(this.value, false)" 
+              class="liquid-input px-2.5 py-1 text-xs font-bold text-slate-900 cursor-pointer">
+              <option value="30">Día 30 (Fin de mes)</option>
+              <option value="20">Día 20</option>
+              <option value="15">Día 15</option>
+              <option value="10">Día 10</option>
+              <option value="5">Día 5</option>
+            </select>
           </div>
+        </div>
 
-          <div class="rounded-2xl p-5 border bg-amber-50/40 border-amber-200/60 backdrop-blur-md shadow-sm">
-            <div class="flex items-start justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hito 3</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 font-numeric">PENDIENTE</span>
-            </div>
-            <h3 class="text-sm font-bold text-slate-900 mt-1">A pagar 30 de octubre</h3>
-            <div class="text-2xl font-extrabold text-slate-900 mt-2 font-numeric">$2,626.00</div>
-            <div class="w-full bg-slate-200/60 h-2 rounded-full mt-3 overflow-hidden">
-              <div class="bg-amber-500 h-full w-1/5"></div>
-            </div>
-            <div class="mt-2 text-[11px] text-slate-500">Cierre de temporada y reposición</div>
-          </div>
-
+        <div class="overflow-x-auto mt-4 -mx-5 sm:mx-0 px-5 sm:px-0">
+          <table class="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr class="liquid-table-head text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-2.5 px-4">Mes de Corte</th>
+                <th class="py-2.5 px-3">Fecha Límite de Pago</th>
+                <th class="py-2.5 px-3 text-right">Digs</th>
+                <th class="py-2.5 px-3 text-right">Angy</th>
+                <th class="py-2.5 px-3 text-right">Nogadísima</th>
+                <th class="py-2.5 px-3 text-right">Otros</th>
+                <th class="py-2.5 px-4 text-right">Total a Liquidar</th>
+                <th class="py-2.5 px-3 text-center">Estatus</th>
+                <th class="py-2.5 px-3 text-right">Filtro</th>
+              </tr>
+            </thead>
+            <tbody id="settlement-matrix-body" class="divide-y divide-white/40 text-xs sm:text-sm">
+              <!-- Rendered dynamically by InvestmentApp.renderSettlementMatrix() -->
+            </tbody>
+            <tfoot>
+              <tr class="bg-white/40 border-t-2 border-slate-300 font-bold text-xs sm:text-sm">
+                <td class="py-3 px-4 text-slate-900 font-heading">Total General</td>
+                <td class="py-3 px-3 text-slate-500 text-xs font-normal">Auditoría Completa</td>
+                <td id="matrix-total-digs" class="py-3 px-3 text-right font-numeric text-slate-900">$12,041.50</td>
+                <td id="matrix-total-angy" class="py-3 px-3 text-right font-numeric text-slate-900">$6,847.50</td>
+                <td id="matrix-total-noga" class="py-3 px-3 text-right font-numeric text-slate-900">$6,094.50</td>
+                <td id="matrix-total-otros" class="py-3 px-3 text-right font-numeric text-slate-900">$1,596.25</td>
+                <td id="matrix-total-grand" class="py-3 px-4 text-right font-numeric text-base font-extrabold text-slate-900">$26,579.75</td>
+                <td colspan="2" class="py-3 px-3 text-center text-slate-400 text-xs font-normal">108 Adquisiciones</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </section>
 
-      <!-- Store Purchases Summary Table Preview -->
-      <section class="liquid-card p-6">
-        <h3 class="text-base font-bold text-slate-900 mb-4 font-heading">Registro Consolidado de Proveedores</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div class="p-4 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <span class="text-slate-400 font-semibold">Tlalnepantla (Frutos Secos)</span>
-            <div class="text-lg font-bold text-slate-900 mt-1 font-numeric">$929.00</div>
+      <!-- Section C: Interactive Expense Data Grid -->
+      <section id="expenses-data-grid-section" class="liquid-card overflow-hidden">
+        
+        <!-- Filter Header Bar -->
+        <div class="p-5 sm:p-6 bg-white/40 backdrop-blur-md border-b border-white/60 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 font-heading">Registro Detallado de Compras e Insumos</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Edición en tiempo real con persistencia automática en el navegador. Haz clic en el estatus para alternar entre Pagado y Pendiente.</p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <span id="inv-filter-summary" class="text-xs font-semibold text-slate-700 bg-white/70 px-3 py-1.5 rounded-full border border-white/90 shadow-sm font-numeric">
+                Mostrando 108 gastos
+              </span>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <span class="text-slate-400 font-semibold">Costco (Carnes & Quesos)</span>
-            <div class="text-lg font-bold text-slate-900 mt-1 font-numeric">$1,097.00</div>
-          </div>
-          <div class="p-4 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <span class="text-slate-400 font-semibold">Mercado Libre (Empaques)</span>
-            <div class="text-lg font-bold text-slate-900 mt-1 font-numeric">$827.00</div>
-          </div>
-          <div class="p-4 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <span class="text-slate-400 font-semibold">Goplas (Envases termoformados)</span>
-            <div class="text-lg font-bold text-slate-900 mt-1 font-numeric">$670.00</div>
+
+          <!-- Search Input & Multi-Dimension Filter Pills -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-2">
+            
+            <!-- Search Bar -->
+            <div class="lg:col-span-4 relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+              <input type="text" id="inv-search-input" placeholder="Buscar insumo, tienda o socio..."
+                oninput="InvestmentApp.setSearch(this.value)"
+                class="w-full liquid-input pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400">
+            </div>
+
+            <!-- Funding Source Pills -->
+            <div class="lg:col-span-8 flex flex-wrap items-center gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Fuente:</span>
+              <div id="filter-pills-source" class="flex flex-wrap gap-1.5">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Cutoff Month Pills & Status Pills -->
+            <div class="lg:col-span-12 flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-white/40">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Corte:</span>
+                <div id="filter-pills-month" class="flex flex-wrap gap-1.5">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Estatus:</span>
+                  <div id="filter-pills-status" class="flex flex-wrap gap-1.5">
+                    <!-- Rendered dynamically -->
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-300">
+                  <span class="text-[11px] text-slate-500">Filas:</span>
+                  <select onchange="InvestmentApp.setPerPage(this.value)" class="liquid-input px-2 py-1 text-xs text-slate-800">
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Todas</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
+        <!-- Master Data Grid Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse min-w-[850px]">
+            <thead>
+              <tr class="liquid-table-head text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                <th class="py-3 px-3 text-left w-36">Fuente</th>
+                <th class="py-3 px-2 text-left w-44">Tienda / Proveedor</th>
+                <th class="py-3 px-2 text-left">Concepto / Insumo</th>
+                <th class="py-3 px-2 text-right w-28">Monto ($ MXN)</th>
+                <th class="py-3 px-2 text-center w-36">Mes de Corte</th>
+                <th class="py-3 px-2 text-center w-32">Fecha de Pago</th>
+                <th class="py-3 px-3 text-center w-28">Estatus</th>
+                <th class="py-3 px-2 text-center w-12">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body" class="divide-y divide-white/40 text-xs sm:text-sm">
+              <!-- Rendered dynamically by InvestmentApp.renderTable() -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer Pagination Bar -->
+        <div class="p-4 bg-white/35 backdrop-blur-md border-t border-white/60 flex items-center justify-between">
+          <div id="expenses-pagination-container" class="w-full">
+            <!-- Rendered dynamically by InvestmentApp.renderPagination() -->
+          </div>
+        </div>
+
       </section>
 
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 3: CONTROL DE PEDIDOS (PLACEHOLDER)    -->
+    <!-- TAB 3: CONTROL DE PEDIDOS & GANANCIAS      -->
     <!-- ========================================== -->
-    <div id="panel-pedidos" class="hidden space-y-6 transition-all duration-300">
-      <div class="liquid-card p-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/60">
-          <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-100/80 text-blue-800 text-xs font-bold mb-2">
-              <span class="w-2 h-2 rounded-full bg-blue-600 animate-glass-pulse"></span>
-              <span>Sprint 2</span>
-            </div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Pedidos & Logística</h2>
-            <p class="text-sm text-slate-500 mt-1">Gestión de comandas, fechas de entrega, pagos vía Revolut/Efectivo y asignación de cocina.</p>
+    <div id="panel-pedidos" class="hidden space-y-7 transition-all duration-300">
+      
+      <!-- Top Action Bar & Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2.5">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Pedidos & Ganancias</h1>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+              95 Comandas
+            </span>
           </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Motor de facturación, rentabilidad neta real, seguimiento de cobranza y pipeline logístico de cocina.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <button onclick="openNewOrderModal()" 
+            class="liquid-btn-dark px-4 py-2 text-xs font-semibold space-x-2">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+            <span>Registrar Pedido</span>
+          </button>
+
+          <button onclick="OrdersApp.exportCsv()" 
+            class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Exportar CSV</span>
+          </button>
+
+          <button onclick="openResetOrdersModal()" 
+            class="p-2 text-slate-400 hover:text-amber-600 rounded-xl hover:bg-white/60 transition-colors" title="Restaurar datos base">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section A: Top KPI Cards (Liquid Glass) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- KPI 1: Ganancia Generada (Utilidad Bruta) -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
           <div>
-            <span class="px-4 py-2 rounded-full liquid-pill text-amber-800 text-xs font-bold font-numeric">
-              13 Chiles por Preparar
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ganancia Generada</span>
+              <span id="ord-kpi-gross-margin" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 font-numeric">69.3%</span>
+            </div>
+            <div id="ord-kpi-gross-profit" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$60,045.25</div>
+            <p id="ord-kpi-gross-sub" class="text-[11px] text-slate-500 mt-1">Ventas ($86,625.00) - Inversión ($26,579.75)</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60">
+            <div class="flex justify-between text-[11px] font-numeric mb-1">
+              <span class="text-emerald-700 font-bold">Margen Bruto</span>
+              <span class="text-slate-500">Rentabilidad</span>
+            </div>
+            <div class="w-full bg-slate-200/60 h-2 rounded-full overflow-hidden">
+              <div id="ord-kpi-gross-progress" class="bg-emerald-500 h-full transition-all duration-500" style="width: 71.2%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI 2: Ganancia Neta Disponible -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ganancia Neta Disponible</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-emerald-400 font-numeric shadow-sm">Remanente</span>
+            </div>
+            <div id="ord-kpi-net-profit" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-2 font-numeric">$58,036.95</div>
+            <p id="ord-kpi-net-sub" class="text-[11px] text-slate-500 mt-1">Ganancia ($60,045.25) - Gastado ($2,008.30)</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Gastado de ganancia:</span>
+            <span id="ord-kpi-spent-profit" class="font-numeric font-bold text-amber-700">$2,008.30 MXN</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Total Ventas / Total Pedidos (Quick Filter) -->
+        <div id="card-filter-all" onclick="OrdersApp.quickFilter('all')" 
+          class="liquid-card p-5 sm:p-6 flex flex-col justify-between cursor-pointer hover:bg-white/80 transition-all duration-200 group select-none"
+          title="Clic para restablecer y ver todas las 95 comandas">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-800 transition-colors">Total Ventas / Pedidos</span>
+              <span id="badge-filter-all" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B]/10 text-slate-800 border border-slate-200 font-numeric">Ver Todos</span>
+            </div>
+            <div id="ord-kpi-total-revenue" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$86,625.00</div>
+            <p id="ord-kpi-total-sub" class="text-[11px] text-slate-500 mt-1">332 chiles colocados (95 comandas)</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Ticket promedio:</span>
+            <strong id="ord-kpi-avg-ticket" class="text-slate-800 font-numeric font-bold">$911.84</strong>
+          </div>
+        </div>
+
+        <!-- KPI 4: Cobranza Global -->
+        <div class="liquid-card p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Cobranza Global</span>
+              <span id="ord-kpi-collection-rate" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200 font-numeric">93.9% efectividad</span>
+            </div>
+            <div id="ord-kpi-collected" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$81,355.00</div>
+            <div class="mt-2.5 flex flex-wrap gap-1.5 text-[11px] font-numeric">
+              <button onclick="OrdersApp.quickFilter('paid'); event.stopPropagation();" id="pill-filter-paid"
+                class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-100/90 hover:bg-emerald-200/90 text-emerald-800 border border-emerald-200 transition-all font-bold cursor-pointer"
+                title="Clic para filtrar pedidos pagados">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
+                <span id="ord-kpi-paid-pills">$81,355.00 (86 pagados)</span>
+              </button>
+              <button onclick="OrdersApp.quickFilter('unpaid'); event.stopPropagation();" id="pill-filter-unpaid"
+                class="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-100/90 hover:bg-amber-200/90 text-amber-800 border border-amber-200 transition-all font-bold cursor-pointer"
+                title="Clic para filtrar pedidos pendientes de cobro">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
+                <span id="ord-kpi-unpaid-pills">$5,270.00 (9 no pagados)</span>
+              </button>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Canales:</span>
+            <span class="font-medium text-slate-700">Revolut, Efectivo y Directo</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section B: Kitchen & Delivery Pipeline Quick Filters (Drill-Down Cards) -->
+      <div class="liquid-card p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/60">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-heading">Pipeline Operativo & Filtros Rápidos</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric shadow-sm">Drill-Down Activo</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Haz clic en cualquier tarjeta operativa para filtrar la tabla en tiempo real. Clic de nuevo para apagar el filtro.</p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="text-slate-400 text-[11px] font-numeric">Chiles entregados:</span>
+            <span id="pipe-completed-chiles-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200 font-numeric">
+              319 listos (90 pedidos)
+            </span>
+            <span class="text-slate-300">•</span>
+            <span class="text-slate-400 text-[11px] font-numeric">Gastado ganancia:</span>
+            <span id="pipe-extras-amount" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100/90 text-amber-800 border border-amber-200 font-numeric">
+              $2,008.30 MXN
             </span>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          
+          <!-- 1. Tarjeta "Por Preparar" / "Chiles Pendientes" -->
+          <div id="card-filter-unprepped" onclick="OrdersApp.quickFilter('unprepped')" 
+            class="p-4 rounded-2xl bg-white/40 border border-white/70 flex flex-col justify-between shadow-sm cursor-pointer hover:bg-white/70 hover:shadow-md transition-all duration-200 group select-none"
+            title="Clic para filtrar pedidos con preparación pendiente">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 border border-amber-200/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">Por Preparar</span>
+                  <div class="flex items-baseline space-x-1.5 mt-0.5">
+                    <span id="pipe-unprepped-chiles" class="text-xl sm:text-2xl font-extrabold text-amber-600 font-numeric">13</span>
+                    <span class="text-xs text-slate-500 font-medium">piezas</span>
+                  </div>
+                </div>
+              </div>
+              <span id="indicator-filter-unprepped" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-900 font-numeric hidden">Activo</span>
             </div>
-            <h3 class="text-base font-bold text-slate-800">Pipeline de Entregas</h3>
-            <p class="text-xs text-slate-500 mt-1.5">Monitoreo de pedidos por lotes: Producción vs. Fechas de entrega en CDMX y Toluca.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            <div class="mt-3 pt-2.5 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="pipe-unprepped-orders">5 pedidos activos</span>
+              <span class="text-[10px] text-amber-700 font-semibold group-hover:underline">Filtrar cocina →</span>
             </div>
-            <h3 class="text-base font-bold text-slate-800">Reconciliación de Pagos</h3>
-            <p class="text-xs text-slate-500 mt-1.5">Seguimiento de transferencias Revolut y efectivo contra entrega de comensales.</p>
           </div>
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+
+          <!-- 2. Tarjeta "Por Entregar" -->
+          <div id="card-filter-undelivered" onclick="OrdersApp.quickFilter('undelivered')" 
+            class="p-4 rounded-2xl bg-white/40 border border-white/70 flex flex-col justify-between shadow-sm cursor-pointer hover:bg-white/70 hover:shadow-md transition-all duration-200 group select-none"
+            title="Clic para filtrar pedidos con entrega pendiente">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-700 border border-rose-200/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25V5.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v10.125c0 .621.504 1.125 1.125 1.125H5.25m11.25-9h3.75"/></svg>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-rose-800">Por Entregar</span>
+                  <div class="flex items-baseline space-x-1.5 mt-0.5">
+                    <span id="pipe-undelivered-chiles" class="text-xl sm:text-2xl font-extrabold text-rose-600 font-numeric">13</span>
+                    <span class="text-xs text-slate-500 font-medium">piezas</span>
+                  </div>
+                </div>
+              </div>
+              <span id="indicator-filter-undelivered" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-200/80 text-rose-900 font-numeric hidden">Activo</span>
             </div>
-            <h3 class="text-base font-bold text-slate-800">División Socios (Diego & Angy)</h3>
-            <p class="text-xs text-slate-500 mt-1.5">Distribución transparente de pedidos para cálculo de utilidades por socio.</p>
+            <div class="mt-3 pt-2.5 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="pipe-undelivered-orders">5 pedidos activos</span>
+              <span class="text-[10px] text-rose-700 font-semibold group-hover:underline">Filtrar entrega →</span>
+            </div>
           </div>
+
+          <!-- 3. Tarjeta "Por Cobrar (Pendiente)" -->
+          <div id="card-filter-unpaid" onclick="OrdersApp.quickFilter('unpaid')" 
+            class="p-4 rounded-2xl bg-white/40 border border-white/70 flex flex-col justify-between shadow-sm cursor-pointer hover:bg-white/70 hover:shadow-md transition-all duration-200 group select-none"
+            title="Clic para filtrar pedidos no pagados">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 border border-amber-200/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">Por Cobrar</span>
+                  <div class="flex items-baseline space-x-1 mt-0.5">
+                    <span id="pipe-unpaid-amount" class="text-xl sm:text-2xl font-extrabold text-amber-700 font-numeric">$5,270.00</span>
+                  </div>
+                </div>
+              </div>
+              <span id="indicator-filter-unpaid" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-900 font-numeric hidden">Activo</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="pipe-unpaid-orders">9 pedidos por cobrar</span>
+              <span class="text-[10px] text-amber-800 font-semibold group-hover:underline">Filtrar cobro →</span>
+            </div>
+          </div>
+
+          <!-- 4. Tarjeta "Cobrado" -->
+          <div id="card-filter-paid" onclick="OrdersApp.quickFilter('paid')" 
+            class="p-4 rounded-2xl bg-white/40 border border-white/70 flex flex-col justify-between shadow-sm cursor-pointer hover:bg-white/70 hover:shadow-md transition-all duration-200 group select-none"
+            title="Clic para filtrar pedidos pagados">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Cobrado</span>
+                  <div class="flex items-baseline space-x-1 mt-0.5">
+                    <span id="pipe-paid-amount" class="text-xl sm:text-2xl font-extrabold text-emerald-600 font-numeric">$81,355.00</span>
+                  </div>
+                </div>
+              </div>
+              <span id="indicator-filter-paid" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-900 font-numeric hidden">Activo</span>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="pipe-paid-orders">86 pedidos pagados</span>
+              <span class="text-[10px] text-emerald-700 font-semibold group-hover:underline">Filtrar pagados →</span>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      <!-- Section C: Interactive Orders Data Grid & Quick Controls -->
+      <div class="liquid-card overflow-hidden">
+        
+        <!-- Active Quick Filter Drill-Down Banner -->
+        <div id="ord-drilldown-banner" class="hidden mx-5 sm:mx-6 mt-5 p-3 sm:p-3.5 rounded-2xl bg-[#1E222B] text-white items-center justify-between shadow-lg border border-white/20 text-xs">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-glass-pulse"></span>
+            <span id="ord-drilldown-text" class="font-bold text-slate-100">Filtro activo: Pendientes de preparación (13 chiles)</span>
+          </div>
+          <button onclick="OrdersApp.quickFilter('all')" 
+            class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <span>Limpiar filtro</span>
+          </button>
+        </div>
+        
+        <!-- Controls & Filter Bar -->
+        <div class="p-5 sm:p-6 border-b border-white/60 space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <!-- Search & Count Summary -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+              <div class="relative w-full sm:w-72">
+                <input type="text" id="ord-search-input" placeholder="Buscar cliente, comanda o nota..."
+                  oninput="OrdersApp.setSearch(this.value)"
+                  class="w-full liquid-input pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                </svg>
+              </div>
+
+              <div id="ord-filter-summary" class="text-xs text-slate-500 font-numeric whitespace-nowrap">
+                Mostrando 95 comandas (332 chiles • $86,625.00)
+              </div>
+            </div>
+
+            <!-- Page Size Selector & Clear Filters -->
+            <div class="flex items-center space-x-2 text-xs">
+              <label class="text-slate-500">Filas:</label>
+              <select onchange="OrdersApp.setPerPage(this.value)" class="liquid-input px-2.5 py-1 text-xs text-slate-700 font-numeric">
+                <option value="20" selected>20 por página</option>
+                <option value="50">50 por página</option>
+                <option value="all">Todas las filas</option>
+              </select>
+              <button onclick="OrdersApp.resetFilters()" class="px-3 py-1 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white/60 transition-all font-medium">
+                Limpiar
+              </button>
+            </div>
+          </div>
+
+          <!-- Multi-Category Filter Pills Row -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+            <!-- Filter: Payment -->
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">Pago:</span>
+              <div id="ord-filter-pills-paid" class="flex items-center space-x-1 overflow-x-auto pb-1">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Filter: Preparation -->
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">Cocina:</span>
+              <div id="ord-filter-pills-prep" class="flex items-center space-x-1 overflow-x-auto pb-1">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Filter: Delivery -->
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">Entrega:</span>
+              <div id="ord-filter-pills-delivery" class="flex items-center space-x-1 overflow-x-auto pb-1">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-white/40 border-b border-white/60 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                <th class="py-3 px-3 text-left w-12">#</th>
+                <th class="py-3 px-2 text-left min-w-[160px]">Cliente / Contacto</th>
+                <th class="py-3 px-2 text-center w-28">Fecha Pedido</th>
+                <th class="py-3 px-2 text-center w-28">Fecha Producción</th>
+                <th class="py-3 px-2 text-center w-28">Fecha Entrega</th>
+                <th class="py-3 px-2 text-right w-20">Cant. (Chiles)</th>
+                <th class="py-3 px-2 text-right w-28">Total ($ MXN)</th>
+                <th class="py-3 px-2 text-center w-24">Estatus Pago</th>
+                <th class="py-3 px-2 text-center w-24">Preparación</th>
+                <th class="py-3 px-2 text-center w-24">Entrega</th>
+                <th class="py-3 px-2 text-left min-w-[140px]">Notas / Pago</th>
+                <th class="py-3 px-2 text-center w-14">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table-body" class="divide-y divide-white/40">
+              <!-- Rendered dynamically by OrdersApp.renderTable() -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Orders Pagination Container -->
+        <div id="orders-pagination-container" class="p-4 bg-white/30 border-t border-white/60 flex items-center justify-between">
+          <!-- Rendered dynamically -->
+        </div>
+
+      </div>
+
+      <!-- Section D: Gastos de la Ganancia / Retiros Realizados -->
+      <div class="liquid-card p-5 sm:p-6 space-y-4">
+        
+        <!-- Header & Quick Balance Summary -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/60">
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-heading">Gastos de la Ganancia / Retiros Realizados</h2>
+              <span id="profit-expenses-count" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+                3 Retiros
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Registro de montos retirados o ejercidos directamente sobre la utilidad acumulada del negocio.</p>
+          </div>
+
+          <!-- Inline Balance Badges & Add Button -->
+          <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <!-- Ganancia Generada -->
+            <div class="px-3.5 py-2 rounded-xl bg-white/50 border border-white/80 shadow-sm flex flex-col min-w-[125px]">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ganancia Generada</span>
+              <span id="profit-exp-generated" class="text-sm font-extrabold text-slate-900 font-numeric">$60,045.25</span>
+              <span class="text-[9px] text-slate-400">Ventas - Inversión</span>
+            </div>
+
+            <!-- Total Gastado -->
+            <div class="px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-200/60 shadow-sm flex flex-col min-w-[125px]">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Total Gastado</span>
+              <span id="profit-exp-total-spent" class="text-sm font-extrabold text-amber-700 font-numeric">$2,008.30</span>
+              <span class="text-[9px] text-amber-600/80">Gastos de ganancia</span>
+            </div>
+
+            <!-- Ganancia Disponible -->
+            <div class="px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-200/60 shadow-sm flex flex-col min-w-[135px]">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Ganancia Disponible</span>
+              <span id="profit-exp-available" class="text-sm font-extrabold text-emerald-700 font-numeric">$58,036.95</span>
+              <span class="text-[9px] text-emerald-600/80">Remanente final</span>
+            </div>
+
+            <!-- Add Button -->
+            <button onclick="OrdersApp.addProfitExpense()" 
+              class="liquid-btn-dark px-3.5 py-2 text-xs font-semibold space-x-1.5 self-stretch sm:self-center">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+              <span>+ Registrar Gasto de Ganancia</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table of Profit Expenses / Withdrawals -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-white/40 border-b border-white/60 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                <th class="py-2.5 px-4 text-left">Concepto / Destino</th>
+                <th class="py-2.5 px-3 text-right w-48">Monto ($ MXN)</th>
+                <th class="py-2.5 px-3 text-center w-20">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="profit-expenses-table-body" class="divide-y divide-white/40">
+              <!-- Rendered dynamically by OrdersApp.renderProfitExpenses() -->
+            </tbody>
+            <tfoot>
+              <tr class="bg-white/30 border-t border-white/70 font-semibold">
+                <td class="py-3 px-4 text-slate-700 font-bold">Total Gastado a Cuenta de Ganancias:</td>
+                <td id="profit-expenses-footer-total" class="py-3 px-3 text-right font-extrabold text-amber-700 font-numeric text-sm">$2,008.30</td>
+                <td class="py-3 px-3 text-center"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- ========================================== -->
@@ -617,6 +1199,221 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: REGISTRAR NUEVO GASTO (FROSTED GLASS)-->
+  <!-- ========================================== -->
+  <div id="new-expense-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-6 sm:p-7 max-w-lg w-full">
+      <div class="flex items-center justify-between pb-4 border-b border-white/60">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 font-heading">Registrar Nuevo Gasto</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Añade una compra o adquisición de insumo para la temporada.</p>
+        </div>
+        <button onclick="closeNewExpenseModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-white/60">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="new-expense-form" onsubmit="handleNewExpenseSubmit(event)" class="space-y-4 mt-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Fuente de Fondos</label>
+            <select id="new-exp-source" required onchange="toggleContributorField(this.value)" class="w-full liquid-input px-3 py-2 text-slate-800">
+              <option value="Nogadísima">Nogadísima (Capital Negocio)</option>
+              <option value="Digs" selected>Digs (Diego)</option>
+              <option value="Angy">Angy (Angélica)</option>
+              <option value="Otros">Otros (Aporte Externo / Terceros)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tienda / Proveedor</label>
+            <input type="text" id="new-exp-store" required placeholder="Costco, Tlalne, Walmart..." class="w-full liquid-input px-3 py-2 text-slate-800">
+          </div>
+        </div>
+
+        <!-- Dynamic "Especificar Otro" Field -->
+        <div id="new-exp-contributor-container" class="hidden">
+          <label class="block font-semibold text-slate-700 mb-1">Nombre del Aportante / Beneficiario (opcional)</label>
+          <input type="text" id="new-exp-contributor" placeholder="Ej. Alma, Inversionista, Familiar..." class="w-full liquid-input px-3 py-2 text-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Concepto / Insumo</label>
+          <input type="text" id="new-exp-product" required placeholder="Nuez, carne de res, envases..." class="w-full liquid-input px-3 py-2 text-slate-800">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Monto ($ MXN)</label>
+            <input type="number" step="any" min="0" id="new-exp-price" required placeholder="0.00" class="w-full liquid-input px-3 py-2 text-slate-900 font-extrabold font-numeric">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Mes de Corte</label>
+            <select id="new-exp-month" required class="w-full liquid-input px-2.5 py-2 text-slate-800">
+              <option value="Agosto 2026">Agosto 2026</option>
+              <option value="Septiembre 2026" selected>Septiembre 2026</option>
+              <option value="Octubre 2026">Octubre 2026</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Estatus</label>
+            <select id="new-exp-status" required class="w-full liquid-input px-2.5 py-2 text-slate-800">
+              <option value="Pendiente" selected>Pendiente</option>
+              <option value="Pagado">Pagado</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Fecha Límite de Pago</label>
+          <input type="date" id="new-exp-date" value="2026-09-30" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric">
+        </div>
+
+        <div class="flex items-center justify-end space-x-2.5 pt-3 border-t border-white/60">
+          <button type="button" onclick="closeNewExpenseModal()" class="px-4 py-2 text-slate-600 hover:bg-white/60 rounded-xl transition-colors font-semibold">
+            Cancelar
+          </button>
+          <button type="submit" class="liquid-btn-dark px-5 py-2 font-semibold space-x-1.5">
+            <span>Guardar Gasto</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIRM RESET INVESTMENTS (GLASS)   -->
+  <!-- ========================================== -->
+  <div id="reset-investments-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-7 max-w-sm w-full text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restaurar Balance de Inversión?</h3>
+      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán los 108 gastos auditados originales ($26,579.75 MXN) distribuidos entre Nogadísima, Digs, Angy y Otros.</p>
+      <div class="flex items-center justify-center space-x-3 mt-6">
+        <button onclick="closeResetInvestmentsModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button onclick="executeResetInvestments()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
+          Restaurar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REGISTRAR NUEVO PEDIDO (GLASS)      -->
+  <!-- ========================================== -->
+  <div id="new-order-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-6 sm:p-7 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-white/60">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 font-heading">Registrar Nuevo Pedido</h3>
+          <p class="text-xs text-slate-500">Ingresa la comanda para calcular ingresos y logística en tiempo real.</p>
+        </div>
+        <button onclick="closeNewOrderModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="new-order-form" onsubmit="handleNewOrderSubmit(event)" class="mt-5 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nombre del Cliente / Contacto *</label>
+          <input type="text" id="new-ord-customer" required placeholder="Ej. Familia González / Tec / Daniel" class="w-full liquid-input px-3 py-2 text-slate-800">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Fecha Pedido *</label>
+            <input type="date" id="new-ord-date" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Fecha Producción</label>
+            <input type="date" id="new-ord-prod" class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric" placeholder="Opcional">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Fecha Entrega *</label>
+            <input type="date" id="new-ord-delivery" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Cantidad (Chiles) *</label>
+            <input type="number" id="new-ord-qty" min="1" step="1" value="1" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric font-bold" oninput="calculateSuggestedPrice()">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Total ($ MXN) *</label>
+            <input type="number" id="new-ord-price" min="0" step="any" value="280" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric font-bold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Estatus Pago</label>
+            <select id="new-ord-paid" class="w-full liquid-input px-3 py-2 text-slate-800">
+              <option value="No pagado" selected>No pagado</option>
+              <option value="Pagado">Pagado</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Preparación</label>
+            <select id="new-ord-prep" class="w-full liquid-input px-3 py-2 text-slate-800">
+              <option value="No preparado" selected>No preparado</option>
+              <option value="Preparado">Preparado</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Entrega</label>
+            <select id="new-ord-delivery-status" class="w-full liquid-input px-3 py-2 text-slate-800">
+              <option value="No entregado" selected>No entregado</option>
+              <option value="Entregado">Entregado</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Notas / Método de Pago</label>
+          <input type="text" id="new-ord-notes" placeholder="Ej. Revolut, Efectivo, Angy, Con entrega Uber..." class="w-full liquid-input px-3 py-2 text-slate-800">
+        </div>
+
+        <div class="flex items-center justify-end space-x-2.5 pt-3 border-t border-white/60">
+          <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2 text-slate-600 hover:bg-white/60 rounded-xl transition-colors font-semibold">
+            Cancelar
+          </button>
+          <button type="submit" class="liquid-btn-dark px-5 py-2 font-semibold space-x-1.5">
+            <span>Registrar Comanda</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIRM RESET ORDERS (GLASS)        -->
+  <!-- ========================================== -->
+  <div id="reset-orders-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-7 max-w-sm w-full text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restaurar Pedidos Base?</h3>
+      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán las 95 comandas oficiales ($86,625.00 MXN en facturación y 332 chiles) y los 3 gastos de ganancia base ($2,008.30 MXN).</p>
+      <div class="flex items-center justify-center space-x-3 mt-6">
+        <button onclick="closeResetOrdersModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button onclick="executeResetOrders()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
+          Restaurar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
@@ -624,7 +1421,10 @@
   <!-- APPLICATION SCRIPTS (MODULAR ARCHITECTURE)                      -->
   <!-- ============================================================== -->
   <script src="js/background-canvas.js"></script>
+  <script src="js/global-store.js"></script>
   <script src="js/recipe-engine.js"></script>
+  <script src="js/investment-engine.js"></script>
+  <script src="js/orders-engine.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

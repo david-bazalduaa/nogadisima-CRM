@@ -14,7 +14,9 @@ function switchTab(tabId) {
     if (id === tabId) {
       if (panelEl) panelEl.classList.remove('hidden');
       if (desktopBtn) {
-        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2.5 rounded-full text-xs font-bold transition-all duration-200 liquid-pill-active';
+        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 liquid-pill-active';
+        const svg = desktopBtn.querySelector('svg');
+        if (svg) svg.className = 'w-4 h-4 text-white';
       }
       if (mobileBtn) {
         mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20';
@@ -22,13 +24,35 @@ function switchTab(tabId) {
     } else {
       if (panelEl) panelEl.classList.add('hidden');
       if (desktopBtn) {
-        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200';
+        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200';
+        const svg = desktopBtn.querySelector('svg');
+        if (svg) svg.className = 'w-4 h-4 text-slate-400';
       }
       if (mobileBtn) {
         mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/70 text-slate-600 font-numeric border border-white/80';
       }
     }
   });
+
+  // Toggle Pulse Status Dots
+  const pulsePresupuesto = document.getElementById('tab-pulse-presupuesto');
+  const pulseInversion = document.getElementById('tab-pulse-inversion');
+  const pulsePedidos = document.getElementById('tab-pulse-pedidos');
+  if (pulsePresupuesto) pulsePresupuesto.classList.toggle('hidden', tabId !== 'presupuesto');
+  if (pulseInversion) pulseInversion.classList.toggle('hidden', tabId !== 'inversion');
+  if (pulsePedidos) pulsePedidos.classList.toggle('hidden', tabId !== 'pedidos');
+
+  // Trigger reactive render when entering tabs
+  if (tabId === 'inversion' && window.InvestmentApp && typeof window.InvestmentApp.render === 'function') {
+    window.InvestmentApp.render();
+  }
+  if (tabId === 'pedidos' && window.OrdersApp && typeof window.OrdersApp.render === 'function') {
+    window.OrdersApp.render();
+  }
+  if (tabId === 'presupuesto' && typeof window.recalculateAll === 'function') {
+    window.recalculateAll();
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -92,7 +116,7 @@ window.renderRecipeCards = function() {
         <button onclick="addNewIngredientRow('${cat.id}'); event.stopPropagation();" 
           class="liquid-btn-dark px-3.5 py-1.5 text-xs font-semibold space-x-1.5">
           <svg class="w-3.5 h-3.5 text-white/90" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-          <span>+ Añadir</span>
+          <span>Añadir</span>
         </button>
 
         <!-- Chevron Collapse Toggle -->
@@ -211,7 +235,7 @@ window.renderRecipeCards = function() {
         <button onclick="addNewIngredientRow('${cat.id}')" 
           class="liquid-pill px-3.5 py-1.5 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all">
           <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-          <span>+ Añadir a ${safeHtml(cat.title.split(' ')[0])}</span>
+          <span>Añadir a ${safeHtml(cat.title.split(' ')[0])}</span>
         </button>
       </div>
     `;
@@ -257,9 +281,193 @@ window.showToast = function(message, type = 'info') {
   }, 2400);
 };
 
-// 4. Initialize Application
+// 4. Inversión & Gastos Modal Controllers
+window.openNewExpenseModal = function() {
+  const modal = document.getElementById('new-expense-modal');
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.toggleContributorField = function(sourceValue) {
+  const container = document.getElementById('new-exp-contributor-container');
+  if (container) {
+    if (sourceValue === 'Otros') {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
+      const input = document.getElementById('new-exp-contributor');
+      if (input) input.value = '';
+    }
+  }
+};
+
+window.closeNewExpenseModal = function() {
+  const modal = document.getElementById('new-expense-modal');
+  if (modal) modal.classList.add('hidden');
+  const form = document.getElementById('new-expense-form');
+  if (form) form.reset();
+  const contribContainer = document.getElementById('new-exp-contributor-container');
+  if (contribContainer) contribContainer.classList.add('hidden');
+};
+
+window.handleNewExpenseSubmit = function(e) {
+  e.preventDefault();
+  const source = document.getElementById('new-exp-source').value;
+  const contributorInput = document.getElementById('new-exp-contributor');
+  const contributorName = (source === 'Otros' && contributorInput) ? contributorInput.value.trim() : '';
+  const store = document.getElementById('new-exp-store').value.trim();
+  const product = document.getElementById('new-exp-product').value.trim();
+  const price = parseFloat(document.getElementById('new-exp-price').value) || 0;
+  const cutoffMonth = document.getElementById('new-exp-month').value;
+  const status = document.getElementById('new-exp-status').value;
+  const dueDate = document.getElementById('new-exp-date').value;
+
+  if (!store || !product || price <= 0) {
+    if (window.showToast) window.showToast('Por favor completa todos los campos requeridos', 'error');
+    return;
+  }
+
+  if (window.InvestmentApp && typeof window.InvestmentApp.addNewExpense === 'function') {
+    window.InvestmentApp.addNewExpense({
+      source,
+      contributorName,
+      store,
+      product,
+      price,
+      cutoffMonth,
+      status,
+      dueDate
+    });
+  }
+
+  window.closeNewExpenseModal();
+};
+
+window.openResetInvestmentsModal = function() {
+  const modal = document.getElementById('reset-investments-modal');
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.closeResetInvestmentsModal = function() {
+  const modal = document.getElementById('reset-investments-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.executeResetInvestments = function() {
+  if (window.InvestmentApp && typeof window.InvestmentApp.resetToSeedData === 'function') {
+    window.InvestmentApp.resetToSeedData();
+  }
+  window.closeResetInvestmentsModal();
+};
+
+// ==========================================
+// 5. Control de Pedidos Modal & Helpers
+// ==========================================
+window.openNewOrderModal = function() {
+  const modal = document.getElementById('new-order-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    const today = new Date().toISOString().slice(0, 10);
+    const dateInput = document.getElementById('new-ord-date');
+    const delivInput = document.getElementById('new-ord-delivery');
+    if (dateInput && !dateInput.value) dateInput.value = today;
+    if (delivInput && !delivInput.value) delivInput.value = today;
+    const custInput = document.getElementById('new-ord-customer');
+    if (custInput) custInput.focus();
+  }
+};
+
+window.closeNewOrderModal = function() {
+  const modal = document.getElementById('new-order-modal');
+  if (modal) modal.classList.add('hidden');
+  const form = document.getElementById('new-order-form');
+  if (form) form.reset();
+};
+
+window.calculateSuggestedPrice = function() {
+  const qtyInput = document.getElementById('new-ord-qty');
+  const priceInput = document.getElementById('new-ord-price');
+  if (!qtyInput || !priceInput) return;
+  const qty = parseInt(qtyInput.value, 10) || 1;
+  const priceMap = {
+    1: 280,
+    2: 540,
+    3: 820,
+    4: 1050,
+    5: 1330,
+    6: 1590,
+    7: 1850,
+    20: 4550
+  };
+  priceInput.value = priceMap[qty] !== undefined ? priceMap[qty] : (qty * 265);
+};
+
+window.handleNewOrderSubmit = function(e) {
+  e.preventDefault();
+  const customer = document.getElementById('new-ord-customer').value.trim();
+  const orderDate = document.getElementById('new-ord-date').value;
+  const prodDate = document.getElementById('new-ord-prod') ? document.getElementById('new-ord-prod').value : '';
+  const deliveryDate = document.getElementById('new-ord-delivery').value;
+  const qty = parseInt(document.getElementById('new-ord-qty').value, 10) || 1;
+  const price = parseFloat(document.getElementById('new-ord-price').value) || 0;
+  const paidStatus = document.getElementById('new-ord-paid').value;
+  const prepStatus = document.getElementById('new-ord-prep').value;
+  const deliveryStatus = document.getElementById('new-ord-delivery-status').value;
+  const notes = document.getElementById('new-ord-notes').value.trim();
+
+  if (!customer || qty <= 0) {
+    if (window.showToast) window.showToast('Por favor completa los campos requeridos', 'error');
+    return;
+  }
+
+  if (window.OrdersApp && typeof window.OrdersApp.addNewOrder === 'function') {
+    window.OrdersApp.addNewOrder({
+      customer,
+      orderDate,
+      prodDate,
+      deliveryDate,
+      qty,
+      price,
+      paidStatus,
+      prepStatus,
+      deliveryStatus,
+      notes
+    });
+  }
+
+  window.closeNewOrderModal();
+};
+
+window.openResetOrdersModal = function() {
+  const modal = document.getElementById('reset-orders-modal');
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.closeResetOrdersModal = function() {
+  const modal = document.getElementById('reset-orders-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.executeResetOrders = function() {
+  if (window.OrdersApp && typeof window.OrdersApp.resetToSeedData === 'function') {
+    window.OrdersApp.resetToSeedData();
+  }
+  window.closeResetOrdersModal();
+};
+
+// ==========================================
+// 6. Initialize Application
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.NogaStore && typeof window.NogaStore.init === 'function') {
+    window.NogaStore.init();
+  }
   loadRecipeState();
   window.renderRecipeCards();
   if (window.initPresetButtons) window.initPresetButtons();
+  if (window.InvestmentApp && typeof window.InvestmentApp.init === 'function') {
+    window.InvestmentApp.init();
+  }
+  if (window.OrdersApp && typeof window.OrdersApp.init === 'function') {
+    window.OrdersApp.init();
+  }
 });

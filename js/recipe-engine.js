@@ -83,7 +83,6 @@ window.RecipeApp = {
   collapsedCards: new Set()
 };
 
-// 1. Storage Helpers
 function loadRecipeState() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY_RECIPE);
@@ -96,11 +95,18 @@ function loadRecipeState() {
     console.error('Error loading recipe state', e);
     window.RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
   }
+
+  if (window.NogaStore) {
+    window.NogaStore.setRecipe(window.RecipeApp.data, 'recipe-init', false);
+  }
 }
 
-function saveRecipeState() {
+function saveRecipeState(notify = false) {
   try {
     localStorage.setItem(STORAGE_KEY_RECIPE, JSON.stringify(window.RecipeApp.data));
+    if (window.NogaStore) {
+      window.NogaStore.setRecipe(window.RecipeApp.data, 'recipe-module', notify);
+    }
   } catch (e) {
     console.error('Error saving recipe state', e);
   }
