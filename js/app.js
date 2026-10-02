@@ -14,12 +14,12 @@ function switchTab(tabId) {
     if (id === tabId) {
       if (panelEl) panelEl.classList.remove('hidden');
       if (desktopBtn) {
-        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-200 liquid-pill-active text-white';
+        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 liquid-pill-active';
         const svg = desktopBtn.querySelector('svg');
-        if (svg) svg.className = 'w-4 h-4 text-white';
+        if (svg) svg.className = 'w-4 h-4 text-slate-900';
       }
       if (mobileBtn) {
-        mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide text-white font-numeric shadow-sm liquid-pill-active';
+        mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide font-numeric liquid-pill-active';
       }
     } else {
       if (panelEl) panelEl.classList.add('hidden');
@@ -34,7 +34,7 @@ function switchTab(tabId) {
     }
   });
 
-  // Toggle Pulse Status Dots
+  // Toggle Pulse Status Dots (if elements present)
   const pulsePresupuesto = document.getElementById('tab-pulse-presupuesto');
   const pulseInversion = document.getElementById('tab-pulse-inversion');
   const pulsePedidos = document.getElementById('tab-pulse-pedidos');
@@ -261,15 +261,15 @@ window.showToast = function(message, type = 'info') {
 
   const toast = document.createElement('div');
   
-  let bg = 'bg-[#1E222B]/95 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-  let icon = '<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>';
+  let bg = 'bg-white/95 text-slate-900 backdrop-blur-xl border border-white/90 shadow-xl';
+  let icon = '<svg class="w-4 h-4 text-[#166534]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>';
   
   if (type === 'error') {
-    bg = 'bg-granada-700/95 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-    icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    bg = 'bg-[#9F1239] text-white backdrop-blur-xl border border-white/20 shadow-xl';
+    icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>';
   } else if (type === 'warning') {
-    bg = 'bg-amber-600/95 text-white backdrop-blur-xl border border-white/20 shadow-2xl';
-    icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"></path></svg>';
+    bg = 'bg-[#D97706] text-white backdrop-blur-xl border border-white/20 shadow-xl';
+    icon = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"></path></svg>';
   }
 
   toast.className = `${bg} px-4 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2 text-xs font-semibold transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;

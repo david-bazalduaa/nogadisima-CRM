@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-[#F4F6F4]">
+<html lang="es" class="h-full bg-[#F8F9FA]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nogadísima — Presupuesto de Receta | Chiles en Nogada</title>
   <meta name="description" content="Motor de costeo unitario y presupuesto de receta para lote base de Chiles en Nogada de temporada.">
 
-  <!-- Google Fonts: Outfit (UI), Plus Jakarta Sans (Headings) & Space Grotesk (Numerics) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Apple San Francisco Native Typography Stack (Zero AI-cliché fonts) -->
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,19 +16,36 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Outfit"', 'sans-serif'],
-            heading: ['"Plus Jakarta Sans"', 'sans-serif'],
-            numeric: ['"Space Grotesk"', 'monospace'],
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"SF Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+            heading: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"SF Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+            numeric: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"SF Pro"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
           },
           colors: {
+            obsidian: {
+              950: '#0B0F19',
+              900: '#0F172A', // Primary headers
+              800: '#1E293B',
+            },
             charcoal: {
-              950: '#12141A',
-              900: '#161820',
-              850: '#1A1D24',
-              800: '#1E222B', // Base Smoked Fill
-              700: '#282C37',
-              600: '#333846',
-              500: '#475569',
+              950: '#0B0F19',
+              900: '#0F172A',
+              850: '#151C2C',
+              800: '#1E293B',
+              700: '#334155',
+              600: '#475569',
+              500: '#64748B',
+            },
+            emerald: {
+              50: '#F2F7F4',
+              100: '#E1EFEA',
+              200: '#C0DED3',
+              300: '#94C3B2',
+              400: '#529E7F',
+              500: '#166534', // Refined Deep Forest Emerald (never neon lime #10b981)
+              600: '#1B4332', // Refined Sage / Deep Forest Emerald
+              700: '#166534',
+              800: '#14532D',
+              900: '#0F381E',
             },
             poblano: {
               50: '#F2F7F4',
@@ -41,22 +55,25 @@
               400: '#529E7F',
               500: '#2D6A4F',
               600: '#1B4332',
-              700: '#16382C',
-              800: '#112C23',
-              900: '#0A1C16',
-              dark: '#16382C',
+              700: '#166534',
+              800: '#14532D',
+              900: '#0F381E',
+              dark: '#14532D',
             },
             granada: {
               50: '#FDF2F4',
               100: '#FCE7EB',
               200: '#F7CCD3',
-              500: '#C0392B',
-              600: '#A62639', // Brand Pomegranate / Granadina Red
-              700: '#8A1E2F',
-              800: '#6E1725',
+              300: '#E898A8',
+              400: '#D1536F',
+              500: '#B91C43',
+              600: '#9F1239', // Subtle Granada Garnet Accent
+              700: '#881337',
+              800: '#701A31',
+              900: '#4C0D1C',
             },
             cream: {
-              50: '#FDFBF7', // Brand Warm Bone Neutral
+              50: '#FDFBF7',
               100: '#FAF7F2',
               200: '#F4ECE0',
             },
@@ -76,7 +93,7 @@
   <!-- Liquid Frosted Glass Design System Stylesheet -->
   <link rel="stylesheet" href="css/liquid-glass.css">
 </head>
-<body class="h-full bg-[#F4F6F4] text-slate-800 antialiased selection:bg-slate-200 selection:text-slate-900 font-sans min-h-screen relative overflow-x-hidden m-0 p-0">
+<body class="h-full bg-[#F8F9FA] text-slate-800 antialiased selection:bg-slate-200 selection:text-slate-900 font-sans min-h-screen relative overflow-x-hidden m-0 p-0">
 
   <!-- ============================================================== -->
   <!-- 1. DYNAMIC AMBIENT LIQUID CANVAS (60FPS FLUID GRADIENT MESH)    -->
@@ -107,15 +124,14 @@
         </div>
       </div>
 
-      <!-- Center: Tab Switchers (Frosted Glass Pill Bar) -->
+      <!-- Center: Tab Switchers (Frosted Glass Pill Bar: Apple Control Center Selection) -->
       <nav class="flex items-center p-1.5 liquid-pill overflow-x-auto no-scrollbar max-w-full">
         <button id="tab-presupuesto" onclick="switchTab('presupuesto')" 
-          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-200 liquid-pill-active text-white">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          class="tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 liquid-pill-active">
+          <svg class="w-4 h-4 text-slate-900" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
           </svg>
           <span class="whitespace-nowrap">Presupuesto de Receta</span>
-          <span id="tab-pulse-presupuesto" class="ml-1 liquid-status-jewel animate-glass-pulse"></span>
         </button>
 
         <button id="tab-inversion" onclick="switchTab('inversion')" 
@@ -124,7 +140,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <span class="whitespace-nowrap">Inversión & Gastos</span>
-          <span id="tab-pulse-inversion" class="ml-1 liquid-status-jewel animate-glass-pulse hidden"></span>
         </button>
 
         <button id="tab-pedidos" onclick="switchTab('pedidos')" 
@@ -133,7 +148,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
           </svg>
           <span class="whitespace-nowrap">Control de Pedidos</span>
-          <span id="tab-pulse-pedidos" class="ml-1 liquid-status-jewel animate-glass-pulse hidden"></span>
         </button>
 
         <button id="tab-inventario" onclick="switchTab('inventario')" 
@@ -142,7 +156,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
           </svg>
           <span class="whitespace-nowrap">Inventario</span>
-          <span id="tab-pulse-inventario" class="ml-1 liquid-status-jewel animate-glass-pulse hidden"></span>
         </button>
       </nav>
 
@@ -240,7 +253,7 @@
             </div>
           </div>
           <div class="w-full bg-slate-200/50 h-2 rounded-full mt-3.5 overflow-hidden">
-            <div class="bg-[#1E222B] h-full rounded-full" style="width: 100%"></div>
+            <div class="bg-[#166534] h-full rounded-full" style="width: 100%"></div>
           </div>
         </div>
 
@@ -329,40 +342,40 @@
                 <span class="text-slate-400 text-[11px] mr-1">Precios comunes:</span>
                 <button type="button" data-preset-price="220" onclick="setSalePrice(220)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$220</button>
                 <button type="button" data-preset-price="250" onclick="setSalePrice(250)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$250</button>
-                <button type="button" data-preset-price="280" onclick="setSalePrice(280)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill liquid-pill-active font-bold font-numeric">$280</button>
+                <button type="button" data-preset-price="280" onclick="setSalePrice(280)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill liquid-pill-active font-semibold font-numeric">$280</button>
                 <button type="button" data-preset-price="320" onclick="setSalePrice(320)" class="preset-price-btn px-3.5 py-2 rounded-full liquid-pill font-semibold text-slate-700 font-numeric">$320</button>
               </div>
             </div>
           </div>
 
-          <!-- Right: Elevated Dark Smoked Charcoal Glass Card (Apple Control Center Inspired) -->
-          <div class="liquid-dark-card p-6 min-w-[320px] sm:min-w-[390px]">
-            <div class="grid grid-cols-2 gap-4 pb-4 border-b border-white/10">
+          <!-- Right: Elevated Illuminated Frosted Glass Card (Apple Control Center Inspired) -->
+          <div class="liquid-simulator-card p-6 min-w-[320px] sm:min-w-[390px]">
+            <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-200/70">
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ganancia Neta / Chile</span>
-                <div id="sim-profit-per-chile" class="text-2xl font-extrabold text-apple-emerald mt-0.5 font-numeric">$194.23</div>
-                <span class="text-[11px] text-slate-400">Utilidad limpia por pieza</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ganancia Neta / Chile</span>
+                <div id="sim-profit-per-chile" class="text-2xl font-extrabold text-[#166534] mt-0.5 font-numeric">$194.23</div>
+                <span class="text-[11px] text-slate-500">Utilidad limpia por pieza</span>
               </div>
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Margen Bruto</span>
-                <div id="sim-gross-margin" class="text-2xl font-semibold text-white mt-0.5 font-numeric">69.4%</div>
-                <span class="text-[11px] text-slate-400">Sobre precio de venta</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Margen Bruto</span>
+                <div id="sim-gross-margin" class="text-2xl font-bold text-slate-900 mt-0.5 font-numeric">69.4%</div>
+                <span class="text-[11px] text-slate-500">Sobre precio de venta</span>
               </div>
             </div>
 
             <div class="pt-3.5 flex items-center justify-between text-xs">
-              <span class="text-slate-300 font-medium">Ganancia proyectada por lote (6.5 pzas):</span>
-              <strong id="sim-batch-profit" class="text-sm font-semibold text-emerald-300 font-numeric">$1,262.51 MXN</strong>
+              <span class="text-slate-600 font-medium">Ganancia proyectada por lote (6.5 pzas):</span>
+              <strong id="sim-batch-profit" class="text-sm font-bold text-[#166534] font-numeric">$1,262.51 MXN</strong>
             </div>
 
             <!-- Profit bar split (Apple Liquid Progress Track) -->
             <div class="w-full h-2.5 rounded-full mt-3.5 overflow-hidden flex apple-liquid-track">
-              <div id="sim-bar-cost" class="bg-white/20 h-full transition-all duration-300" style="width: 30.6%" title="Costo Unitario"></div>
+              <div id="sim-bar-cost" class="bg-slate-200/90 h-full transition-all duration-300" style="width: 30.6%" title="Costo Unitario"></div>
               <div id="sim-bar-profit" class="apple-liquid-fill h-full transition-all duration-300" style="width: 69.4%" title="Ganancia Neta"></div>
             </div>
-            <div class="flex justify-between items-center text-[10px] text-slate-400 mt-2">
-              <span>Costo: <strong id="sim-cost-label" class="text-white/90 font-numeric">$85.77</strong></span>
-              <span>Ganancia: <strong id="sim-profit-label" class="text-emerald-300 font-semibold font-numeric">$194.23</strong></span>
+            <div class="flex justify-between items-center text-[10px] text-slate-500 mt-2">
+              <span>Costo: <strong id="sim-cost-label" class="text-slate-700 font-semibold font-numeric">$85.77</strong></span>
+              <span>Ganancia: <strong id="sim-profit-label" class="text-[#166534] font-bold font-numeric">$194.23</strong></span>
             </div>
 
           </div>
@@ -405,7 +418,7 @@
         <div>
           <div class="flex items-center space-x-2.5">
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Inversión Real & Flujo de Caja</h1>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/80 text-slate-800 font-numeric shadow-xs border border-white/90">
               108 Compras
             </span>
           </div>
@@ -690,7 +703,7 @@
         <div>
           <div class="flex items-center space-x-2.5">
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Pedidos & Ganancias</h1>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/80 text-slate-800 font-numeric shadow-xs border border-white/90">
               95 Comandas
             </span>
           </div>
@@ -741,7 +754,7 @@
           <div>
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ganancia Neta Disponible</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-emerald-400 font-numeric shadow-sm">Remanente</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100/90 text-[#166534] font-numeric shadow-xs border border-emerald-200/80">Remanente</span>
             </div>
             <div id="ord-kpi-net-profit" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-2 font-numeric">$58,036.95</div>
             <p id="ord-kpi-net-sub" class="text-[11px] text-slate-500 mt-1">Ganancia ($60,045.25) - Gastado ($2,008.30)</p>
@@ -759,7 +772,7 @@
           <div>
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-800 transition-colors">Total Ventas / Pedidos</span>
-              <span id="badge-filter-all" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B]/10 text-slate-800 border border-slate-200 font-numeric">Ver Todos</span>
+              <span id="badge-filter-all" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/70 text-slate-700 border border-slate-200/80 font-numeric">Ver Todos</span>
             </div>
             <div id="ord-kpi-total-revenue" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-numeric">$86,625.00</div>
             <p id="ord-kpi-total-sub" class="text-[11px] text-slate-500 mt-1">332 chiles colocados (95 comandas)</p>
@@ -807,7 +820,7 @@
           <div>
             <div class="flex items-center space-x-2">
               <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-heading">Pipeline Operativo & Filtros Rápidos</h2>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric shadow-sm">Drill-Down Activo</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-900 border border-slate-200/80 font-numeric shadow-xs">Drill-Down Activo</span>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">Haz clic en cualquier tarjeta operativa para filtrar la tabla en tiempo real. Clic de nuevo para apagar el filtro.</p>
           </div>
@@ -932,13 +945,13 @@
       <div class="liquid-card overflow-hidden">
         
         <!-- Active Quick Filter Drill-Down Banner -->
-        <div id="ord-drilldown-banner" class="hidden mx-5 sm:mx-6 mt-5 p-3 sm:p-3.5 rounded-2xl bg-[#1E222B] text-white items-center justify-between shadow-lg border border-white/20 text-xs">
+        <div id="ord-drilldown-banner" class="hidden mx-5 sm:mx-6 mt-5 p-3 sm:p-3.5 rounded-2xl bg-white/95 text-slate-900 items-center justify-between shadow-md border border-white/90 backdrop-blur-xl text-xs">
           <div class="flex items-center space-x-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-glass-pulse"></span>
-            <span id="ord-drilldown-text" class="font-bold text-slate-100">Filtro activo: Pendientes de preparación (13 chiles)</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#166534] animate-glass-pulse"></span>
+            <span id="ord-drilldown-text" class="font-bold text-slate-900">Filtro activo: Pendientes de preparación (13 chiles)</span>
           </div>
           <button onclick="OrdersApp.quickFilter('all')" 
-            class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-sm">
+            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs border border-slate-200/80">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             <span>Limpiar filtro</span>
           </button>
@@ -1045,7 +1058,7 @@
           <div>
             <div class="flex items-center space-x-2.5">
               <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight font-heading">Gastos de la Ganancia / Retiros Realizados</h2>
-              <span id="profit-expenses-count" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20">
+              <span id="profit-expenses-count" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-900 font-numeric shadow-xs border border-slate-200/80">
                 3 Retiros
               </span>
             </div>
@@ -1141,7 +1154,7 @@
           </button>
 
           <!-- Add Custom Item Button -->
-          <button onclick="openNewCustomItemModal()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold bg-[#1E222B] text-white hover:bg-slate-800 transition-all duration-200 shadow-md border border-white/20">
+          <button onclick="openNewCustomItemModal()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold bg-[#166534] text-white hover:bg-[#1B4332] transition-all duration-200 shadow-md border border-white/20">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
             </svg>
@@ -1325,13 +1338,13 @@
             <!-- Custody Filter Pills (Diego vs. Angy) -->
             <div class="inline-flex items-center p-1 rounded-full bg-white/60 border border-white/80 shadow-xs space-x-1 flex-wrap">
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Custodia:</span>
-              <button onclick="InventoryApp.setCustodyFilter('todos')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-[#1E222B] text-white shadow-xs transition-all" data-custody="todos">
+              <button onclick="InventoryApp.setCustodyFilter('todos')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-bold liquid-pill-active transition-all" data-custody="todos">
                 Ver Todo
               </button>
-              <button onclick="InventoryApp.setCustodyFilter('diego')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-custody="diego">
+              <button onclick="InventoryApp.setCustodyFilter('diego')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-custody="diego">
                 En posesión de Diego
               </button>
-              <button onclick="InventoryApp.setCustodyFilter('angy')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-custody="angy">
+              <button onclick="InventoryApp.setCustodyFilter('angy')" class="custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-custody="angy">
                 En posesión de Angy
               </button>
             </div>
@@ -1339,24 +1352,24 @@
             <!-- Category Filter Pills & Add Item Action -->
             <div class="flex items-center gap-2 flex-wrap">
               <div class="inline-flex items-center p-1 rounded-full bg-white/60 border border-white/80 shadow-xs space-x-1 flex-wrap">
-                <button onclick="InventoryApp.setCatalogFilter('todos')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="todos">
+                <button onclick="InventoryApp.setCatalogFilter('todos')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-bold liquid-pill-active transition-all" data-cat="todos">
                   Todos
                 </button>
-                <button onclick="InventoryApp.setCatalogFilter('nogada')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="nogada">
+                <button onclick="InventoryApp.setCatalogFilter('nogada')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-cat="nogada">
                   Nogada
                 </button>
-                <button onclick="InventoryApp.setCatalogFilter('relleno')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="relleno">
+                <button onclick="InventoryApp.setCatalogFilter('relleno')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-cat="relleno">
                   Relleno
                 </button>
-                <button onclick="InventoryApp.setCatalogFilter('extras')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="extras">
+                <button onclick="InventoryApp.setCatalogFilter('extras')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-cat="extras">
                   Extras & Montaje
                 </button>
-                <button onclick="InventoryApp.setCatalogFilter('empaque')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="empaque">
+                <button onclick="InventoryApp.setCatalogFilter('empaque')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all" data-cat="empaque">
                   Empaque
                 </button>
               </div>
 
-              <button onclick="InventoryApp.openNewItemModal()" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#1E222B] text-white hover:bg-[#2D3340] shadow-xs transition-all inline-flex items-center space-x-1.5 cursor-pointer">
+              <button onclick="InventoryApp.openNewItemModal()" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#166534] text-white hover:bg-[#1B4332] shadow-xs transition-all inline-flex items-center space-x-1.5 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -1659,7 +1672,7 @@
     <div class="liquid-card p-6 sm:p-7 max-w-md w-full shadow-2xl border border-white/80">
       <div class="flex items-center justify-between pb-4 border-b border-white/60 mb-5">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-2xl bg-[#1E222B] text-white flex items-center justify-center shadow-sm">
+          <div class="w-10 h-10 rounded-2xl bg-[#166534] text-white flex items-center justify-center shadow-sm">
             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path></svg>
           </div>
           <div>
@@ -1866,7 +1879,7 @@
     <div class="liquid-card p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-white/80 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-4 border-b border-white/60 mb-5">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-2xl bg-[#1E222B] text-white flex items-center justify-center shadow-sm">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
             <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"></path>
             </svg>
@@ -1956,7 +1969,7 @@
     <div class="liquid-card p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-white/80 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-4 border-b border-white/60 mb-5">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-2xl bg-[#1E222B] text-white flex items-center justify-center shadow-sm">
+          <div class="w-10 h-10 rounded-2xl bg-[#166534] text-white flex items-center justify-center shadow-sm">
             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
             </svg>

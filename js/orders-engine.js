@@ -447,10 +447,10 @@
       if (badgeAll) {
         if (qf) {
           badgeAll.textContent = 'Limpiar Filtro';
-          badgeAll.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric cursor-pointer shadow-xs hover:bg-slate-800 transition-all';
+          badgeAll.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold liquid-pill-active font-numeric cursor-pointer shadow-xs transition-all';
         } else {
           badgeAll.textContent = '95 Pedidos';
-          badgeAll.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B]/10 text-slate-800 border border-slate-200 font-numeric';
+          badgeAll.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white/70 text-slate-700 border border-slate-200/80 font-numeric';
         }
       }
 
@@ -602,7 +602,7 @@
           const active = (this.filters.paid === opt.val);
           return `
             <button onclick="OrdersApp.setFilter('paid', '${opt.val}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${opt.label}
             </button>
           `;
@@ -621,7 +621,7 @@
           const active = (this.filters.prep === opt.val);
           return `
             <button onclick="OrdersApp.setFilter('prep', '${opt.val}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${opt.label}
             </button>
           `;
@@ -640,7 +640,7 @@
           const active = (this.filters.delivery === opt.val);
           return `
             <button onclick="OrdersApp.setFilter('delivery', '${opt.val}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${opt.label}
             </button>
           `;
@@ -722,7 +722,7 @@
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border border-slate-200/90 shadow-xs text-slate-800 text-xs font-semibold backdrop-blur-md">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
               <span>Mostrando <strong class="text-slate-900 font-extrabold font-numeric">${totalFiltered}</strong> resultados (${subChiles} chiles)</span>
-              <button onclick="OrdersApp.quickFilter('all')" class="ml-1 px-2.5 py-0.5 rounded-full bg-[#1E222B] text-white hover:bg-slate-800 text-[11px] font-bold transition-all cursor-pointer shadow-xs" title="Ver todas las comandas">
+              <button onclick="OrdersApp.quickFilter('all')" class="ml-1 px-2.5 py-0.5 rounded-full liquid-pill-active hover:bg-white text-[11px] font-bold transition-all cursor-pointer shadow-xs" title="Ver todas las comandas">
                 Ver todos
               </button>
             </span>`;
@@ -783,7 +783,7 @@
 
         const prepPill = isPrepped
           ? `<button onclick="OrdersApp.togglePrep(${item.id})" title="Clic para marcar como No preparado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#1E222B]/10 text-slate-800 border border-slate-300 hover:bg-[#1E222B]/20 transition-all font-numeric">
+              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/80 text-slate-800 border border-slate-300 hover:bg-white transition-all font-numeric">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
               <span>Preparado</span>
              </button>`

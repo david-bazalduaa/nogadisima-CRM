@@ -441,7 +441,7 @@
             <td class="py-3 px-3 text-center">${statusBadge}</td>
             <td class="py-3 px-3 text-right">
               <button onclick="event.stopPropagation(); InvestmentApp.applyMonthFilter('${escapeHtml(mKey)}');"
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold ${isCurrentFilter ? 'bg-slate-900 text-white shadow-sm' : 'bg-white/70 text-slate-700 hover:bg-white border border-white/80'} transition-all">
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold ${isCurrentFilter ? 'liquid-pill-active' : 'liquid-pill hover:bg-white'} transition-all">
                 ${isCurrentFilter ? 'Filtrado' : 'Ver Compras'}
               </button>
             </td>
@@ -524,7 +524,7 @@
         // Badges for funding source (with optional contributor tag for Otros)
         let sourceBadge = '';
         if (currentSource === 'Nogadísima') {
-          sourceBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#1E222B] text-white border border-white/20">Nogadísima</span>`;
+          sourceBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-slate-900 border border-slate-200/60 shadow-xs">Nogadísima</span>`;
         } else if (currentSource === 'Digs') {
           sourceBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-900/85 text-sky-100 border border-sky-700/40">Digs</span>`;
         } else if (currentSource === 'Angy') {
@@ -676,7 +676,7 @@
           const active = (this.filters.source === src);
           return `
             <button onclick="InvestmentApp.setFilter('source', '${src}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${src}
             </button>
           `;
@@ -691,7 +691,7 @@
           const active = (this.filters.cutoffMonth === m);
           return `
             <button onclick="InvestmentApp.setFilter('cutoffMonth', '${m}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${m}
             </button>
           `;
@@ -706,7 +706,7 @@
           const active = (this.filters.status === st);
           return `
             <button onclick="InvestmentApp.setFilter('status', '${st}')"
-              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'bg-[#1E222B] text-white shadow-sm' : 'bg-white/60 text-slate-600 hover:bg-white border border-white/80'}">
+              class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${active ? 'liquid-pill-active' : 'liquid-pill hover:bg-white/70'}">
               ${st}
             </button>
           `;

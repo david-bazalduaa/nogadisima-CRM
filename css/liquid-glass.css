@@ -1,49 +1,104 @@
 /* ==========================================================================
-   NOGADÍSIMA — LIQUID FROSTED GLASS DESIGN SYSTEM
-   Apple Control Center Inspired | Smoked Charcoal Glass & Pure Neumorphism
+   NOGADÍSIMA — APPLE CONTROL CENTER FROSTED GLASS DESIGN SYSTEM
+   Refactored Apple iOS Control Center Architecture | San Francisco Font Stack
    ========================================================================== */
 
 :root {
-  /* Neutral Dark Graphite / Smoked Charcoal Palette */
-  --charcoal-950: #12141A;
-  --charcoal-900: #161820;
-  --charcoal-850: #1A1D24;
-  --charcoal-800: #1E222B; /* Base Dark Smoked Fill */
-  --charcoal-700: #282C37;
-  --charcoal-600: #333846;
-  --charcoal-text-light: #F8FAFC;
-  --charcoal-text-muted: #94A3B8;
+  /* Official Apple San Francisco Font Stack */
+  --apple-font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-  /* Culinary Accent Touches */
-  --amber-600:   #D97706;
-  --amber-500:   #F59E0B;
-  --amber-400:   #FBBF24;
-  --amber-100:   #FEF3C7;
-  --amber-50:    #FFFBEB;
+  /* Organic Culinary Palette Tokens */
+  --canvas-base: #F8F9FA;
 
-  --granada-700: #8A1E2F;
-  --granada-600: #A62639; /* Pomegranate Red Accent */
-  --granada-500: #C0392B;
-  --granada-100: #FCE7EB;
-  --granada-50:  #FDF2F4;
+  /* Deep Obsidian Primary Headers & Labels */
+  --obsidian-950: #0B0F19;
+  --obsidian-900: #0F172A; /* Primary headers */
+  --obsidian-800: #1E293B;
+  --slate-700:    #334155;
+  --slate-600:    #475569;
+  --slate-500:    #64748B; /* Secondary labels */
+  --slate-400:    #94A3B8;
+  --slate-300:    #CBD5E1;
 
-  --cream-50:    #FDFBF7;
-  --cream-100:   #FAF7F2;
-  --cream-200:   #F4ECE0;
+  /* Financial Accents: Refined Sage / Deep Forest Emerald (Never neon lime) */
+  --forest-emerald-900: #0F381E;
+  --forest-emerald-800: #14532D;
+  --forest-emerald-700: #166534;
+  --forest-emerald-600: #1B4332; /* Primary sage / deep forest */
+  --forest-emerald-500: #2D6A4F;
+  --sage-400:           #529E7F;
+  --sage-300:           #94C3B2;
+  --sage-200:           #C0DED3;
+  --sage-100:           #E1EFEA;
+  --sage-50:            #F2F7F4;
 
-  --emerald-500: #10B981;
-  --emerald-400: #34D399;
+  /* Subtle Granada Garnet Accent (Pomegranate highlights) */
+  --granada-garnet:       #9F1239;
+  --granada-garnet-dark:  #881337;
+  --granada-garnet-light: #FCE7EB;
+  --granada-garnet-soft:  #FDF2F4;
 
-  /* Glass Specular & Refractive Tokens */
+  /* Warm Bone & Cream Neutral Backgrounds */
+  --cream-50:  #FDFBF7;
+  --cream-100: #FAF7F2;
+  --cream-200: #F4ECE0;
+
+  /* Warm Amber Accents */
+  --amber-700: #B45309;
+  --amber-600: #D97706;
+  --amber-500: #F59E0B;
+  --amber-400: #FBBF24;
+  --amber-100: #FEF3C7;
+  --amber-50:  #FFFBEB;
+
+  /* Glass Specular & Refractive Elevation Tokens */
   --glass-blur-deep: 32px;
   --glass-blur-mid:  24px;
   --glass-blur-soft: 16px;
 
   --glass-sheen: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 2px 0 rgba(0, 0, 0, 0.02);
-  --glass-glow: 0 12px 35px -8px rgba(0, 0, 0, 0.05), 0 2px 8px 0 rgba(0, 0, 0, 0.02);
+  --glass-glow: 0 12px 35px -8px rgba(0, 0, 0, 0.04), 0 2px 8px 0 rgba(0, 0, 0, 0.02);
 }
 
-/* Ambient Fluid Background Canvas (Spans 100% of Viewport Continuously) */
+/* ==========================================================================
+   1. Apple San Francisco Native Typography Stack & Accounting Precision
+   ========================================================================== */
+:root,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular Numbers on all prices, weights, quantities, badges, inputs and tables */
+.font-numeric,
+.tabular-nums,
+table,
+th,
+td,
+input[type="number"],
+input[type="text"],
+[data-preset-price],
+.kpi-number,
+.kpi-value,
+.badge-numeric {
+  font-variant-numeric: tabular-nums;
+  -moz-font-feature-settings: "tnum";
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/* Primary Headers & Text Hierarchy */
+h1, h2, h3, .font-heading {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.022em;
+  color: var(--obsidian-900);
+}
+
+/* ==========================================================================
+   2. Ambient Fluid Background Canvas (Spans 100% of Viewport Continuously)
+   ========================================================================== */
 #ambient-liquid-canvas {
   position: fixed;
   inset: 0;
@@ -61,150 +116,90 @@
   width: 100%;
   min-height: 100vh;
   margin: 0;
-  background: rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: none;
   box-shadow: none;
 }
 
-/* Liquid Frosted Glass Panels (Cards) */
+/* Liquid Frosted Glass Panels (Desktop Workspace Cards) */
 .liquid-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.46) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.50) 100%);
   backdrop-filter: blur(var(--glass-blur-mid)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--glass-blur-mid)) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: 28px;
   box-shadow: 
-    0 12px 32px -6px rgba(0, 0, 0, 0.04),
-    0 2px 6px 0 rgba(0, 0, 0, 0.02),
+    0 12px 32px -6px rgba(15, 23, 42, 0.04),
+    0 2px 6px 0 rgba(15, 23, 42, 0.02),
     var(--glass-sheen);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .liquid-card:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.56) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.60) 100%);
   border-color: rgba(255, 255, 255, 0.98);
   box-shadow: 
-    0 18px 45px -8px rgba(0, 0, 0, 0.06),
-    0 4px 12px 0 rgba(0, 0, 0, 0.03),
+    0 18px 45px -8px rgba(15, 23, 42, 0.06),
+    0 4px 12px 0 rgba(15, 23, 42, 0.03),
     inset 0 2px 3px 0 rgba(255, 255, 255, 1);
   transform: translateY(-2px);
 }
 
 /* ==========================================================================
-   Apple Control Center: Smoked Charcoal / Dark Graphite Glass Card
-   ========================================================================== */
-.liquid-dark-card {
-  position: relative;
-  background: linear-gradient(145deg, rgba(28, 32, 42, 0.75) 0%, rgba(15, 18, 25, 0.85) 100%) !important;
-  backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  border-radius: 1.75rem !important;
-  box-shadow: 
-    0 20px 45px -10px rgba(0, 0, 0, 0.32),
-    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.40) !important;
-  color: var(--charcoal-text-light);
-  overflow: hidden;
-}
-
-/* Apple Liquid Progress Bar (Track & Fill) */
-.apple-liquid-track {
-  background: rgba(255, 255, 255, 0.12) !important;
-  backdrop-filter: blur(8px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
-  border-radius: 9999px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-.apple-liquid-fill {
-  background: linear-gradient(90deg, rgba(52, 211, 153, 0.85) 0%, rgba(16, 185, 129, 0.95) 100%) !important;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.40) !important;
-}
-
-/* Apple Financial Frosted Teal / Emerald Text Gradient */
-.text-apple-emerald {
-  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-}
-
-/* Ethereal Apple Status Jewel */
-.liquid-status-jewel {
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 35% 35%, rgba(52, 211, 153, 0.95), rgba(16, 185, 129, 0.60)) !important;
-  box-shadow: 0 0 10px 1px rgba(52, 211, 153, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.60) !important;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-/* ==========================================================================
-   Apple Control Center: Frosted Glass Capsule Controls (Pills & Buttons)
+   3. Apple iOS Control Center Selection Architecture
+   (Elimination of Flat Dark Charcoal Blob #1E222B)
    ========================================================================== */
 
-/* 1. Default Inactive Glass Pill */
+/* A. Inactive Glass Capsule (Translucent frosted smoke glass) */
 .liquid-pill {
   position: relative;
   background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(16px) saturate(170%);
-  -webkit-backdrop-filter: blur(16px) saturate(170%);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.60);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.80);
+  color: #475569;
   border-radius: 9999px;
-  box-shadow: 
-    0 4px 12px 0 rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.80);
-  color: #334155;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   cursor: pointer;
 }
 
 .liquid-pill:hover {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(255, 255, 255, 0.90);
-  box-shadow: 
-    0 6px 16px -2px rgba(0, 0, 0, 0.07),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
   color: #0F172A;
+  transform: translateY(-1px);
 }
 
 .liquid-pill:active {
   transform: scale(0.97);
-  box-shadow: 
-    0 2px 6px 0 rgba(0, 0, 0, 0.04),
-    inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.03), inset 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 }
 
-/* 2. Active Liquid Glass Pill (Apple Capsule Control) */
+/* B. Active Selected State (True Apple Control Center Style: Illuminated Solid White) */
 .liquid-pill-active {
-  background: linear-gradient(135deg, rgba(30, 36, 48, 0.78) 0%, rgba(18, 22, 30, 0.88) 100%) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  box-shadow: 
-    0 8px 24px -4px rgba(0, 0, 0, 0.25), 
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35), 
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40) !important;
-  color: #FFFFFF !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.025em !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important; /* Deep graphite text/icons for maximum clarity */
+  font-weight: 600 !important;
+  border: 1px solid rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+.liquid-pill-active svg {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
 }
 
 .liquid-pill-active:hover {
-  background: linear-gradient(135deg, rgba(38, 45, 60, 0.84) 0%, rgba(22, 27, 36, 0.92) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.32) !important;
-  box-shadow: 
-    0 10px 28px -4px rgba(0, 0, 0, 0.30), 
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45), 
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40) !important;
-  color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 10px 24px -2px rgba(0, 0, 0, 0.10), 0 3px 8px -1px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
   transform: translateY(-1px);
 }
 
@@ -212,19 +207,95 @@
   transform: scale(0.97) !important;
 }
 
-/* 3. Smoked Charcoal Action Button (Apple Control Center Inspired) */
+/* Global Replacement of legacy #1E222B active buttons & filter pills */
+button.bg-\[\#1E222B\],
+.custody-filter-btn.bg-\[\#1E222B\],
+.cat-filter-btn.bg-\[\#1E222B\],
+.inv-filter-btn.bg-\[\#1E222B\],
+#filter-pills-source button.bg-\[\#1E222B\],
+#filter-pills-month button.bg-\[\#1E222B\],
+#filter-pills-status button.bg-\[\#1E222B\],
+#ord-filter-pills-paid button.bg-\[\#1E222B\],
+#ord-filter-pills-prep button.bg-\[\#1E222B\],
+#ord-filter-pills-delivery button.bg-\[\#1E222B\] {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  font-weight: 600 !important;
+  border: 1px solid rgba(255, 255, 255, 0.90) !important;
+  box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+/* ==========================================================================
+   4. Commercial Simulator Card: Illuminated Elevated Frosted Glass Card
+   (Replaces the standalone dark charcoal box container)
+   ========================================================================== */
+.liquid-simulator-card,
+.liquid-dark-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 1.75rem !important;
+  box-shadow: 
+    0 20px 45px -12px rgba(15, 23, 42, 0.08),
+    0 8px 18px -4px rgba(15, 23, 42, 0.04),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 1) !important;
+  color: var(--obsidian-900) !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-simulator-card:hover,
+.liquid-dark-card:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  box-shadow: 
+    0 24px 50px -12px rgba(15, 23, 42, 0.10),
+    0 10px 22px -4px rgba(15, 23, 42, 0.05),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 1) !important;
+}
+
+/* Apple Liquid Progress Bar (Track & Organic Forest Emerald Fill) */
+.apple-liquid-track {
+  background: rgba(15, 23, 42, 0.06) !important;
+  backdrop-filter: blur(8px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.60) !important;
+}
+
+.apple-liquid-fill {
+  background: linear-gradient(90deg, #1B4332 0%, #166534 100%) !important;
+  box-shadow: 0 1px 4px rgba(22, 101, 52, 0.25) !important;
+}
+
+/* Financial Accents: Refined Sage / Deep Forest Emerald (Replacing Neon Lime) */
+.text-apple-emerald {
+  color: #166534 !important;
+  -webkit-text-fill-color: #166534 !important;
+  background: none !important;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.text-refined-sage {
+  color: #1B4332 !important;
+}
+
+.text-granada-garnet {
+  color: #9F1239 !important;
+}
+
+/* Deep Obsidian Action Button */
 .liquid-btn-dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(30, 36, 48, 0.82) 0%, rgba(18, 22, 30, 0.90) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  box-shadow: 
-    0 4px 14px -2px rgba(0, 0, 0, 0.22),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.32);
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
   color: #FFFFFF;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -232,33 +303,19 @@
 }
 
 .liquid-btn-dark:hover {
-  background: linear-gradient(135deg, rgba(38, 45, 60, 0.88) 0%, rgba(22, 27, 36, 0.94) 100%);
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow: 
-    0 6px 18px -2px rgba(0, 0, 0, 0.28),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.42);
+  background: #1E293B;
+  border-color: rgba(255, 255, 255, 0.30);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.20);
   transform: translateY(-1px);
   color: #FFFFFF;
 }
 
 .liquid-btn-dark:active {
   transform: scale(0.97);
-  box-shadow: 
-    0 2px 6px 0 rgba(0, 0, 0, 0.15),
-    inset 0 1px 2px 0 rgba(0, 0, 0, 0.30);
-}
-
-/* Authentic Apple Liquid Glass for dark pill elements */
-.bg-\[\#1E222B\] {
-  background: linear-gradient(135deg, rgba(30, 36, 48, 0.80) 0%, rgba(18, 22, 30, 0.88) 100%) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.20) !important;
-  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.22), inset 0 1px 1px 0 rgba(255, 255, 255, 0.32) !important;
 }
 
 /* ==========================================================================
-   Apple Control Center: Liquid Select Controls & Dropdown Menus
+   5. Apple Control Center: Form Controls & Inputs
    ========================================================================== */
 select,
 select.liquid-input,
@@ -266,10 +323,10 @@ select.liquid-select {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-  background-color: rgba(255, 255, 255, 0.55) !important;
+  background-color: rgba(255, 255, 255, 0.60) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.70) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
   box-shadow: 
     0 4px 14px rgba(0, 0, 0, 0.03), 
     inset 0 1px 1px rgba(255, 255, 255, 0.90) !important;
@@ -279,7 +336,7 @@ select.liquid-select {
   background-repeat: no-repeat !important;
   background-position: right 0.75rem center !important;
   background-size: 0.85rem 0.85rem !important;
-  color: #1E293B !important;
+  color: var(--obsidian-900) !important;
   font-weight: 500 !important;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
   cursor: pointer !important;
@@ -288,7 +345,7 @@ select.liquid-select {
 select:hover,
 select.liquid-input:hover,
 select.liquid-select:hover {
-  background-color: rgba(255, 255, 255, 0.75) !important;
+  background-color: rgba(255, 255, 255, 0.80) !important;
   border-color: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 
     0 6px 18px rgba(0, 0, 0, 0.05), 
@@ -298,10 +355,10 @@ select.liquid-select:hover {
 select:focus,
 select.liquid-input:focus,
 select.liquid-select:focus {
-  background-color: rgba(255, 255, 255, 0.88) !important;
-  border-color: rgba(52, 211, 153, 0.40) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #166534 !important;
   box-shadow: 
-    0 0 0 3px rgba(16, 185, 129, 0.20),
+    0 0 0 3px rgba(22, 101, 52, 0.15),
     0 6px 20px rgba(0, 0, 0, 0.05),
     inset 0 1px 1px rgba(255, 255, 255, 0.95) !important;
   outline: none !important;
@@ -311,34 +368,34 @@ select option,
 select.liquid-input option,
 select.liquid-select option {
   background-color: #FFFFFF !important;
-  color: #1E222B !important;
+  color: var(--obsidian-900) !important;
   font-weight: 500 !important;
   padding: 8px 12px !important;
 }
 
 /* Subtle Glass Form Inputs (Text, Number, Date, etc.) */
 .liquid-input {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.60);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.75);
   border-radius: 0.85rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.90);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  color: #1E293B;
+  color: var(--obsidian-900);
 }
 
 .liquid-input:hover {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.80);
   border-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
 }
 
 .liquid-input:focus {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(52, 211, 153, 0.40);
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #166534;
   box-shadow: 
-    0 0 0 3px rgba(16, 185, 129, 0.20),
+    0 0 0 3px rgba(22, 101, 52, 0.15),
     0 6px 20px rgba(0, 0, 0, 0.05),
     inset 0 1px 1px rgba(255, 255, 255, 0.95);
   outline: none;
@@ -346,7 +403,7 @@ select.liquid-select option {
 
 /* Glass Table Styles */
 .liquid-table-head {
-  background: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgba(255, 255, 255, 0.80);
@@ -359,7 +416,7 @@ select.liquid-select option {
 }
 
 .liquid-table-row:hover {
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.65);
 }
 
 /* Custom Glass Scrollbar */
@@ -368,16 +425,16 @@ select.liquid-select option {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(240, 244, 242, 0.5);
+  background: rgba(240, 244, 242, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.40);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.60);
+  background: rgba(100, 116, 139, 0.55);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
@@ -392,10 +449,21 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+/* Refined Subtle Status Dots */
+.liquid-status-jewel {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, #2D6A4F, #166534) !important;
+  box-shadow: 0 0 8px 1px rgba(22, 101, 52, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.60) !important;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
 /* Pulsing Status Glow */
 @keyframes glassPulse {
   0%, 100% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.15); }
+  50% { opacity: 0.5; transform: scale(1.12); }
 }
 
 .animate-glass-pulse {

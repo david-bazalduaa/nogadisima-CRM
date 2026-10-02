@@ -1,6 +1,6 @@
 /**
  * NOGADÍSIMA — AMBIENT LIQUID CANVAS ENGINE
- * High-performance 60fps fluid gradient mesh with Poblano Forest Green & warm culinary tones
+ * High-performance 60fps fluid gradient mesh with Organic Culinary Palette & Porcelain Mist
  */
 
 (function initAmbientLiquidCanvas() {
@@ -11,16 +11,16 @@
   let width, height;
   let animationFrameId;
 
-  // Fluid Orb definitions with phase, radius, speed and organic color stops
+  // Fluid Orb definitions with phase, radius, speed and organic culinary color stops
   const orbs = [
     {
-      // Orb 1: Artisanal Poblano Forest Green
+      // Orb 1: Artisanal Poblano Forest Green (Refined Sage)
       baseX: 0.15, baseY: 0.22,
       radiusFactor: 0.44,
       speedX: 0.0006, speedY: 0.0008,
       phaseX: 0, phaseY: Math.PI / 3,
-      colorStart: 'rgba(22, 56, 44, 0.28)',
-      colorEnd: 'rgba(240, 247, 243, 0)'
+      colorStart: 'rgba(27, 67, 50, 0.20)',
+      colorEnd: 'rgba(248, 249, 250, 0)'
     },
     {
       // Orb 2: Warm Cream / Bone Pearl
@@ -32,12 +32,12 @@
       colorEnd: 'rgba(253, 251, 247, 0)'
     },
     {
-      // Orb 3: Pomegranate Rose Blush
+      // Orb 3: Subtle Granada Garnet Blush (Pomegranate)
       baseX: 0.75, baseY: 0.65,
       radiusFactor: 0.38,
       speedX: 0.0005, speedY: 0.0007,
       phaseX: Math.PI, phaseY: Math.PI / 4,
-      colorStart: 'rgba(247, 204, 211, 0.38)',
+      colorStart: 'rgba(247, 204, 211, 0.30)',
       colorEnd: 'rgba(252, 231, 235, 0)'
     },
     {
@@ -46,7 +46,7 @@
       radiusFactor: 0.40,
       speedX: 0.0008, speedY: 0.0006,
       phaseX: Math.PI * 1.5, phaseY: Math.PI / 2,
-      colorStart: 'rgba(251, 191, 36, 0.20)',
+      colorStart: 'rgba(251, 191, 36, 0.16)',
       colorEnd: 'rgba(254, 243, 199, 0)'
     },
     {
@@ -55,7 +55,7 @@
       radiusFactor: 0.36,
       speedX: 0.0004, speedY: 0.0005,
       phaseX: Math.PI / 4, phaseY: Math.PI * 1.2,
-      colorStart: 'rgba(192, 222, 211, 0.45)',
+      colorStart: 'rgba(192, 222, 211, 0.35)',
       colorEnd: 'rgba(225, 239, 234, 0)'
     }
   ];
@@ -89,8 +89,8 @@
     mouseX += (targetMouseX - mouseX) * 0.05;
     mouseY += (targetMouseY - mouseY) * 0.05;
 
-    // Organic soft background base
-    ctx.fillStyle = '#F4F6F4';
+    // Organic porcelain mist background base
+    ctx.fillStyle = '#F8F9FA';
     ctx.fillRect(0, 0, width, height);
 
     const minDim = Math.max(width, height);

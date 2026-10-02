@@ -1090,9 +1090,9 @@
             <!-- 9. Acción Primaria: Restock Realizado -->
             <td class="py-3 px-2 text-center whitespace-nowrap">
               <button onclick="InventoryApp.openRestockModal('${item.id}')"
-                class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1E222B] text-white hover:bg-slate-800 transition-all shadow-xs border border-white/20 hover:scale-[1.02]"
+                class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#166534] text-white hover:bg-[#1B4332] transition-all shadow-xs border border-white/20 hover:scale-[1.02]"
                 title="Registrar entrada de restock y transferir a Inversión">
-                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
                 </svg>
                 <span>Restock Realizado</span>
@@ -1448,9 +1448,9 @@
       document.querySelectorAll('.custody-filter-btn').forEach(btn => {
         const c = btn.getAttribute('data-custody');
         if (c === this.filters.custodyFilter) {
-          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-[#1E222B] text-white shadow-xs transition-all';
+          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-bold liquid-pill-active transition-all';
         } else {
-          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all';
+          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all';
         }
       });
       this.renderMasterCatalogTable();
@@ -1461,9 +1461,9 @@
       document.querySelectorAll('.inv-filter-btn').forEach(btn => {
         const f = btn.getAttribute('data-filter');
         if (f === filterName) {
-          btn.className = 'inv-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-[#1E222B] text-white shadow-xs transition-all';
+          btn.className = 'inv-filter-btn px-3 py-1 rounded-full text-xs font-bold liquid-pill-active transition-all';
         } else {
-          btn.className = 'inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all';
+          btn.className = 'inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all';
         }
       });
       this.renderRestockAlertsTable();
@@ -1479,9 +1479,9 @@
       document.querySelectorAll('.cat-filter-btn').forEach(btn => {
         const c = btn.getAttribute('data-cat');
         if (c === category) {
-          btn.className = 'cat-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-[#1E222B] text-white shadow-xs transition-all';
+          btn.className = 'cat-filter-btn px-3 py-1 rounded-full text-xs font-bold liquid-pill-active transition-all';
         } else {
-          btn.className = 'cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all';
+          btn.className = 'cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-slate-700 hover:text-slate-900 transition-all';
         }
       });
       this.renderMasterCatalogTable();
