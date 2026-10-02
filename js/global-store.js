@@ -1,9 +1,25 @@
 /**
- * NOGADÍSIMA — SCALABLE MULTI-YEAR GLOBAL REACTIVE STATE STORE (2026 - 2030)
+ * NOGADÍSIMA — MULTI-USER REAL-TIME CLOUD STORE (FIREBASE REALTIME DATABASE)
+ * Scalable Multi-Year Global Reactive State Store (2026 - 2030)
  * Centralized Single Source of Truth for Recipe, Investment, Orders, Inventory & Profit Draws
- * Supports 5-Year Rolling Horizon (2026, 2027, 2028, 2029, 2030) with Dynamic State Isolation
- * Persists Unified Multiverse Database to localStorage under 'nogadisima_multiverse_v1'
+ * Live bidirectional cloud synchronization between Diego & Angy with 0ms input latency,
+ * debounced cloud writes (300ms), and 100% offline local cache fallback.
  */
+
+// =========================================================================
+// 0. FIREBASE REALTIME DATABASE CLOUD CONFIGURATION (MULTI-USER ENGINE)
+// Static GitHub Pages Compatible — Real-time live two-way sync for Diego & Angy
+// Replace placeholders with your Firebase project credentials or configure via UI
+// =========================================================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
 (function (window) {
   'use strict';
@@ -16,6 +32,7 @@
     MULTIVERSE_V1: 'nogadisima_multiverse_v1',
     DB_V2: 'nogadisima_db_v2', // backward-compatible mirror
     ACTIVE_YEAR: 'nogadisima_active_year',
+    FIREBASE_CUSTOM_CONFIG: 'nogadisima_firebase_custom_config',
     // 100% backward-compatible legacy keys for historical fallback & 2026 mirror
     RECIPE_LEGACY: 'nogadisima_recipe_engine_v5',
     INVESTMENTS_LEGACY: 'nogadisima_investments_v1',
@@ -28,6 +45,19 @@
   const NogaStore = {
     SUPPORTED_YEARS: SUPPORTED_YEARS,
 
+    // Firebase Cloud Synchronization Properties
+    _firebaseApp: null,
+    _firebaseDb: null,
+    _dbRef: null,
+    _connectedRef: null,
+    _connectionStatus: 'offline', // 'connected' | 'syncing' | 'offline'
+    _isReceivingRemoteSync: false,
+    _isPerformingCloudSave: false,
+    _cloudSaveTimer: null,
+    _pendingCloudSave: false,
+    _lastSyncTime: null,
+    _hasUnsyncedLocalChanges: false,
+
     // 1. Centralized Multi-Year Master Database Schema
     db: {
       activeYear: '2026',
@@ -38,7 +68,8 @@
           orders: [],
           profitDraws: [],
           inventory: [],
-          cutoffDay: 30
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
         },
         '2027': {
           recipe: null,
@@ -46,7 +77,8 @@
           orders: [],
           profitDraws: [],
           inventory: [],
-          cutoffDay: 30
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
         },
         '2028': {
           recipe: null,
@@ -54,7 +86,8 @@
           orders: [],
           profitDraws: [],
           inventory: [],
-          cutoffDay: 30
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
         },
         '2029': {
           recipe: null,
@@ -62,7 +95,8 @@
           orders: [],
           profitDraws: [],
           inventory: [],
-          cutoffDay: 30
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
         },
         '2030': {
           recipe: null,
@@ -70,7 +104,8 @@
           orders: [],
           profitDraws: [],
           inventory: [],
-          cutoffDay: 30
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
         }
       }
     },
@@ -82,7 +117,8 @@
       orders: [],
       profitDraws: [],
       inventory: [],
-      cutoffDay: 30
+      cutoffDay: 30,
+      pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
     },
 
     // 2. Pub-Sub Event Emitter
@@ -94,6 +130,7 @@
       this._bindStorageListener();
       this.updateYearSelectorUI(this.getActiveYear());
       this.updateYearDependentFormElements(this.getActiveYear());
+      this._initFirebase();
       console.log('NogaStore: Scalable Multi-Year Store initialized (Active: ' + this.getActiveYear() + ')');
     },
 
@@ -136,6 +173,10 @@
       }
       if ((!y26.profitDraws || y26.profitDraws.length === 0) && window.INITIAL_PROFIT_EXPENSES) {
         y26.profitDraws = JSON.parse(JSON.stringify(window.INITIAL_PROFIT_EXPENSES));
+        mutated = true;
+      }
+      if (!y26.pricingTiers) {
+        y26.pricingTiers = { single: 280, pack2: 540, pack4: 1050 };
         mutated = true;
       }
       if ((!y26.inventory || y26.inventory.length === 0) && window.INITIAL_INVENTORY_ITEMS) {
@@ -181,6 +222,10 @@
         // 4. "Gastos de Ganancia": COMPLETELY EMPTY
         if (!Array.isArray(yFuture.profitDraws)) {
           yFuture.profitDraws = [];
+          mutated = true;
+        }
+        if (!yFuture.pricingTiers) {
+          yFuture.pricingTiers = { single: 280, pack2: 540, pack4: 1050 };
           mutated = true;
         }
         // 5. "Inventario & Reabastecimiento": COMPLETELY EMPTY / ZERO STOCK
@@ -258,6 +303,7 @@
       this.state.profitDraws = yData.profitDraws || [];
       this.state.inventory = yData.inventory || [];
       this.state.cutoffDay = yData.cutoffDay || 30;
+      this.state.pricingTiers = yData.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
     },
 
     // 4. Smooth Year Switching Engine (2026 through 2030)
@@ -314,6 +360,9 @@
       if (window.OrdersApp && Array.isArray(window.OrdersApp.profitExpenses)) {
         this.db.years[year].profitDraws = window.OrdersApp.profitExpenses;
       }
+      if (window.OrdersApp && window.OrdersApp.pricingTiers) {
+        this.db.years[year].pricingTiers = window.OrdersApp.pricingTiers;
+      }
       if (window.InventoryApp && Array.isArray(window.InventoryApp.items)) {
         this.db.years[year].inventory = window.InventoryApp.items;
       }
@@ -341,6 +390,7 @@
       if (window.OrdersApp) {
         window.OrdersApp.orders = currentYearData.orders || [];
         window.OrdersApp.profitExpenses = currentYearData.profitDraws || [];
+        window.OrdersApp.pricingTiers = currentYearData.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
         if (window.OrdersApp.pagination) {
           window.OrdersApp.pagination.currentPage = 1;
         }
@@ -371,6 +421,9 @@
       // 3. Control de Pedidos
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
+      }
+      if (window.OrdersApp && typeof window.OrdersApp.renderPricingTiersWidget === 'function') {
+        window.OrdersApp.renderPricingTiersWidget();
       }
 
       // 4. Inventario & Reabastecimiento
@@ -508,8 +561,11 @@
               orders: [],
               profitDraws: [],
               inventory: [],
-              cutoffDay: 30
+              cutoffDay: 30,
+              pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
             };
+          } else if (!this.db.years[y].pricingTiers) {
+            this.db.years[y].pricingTiers = { single: 280, pack2: 540, pack4: 1050 };
           }
         });
 
@@ -585,7 +641,7 @@
       return 'presupuesto';
     },
 
-    // 8. High-Performance Debounced Persistence Architecture
+    // 8. High-Performance Debounced Persistence Architecture (Local + Cloud)
     _saveTimer: null,
     _pendingSave: false,
 
@@ -599,21 +655,24 @@
         this.db.years[year].profitDraws = this.state.profitDraws;
         this.db.years[year].inventory = this.state.inventory;
         this.db.years[year].cutoffDay = this.state.cutoffDay;
+        this.db.years[year].pricingTiers = this.state.pricingTiers;
       }
 
       this._pendingSave = true;
 
       if (immediate) {
         this._flushSave();
-        return;
-      }
-
-      // Batch multiple rapid keystrokes/actions into a single non-blocking disk flush (250ms)
-      if (!this._saveTimer) {
+      } else if (!this._saveTimer) {
+        // Batch multiple rapid keystrokes/actions into a single non-blocking disk flush (250ms)
         this._saveTimer = setTimeout(() => {
           this._saveTimer = null;
           this._flushSave();
         }, 250);
+      }
+
+      // 2. Multi-user cloud write (Firebase Realtime Database) with 300ms debounce
+      if (!this._isReceivingRemoteSync) {
+        this._scheduleCloudSave(immediate);
       }
     },
 
@@ -685,6 +744,47 @@
 
     getCutoffDay: function () {
       return this.state.cutoffDay;
+    },
+
+    getPricingTiers: function (year) {
+      const y = year || this.getActiveYear();
+      const yData = (this.db && this.db.years) ? this.db.years[y] : null;
+      if (yData && yData.pricingTiers) {
+        return { ...yData.pricingTiers };
+      }
+      return { single: 280, pack2: 540, pack4: 1050 };
+    },
+
+    setPricingTiers: function (newTiers, year, notifyOrigin = 'system') {
+      const y = year || this.getActiveYear();
+      if (!this.db.years[y]) {
+        this.db.years[y] = {
+          recipe: null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: [],
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
+        };
+      }
+      const single = Math.max(0, parseFloat(newTiers.single) || 280);
+      const pack2 = Math.max(0, parseFloat(newTiers.pack2) || 540);
+      const pack4 = Math.max(0, parseFloat(newTiers.pack4) || 1050);
+
+      this.db.years[y].pricingTiers = { single, pack2, pack4 };
+
+      if (y === this.getActiveYear()) {
+        this.state.pricingTiers = { single, pack2, pack4 };
+        if (window.OrdersApp) {
+          window.OrdersApp.pricingTiers = { single, pack2, pack4 };
+          if (typeof window.OrdersApp.renderPricingTiersWidget === 'function') {
+            window.OrdersApp.renderPricingTiersWidget();
+          }
+        }
+      }
+      this.save(true);
+      this.emit('pricing:changed', { year: y, tiers: { single, pack2, pack4 }, source: notifyOrigin });
     },
 
     // 10. Reactive State Mutators (Active-Tab-Scoped Re-rendering)
@@ -869,7 +969,312 @@
       }
     },
 
-    // 12. Cross-Window / Cross-Tab Storage Listener
+    // 12. Firebase Realtime Database Cloud Sync Engine
+    getActiveFirebaseConfig: function () {
+      try {
+        const custom = localStorage.getItem(STORAGE_KEYS.FIREBASE_CUSTOM_CONFIG);
+        if (custom) {
+          const parsed = JSON.parse(custom);
+          if (parsed && parsed.databaseURL && !parsed.databaseURL.includes('YOUR_PROJECT_ID')) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return firebaseConfig;
+    },
+
+    _initFirebase: function () {
+      if (typeof window.firebase === 'undefined' || !window.firebase.initializeApp) {
+        console.warn('NogaStore: Firebase SDK no cargado vía CDN. Ejecutando en modo local.');
+        this.updateConnectionStatus('offline');
+        return;
+      }
+
+      const activeConfig = this.getActiveFirebaseConfig();
+      const hasRealCredentials = activeConfig &&
+        activeConfig.databaseURL &&
+        !activeConfig.databaseURL.includes('YOUR_PROJECT_ID') &&
+        activeConfig.projectId &&
+        !activeConfig.projectId.includes('YOUR_PROJECT_ID');
+
+      if (!hasRealCredentials) {
+        console.info('NogaStore: Firebase en modo local ("Sin conexión (Modo local)"). Puedes configurar las credenciales en el badge de sincronización.');
+        this.updateConnectionStatus('offline');
+        return;
+      }
+
+      try {
+        if (!firebase.apps || firebase.apps.length === 0) {
+          this._firebaseApp = firebase.initializeApp(activeConfig);
+        } else {
+          this._firebaseApp = firebase.apps[0];
+        }
+
+        this._firebaseDb = firebase.database();
+        this._dbRef = this._firebaseDb.ref('nogadisima_crm');
+        this._connectedRef = this._firebaseDb.ref('.info/connected');
+
+        // 1. Connection health monitor
+        this._connectedRef.on('value', (snap) => {
+          const isConnected = (snap.val() === true);
+          if (isConnected) {
+            this.updateConnectionStatus('connected');
+            if (this._hasUnsyncedLocalChanges) {
+              this._scheduleCloudSave(true);
+            }
+          } else {
+            this.updateConnectionStatus('offline');
+          }
+        });
+
+        // 2. Real-time root database listener (Two-way sync)
+        this._dbRef.on('value', (snapshot) => {
+          const remoteVal = snapshot.val();
+          this._handleRemoteCloudSync(remoteVal);
+        }, (error) => {
+          console.warn('NogaStore: Error en listener de Firebase Realtime Database:', error);
+          this.updateConnectionStatus('offline');
+        });
+
+        console.log('NogaStore: Firebase Realtime Database conectado y escuchando en /nogadisima_crm');
+      } catch (err) {
+        console.error('NogaStore: Error inicializando Firebase Realtime Database:', err);
+        this.updateConnectionStatus('offline');
+      }
+    },
+
+    _handleRemoteCloudSync: function (remoteData) {
+      if (this._isPerformingCloudSave) {
+        // Echo preventer from local outgoing save
+        return;
+      }
+
+      if (!remoteData || !remoteData.years) {
+        // Database is newly created: seed it with local verified dataset
+        console.log('NogaStore: Base de datos en la nube vacía. Subiendo datos maestros verificados...');
+        this._scheduleCloudSave(true);
+        return;
+      }
+
+      this._isReceivingRemoteSync = true;
+      this._lastSyncTime = new Date();
+
+      try {
+        const activeYear = this.getActiveYear();
+        const prevYearData = (this.db && this.db.years) ? this.db.years[activeYear] : null;
+        const newYearData = remoteData.years ? remoteData.years[activeYear] : null;
+
+        // Apply remote database
+        this.db = remoteData;
+        this._syncStatePointer();
+
+        // Keep local mirror storage synchronized
+        const serialized = JSON.stringify(this.db);
+        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, serialized);
+        localStorage.setItem(STORAGE_KEYS.DB_V2, serialized);
+
+        // Targeted DOM Patching (0 FPS stutter, avoid blanket innerHTML resets on unchanged rows)
+        if (prevYearData && newYearData) {
+          // A. Orders patching
+          if (window.OrdersApp) {
+            const oldOrders = prevYearData.orders || [];
+            const newOrders = newYearData.orders || [];
+            window.OrdersApp.orders = newOrders;
+            window.OrdersApp.profitExpenses = newYearData.profitDraws || [];
+            window.OrdersApp.pricingTiers = newYearData.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
+
+            if (oldOrders.length === newOrders.length && typeof window.OrdersApp.patchOrderRow === 'function') {
+              for (let i = 0; i < newOrders.length; i++) {
+                if (JSON.stringify(oldOrders[i]) !== JSON.stringify(newOrders[i])) {
+                  window.OrdersApp.patchOrderRow(newOrders[i].id);
+                }
+              }
+              window.OrdersApp.renderKpiCards();
+              window.OrdersApp.renderPipelinePills();
+            } else {
+              window.OrdersApp.render();
+            }
+          }
+
+          // B. Investments patching
+          if (window.InvestmentApp) {
+            const oldInv = prevYearData.investments || [];
+            const newInv = newYearData.investments || [];
+            window.InvestmentApp.items = newInv;
+            window.InvestmentApp.cutoffDay = newYearData.cutoffDay || 30;
+
+            if (oldInv.length === newInv.length && typeof window.InvestmentApp.patchExpenseRow === 'function') {
+              for (let i = 0; i < newInv.length; i++) {
+                if (JSON.stringify(oldInv[i]) !== JSON.stringify(newInv[i])) {
+                  window.InvestmentApp.patchExpenseRow(newInv[i].id);
+                }
+              }
+              window.InvestmentApp.renderKpiCards();
+            } else {
+              window.InvestmentApp.render();
+            }
+          }
+
+          // C. Inventory patching
+          if (window.InventoryApp) {
+            window.InventoryApp.items = newYearData.inventory || [];
+            window.InventoryApp.render();
+          }
+
+          // D. Recipe patching
+          if (window.RecipeApp && newYearData.recipe) {
+            window.RecipeApp.data = newYearData.recipe;
+            if (typeof window.renderRecipeCards === 'function') {
+              window.renderRecipeCards();
+            }
+          }
+        } else {
+          this._pushStateToModules();
+          this._reRenderAllModules();
+        }
+
+        this.updateConnectionStatus('connected');
+        this.emit('cloud:synced', { timestamp: this._lastSyncTime });
+      } catch (err) {
+        console.error('NogaStore: Error procesando sincronización remota:', err);
+      } finally {
+        this._isReceivingRemoteSync = false;
+      }
+    },
+
+    _scheduleCloudSave: function (immediate = false) {
+      if (this._isReceivingRemoteSync) return;
+
+      if (!this._dbRef) {
+        this._hasUnsyncedLocalChanges = true;
+        return;
+      }
+
+      this._pendingCloudSave = true;
+      this.updateConnectionStatus('syncing');
+
+      if (immediate) {
+        this._performCloudSave();
+        return;
+      }
+
+      // Debounce cloud writes (300ms) to prevent flooding on rapid typing/inputs
+      if (this._cloudSaveTimer) {
+        clearTimeout(this._cloudSaveTimer);
+      }
+      this._cloudSaveTimer = setTimeout(() => {
+        this._cloudSaveTimer = null;
+        this._performCloudSave();
+      }, 300);
+    },
+
+    _performCloudSave: function () {
+      if (!this._pendingCloudSave || !this._dbRef) return;
+      this._pendingCloudSave = false;
+      if (this._cloudSaveTimer) {
+        clearTimeout(this._cloudSaveTimer);
+        this._cloudSaveTimer = null;
+      }
+
+      this._isPerformingCloudSave = true;
+      const payload = JSON.parse(JSON.stringify(this.db));
+
+      this._dbRef.set(payload)
+        .then(() => {
+          this._isPerformingCloudSave = false;
+          this._hasUnsyncedLocalChanges = false;
+          this._lastSyncTime = new Date();
+          this.updateConnectionStatus('connected');
+        })
+        .catch((err) => {
+          this._isPerformingCloudSave = false;
+          this._hasUnsyncedLocalChanges = true;
+          console.warn('NogaStore: Error al guardar en Firebase. Cambios respaldados localmente:', err);
+          this.updateConnectionStatus('offline');
+        });
+    },
+
+    updateConnectionStatus: function (status, customLabel) {
+      this._connectionStatus = status;
+
+      const badge = document.getElementById('global-sync-badge');
+      const dot = document.getElementById('global-sync-dot');
+      const text = document.getElementById('global-sync-text');
+
+      const modalBadge = document.getElementById('modal-sync-status-badge');
+      const modalDot = document.getElementById('modal-sync-dot');
+      const modalText = document.getElementById('modal-sync-status-text');
+      const modalTime = document.getElementById('modal-last-sync-time');
+
+      let labelText = '';
+      if (status === 'connected') {
+        labelText = customLabel || 'En vivo (Sincronizado)';
+        if (dot) {
+          dot.className = 'liquid-status-jewel status-connected animate-glass-pulse';
+        }
+        if (badge) {
+          badge.setAttribute('title', 'Conectado a Firebase Realtime Database: Sincronización en vivo');
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+        }
+        if (modalBadge) {
+          modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+          const innerDot = modalBadge.querySelector('span:first-child');
+          if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600';
+        }
+        if (modalDot) {
+          modalDot.className = 'liquid-status-jewel status-connected animate-glass-pulse';
+        }
+      } else if (status === 'syncing') {
+        labelText = customLabel || 'Sincronizando...';
+        if (dot) {
+          dot.className = 'liquid-status-jewel status-syncing animate-pulse';
+        }
+        if (badge) {
+          badge.setAttribute('title', 'Sincronizando cambios en la nube...');
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-50/80 hover:bg-amber-50 text-amber-800 border border-amber-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+        }
+        if (modalBadge) {
+          modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
+          const innerDot = modalBadge.querySelector('span:first-child');
+          if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
+        }
+        if (modalDot) {
+          modalDot.className = 'liquid-status-jewel status-syncing animate-pulse';
+        }
+      } else {
+        labelText = customLabel || 'Sin conexión (Modo local)';
+        if (dot) {
+          dot.className = 'liquid-status-jewel status-offline';
+        }
+        if (badge) {
+          badge.setAttribute('title', 'Modo local: Cambios guardados en memoria local');
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-100 text-slate-600 border border-slate-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+        }
+        if (modalBadge) {
+          modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300';
+          const innerDot = modalBadge.querySelector('span:first-child');
+          if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400';
+        }
+        if (modalDot) {
+          modalDot.className = 'liquid-status-jewel status-offline';
+        }
+      }
+
+      if (text) text.textContent = labelText;
+      if (modalText) modalText.textContent = labelText;
+      if (modalTime) {
+        if (this._lastSyncTime) {
+          const hours = String(this._lastSyncTime.getHours()).padStart(2, '0');
+          const minutes = String(this._lastSyncTime.getMinutes()).padStart(2, '0');
+          const seconds = String(this._lastSyncTime.getSeconds()).padStart(2, '0');
+          modalTime.textContent = `${hours}:${minutes}:${seconds}`;
+        } else {
+          modalTime.textContent = 'En espera de conexión';
+        }
+      }
+    },
+
+    // 13. Cross-Window / Cross-Tab Storage Listener
     _bindStorageListener: function () {
       window.addEventListener('storage', (e) => {
         if (!e.key) return;
@@ -904,10 +1309,74 @@
           this._flushSave();
         }
       });
+
+      window.addEventListener('online', () => {
+        if (this._hasUnsyncedLocalChanges && this._dbRef) {
+          this._scheduleCloudSave(true);
+        }
+      });
     }
   };
 
   // Expose to window and initialize immediately
   window.NogaStore = NogaStore;
+
+  // Cloud Sync Modal Global Handlers
+  window.openCloudSyncModal = function () {
+    const modal = document.getElementById('cloud-sync-modal');
+    if (!modal) return;
+    const cfg = NogaStore.getActiveFirebaseConfig();
+    const dbUrlInp = document.getElementById('fb-cfg-dburl');
+    const projInp = document.getElementById('fb-cfg-projectid');
+    const apiInp = document.getElementById('fb-cfg-apikey');
+    if (dbUrlInp) dbUrlInp.value = (cfg && cfg.databaseURL && !cfg.databaseURL.includes('YOUR_PROJECT_ID')) ? cfg.databaseURL : '';
+    if (projInp) projInp.value = (cfg && cfg.projectId && !cfg.projectId.includes('YOUR_PROJECT_ID')) ? cfg.projectId : '';
+    if (apiInp) apiInp.value = (cfg && cfg.apiKey && !cfg.apiKey.includes('YOUR_API_KEY')) ? cfg.apiKey : '';
+
+    NogaStore.updateConnectionStatus(NogaStore._connectionStatus);
+    modal.classList.remove('hidden');
+  };
+
+  window.closeCloudSyncModal = function () {
+    const modal = document.getElementById('cloud-sync-modal');
+    if (modal) modal.classList.add('hidden');
+  };
+
+  window.handleSaveFirebaseConfig = function (e) {
+    if (e) e.preventDefault();
+    const dbUrl = (document.getElementById('fb-cfg-dburl')?.value || '').trim();
+    const projectId = (document.getElementById('fb-cfg-projectid')?.value || '').trim();
+    const apiKey = (document.getElementById('fb-cfg-apikey')?.value || '').trim();
+
+    if (!dbUrl || !projectId) {
+      if (window.showToast) window.showToast('Ingresa al menos Database URL y Project ID', 'warning');
+      return;
+    }
+
+    const customCfg = {
+      apiKey: apiKey || 'YOUR_API_KEY',
+      authDomain: `${projectId}.firebaseapp.com`,
+      databaseURL: dbUrl,
+      projectId: projectId,
+      storageBucket: `${projectId}.appspot.com`,
+      messagingSenderId: '',
+      appId: ''
+    };
+
+    localStorage.setItem(STORAGE_KEYS.FIREBASE_CUSTOM_CONFIG, JSON.stringify(customCfg));
+    if (window.showToast) window.showToast('Configuración guardada. Conectando a Firebase...', 'info');
+    NogaStore._initFirebase();
+    window.closeCloudSyncModal();
+  };
+
+  window.handleForceCloudSync = function () {
+    if (NogaStore._dbRef) {
+      NogaStore._scheduleCloudSave(true);
+      if (window.showToast) window.showToast('Sincronización forzada a la nube enviada', 'info');
+    } else {
+      if (window.showToast) window.showToast('Modo local: no hay conexión de Firebase activa', 'warning');
+    }
+  };
+
   NogaStore.init();
 })(window);

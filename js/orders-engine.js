@@ -173,10 +173,12 @@
       currentPage: 1,
       perPage: 20
     },
+    pricingTiers: { single: 280, pack2: 540, pack4: 1050 },
 
     init: function () {
       this.loadFromStorage();
       this.loadProfitExpensesFromStorage();
+      this.pricingTiers = this.getPricingTiers();
       this.render();
 
       if (window.NogaStore) {
@@ -382,6 +384,112 @@
       this.renderFilterPills();
       this.renderTable();
       this.renderProfitExpenses();
+      this.renderPricingTiersWidget();
+    },
+
+    // 0. Tiered Packaging Pricing Engine (Greedy Packaging Algorithm)
+    getPricingTiers: function () {
+      if (window.NogaStore && typeof window.NogaStore.getPricingTiers === 'function') {
+        return window.NogaStore.getPricingTiers();
+      }
+      return this.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
+    },
+
+    setPricingTiers: function (newTiers) {
+      this.pricingTiers = { ...newTiers };
+      if (window.NogaStore && typeof window.NogaStore.setPricingTiers === 'function') {
+        window.NogaStore.setPricingTiers(this.pricingTiers, null, 'orders-tiers-ui');
+      }
+      this.renderPricingTiersWidget();
+    },
+
+    calculateTieredPrice: function (quantity, customTiers) {
+      const q = Math.max(0, parseInt(quantity, 10) || 0);
+      const tiers = customTiers || this.getPricingTiers();
+      const single = parseFloat(tiers.single) || 280;
+      const pack2 = parseFloat(tiers.pack2) || 540;
+      const pack4 = parseFloat(tiers.pack4) || 1050;
+
+      if (q === 0) {
+        return {
+          totalPrice: 0,
+          breakdownText: '',
+          pack4Count: 0,
+          pack2Count: 0,
+          singleCount: 0
+        };
+      }
+
+      // Greedy Packaging Algorithm:
+      // 1. Maximize 4-packs
+      const pack4Count = Math.floor(q / 4);
+      const r = q % 4;
+      // 2. From remainder, maximize 2-packs
+      const pack2Count = Math.floor(r / 2);
+      // 3. Remainder singles
+      const singleCount = r % 2;
+
+      // 4. Formula: (pack4Count * pack4) + (pack2Count * pack2) + (singleCount * single)
+      const totalPrice = (pack4Count * pack4) + (pack2Count * pack2) + (singleCount * single);
+
+      // Verified Spanish bundle composition breakdown
+      const parts = [];
+      if (pack4Count > 0) {
+        parts.push(`${pack4Count} ${pack4Count === 1 ? 'paquete' : 'paquetes'} de 4 ($${(pack4Count * pack4).toLocaleString('es-MX')})`);
+      }
+      if (pack2Count > 0) {
+        parts.push(`${pack2Count} ${pack2Count === 1 ? 'paquete' : 'paquetes'} de 2 ($${(pack2Count * pack2).toLocaleString('es-MX')})`);
+      }
+      if (singleCount > 0) {
+        parts.push(`${singleCount} ${singleCount === 1 ? 'individual' : 'individuales'} ($${(singleCount * single).toLocaleString('es-MX')})`);
+      }
+
+      const breakdownText = parts.length > 0 ? `Calculado: ${parts.join(' + ')}` : '';
+
+      return {
+        totalPrice,
+        breakdownText,
+        pack4Count,
+        pack2Count,
+        singleCount
+      };
+    },
+
+    renderPricingTiersWidget: function () {
+      const tiers = this.getPricingTiers();
+      const activeYear = window.NogaStore ? window.NogaStore.getActiveYear() : '2026';
+
+      // 1. Update quick summary pill in action bar
+      const summaryEl = document.getElementById('quick-tier-summary');
+      if (summaryEl) {
+        summaryEl.textContent = `1x $${tiers.single} · 2x $${tiers.pack2} · 4x $${tiers.pack4.toLocaleString('es-MX')}`;
+      }
+
+      // 2. Update modal input values if present
+      const inSingle = document.getElementById('tier-input-single');
+      const inPack2 = document.getElementById('tier-input-pack2');
+      const inPack4 = document.getElementById('tier-input-pack4');
+      const yearBadge = document.getElementById('tier-modal-year-badge');
+
+      if (inSingle && document.activeElement !== inSingle) inSingle.value = tiers.single;
+      if (inPack2 && document.activeElement !== inPack2) inPack2.value = tiers.pack2;
+      if (inPack4 && document.activeElement !== inPack4) inPack4.value = tiers.pack4;
+      if (yearBadge) yearBadge.textContent = activeYear;
+
+      // 3. Update simulation grid
+      const simGrid = document.getElementById('tier-sim-grid');
+      if (simGrid) {
+        const testQuantities = [1, 2, 3, 4, 5, 6, 7, 8];
+        simGrid.innerHTML = testQuantities.map(q => {
+          const calc = this.calculateTieredPrice(q, tiers);
+          return `
+            <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-white/80 border border-slate-200/50 text-[11px]">
+              <span class="font-medium text-slate-700">${q} ${q === 1 ? 'chile' : 'chiles'}:</span>
+              <span class="font-bold text-slate-900 font-numeric">$${calc.totalPrice.toLocaleString('es-MX')}</span>
+            </div>
+          `;
+        }).join('');
+      }
     },
 
     // 1. Financial KPI Cards Renderer (Live & Reactive)
@@ -810,42 +918,42 @@
         // Status Pills with interactive toggle
         const paidPill = isPaid
           ? `<button onclick="OrdersApp.togglePaid(${item.id})" title="Clic para marcar como No pagado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric">
+              class="ord-btn-paid inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
               <span>Pagado</span>
              </button>`
           : `<button onclick="OrdersApp.togglePaid(${item.id})" title="Clic para marcar como Pagado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric">
+              class="ord-btn-paid inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
               <span>No pagado</span>
              </button>`;
 
         const prepPill = isPrepped
           ? `<button onclick="OrdersApp.togglePrep(${item.id})" title="Clic para marcar como No preparado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/80 text-slate-800 border border-slate-300 hover:bg-white transition-all font-numeric">
+              class="ord-btn-prep inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/80 text-slate-800 border border-slate-300 hover:bg-white transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
               <span>Preparado</span>
              </button>`
           : `<button onclick="OrdersApp.togglePrep(${item.id})" title="Clic para marcar como Preparado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric">
+              class="ord-btn-prep inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
               <span>No preparado</span>
              </button>`;
 
         const delivPill = isDelivered
           ? `<button onclick="OrdersApp.toggleDelivery(${item.id})" title="Clic para marcar como No entregado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric">
+              class="ord-btn-deliv inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
               <span>Entregado</span>
              </button>`
           : `<button onclick="OrdersApp.toggleDelivery(${item.id})" title="Clic para marcar como Entregado"
-              class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100/90 text-rose-800 border border-rose-300 hover:bg-rose-200 transition-all font-numeric">
+              class="ord-btn-deliv inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100/90 text-rose-800 border border-rose-300 hover:bg-rose-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
               <span>No entregado</span>
              </button>`;
 
         rowsHtml += `
-          <tr class="liquid-table-row group">
+          <tr id="order-row-${item.id}" data-order-id="${item.id}" class="liquid-table-row group">
             <!-- 1. # ID -->
             <td class="py-2.5 px-3 text-left font-numeric font-bold text-slate-400 text-xs w-12">
               #${item.id}
@@ -855,42 +963,42 @@
             <td class="py-2.5 px-2 text-left">
               <input type="text" value="${escapeHtml(item.customer)}"
                 onchange="OrdersApp.updateField(${item.id}, 'customer', this.value)"
-                class="w-full liquid-input px-2.5 py-1 text-xs font-bold text-slate-900">
+                class="ord-inp-customer w-full liquid-input px-2.5 py-1 text-xs font-bold text-slate-900">
             </td>
 
             <!-- 3. Fecha Pedido -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               <input type="date" value="${escapeHtml(item.orderDate || '')}"
                 onchange="OrdersApp.updateField(${item.id}, 'orderDate', this.value)"
-                class="liquid-input px-2 py-1 text-[11px] text-slate-700 font-numeric">
+                class="ord-inp-orderdate liquid-input px-2 py-1 text-[11px] text-slate-700 font-numeric">
             </td>
 
             <!-- 4. Fecha Producción -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               <input type="date" value="${escapeHtml(item.prodDate || '')}"
                 onchange="OrdersApp.updateField(${item.id}, 'prodDate', this.value)"
-                class="liquid-input px-2 py-1 text-[11px] text-slate-700 font-numeric">
+                class="ord-inp-proddate liquid-input px-2 py-1 text-[11px] text-slate-700 font-numeric">
             </td>
 
             <!-- 5. Fecha Entrega -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               <input type="date" value="${escapeHtml(item.deliveryDate || '')}"
                 onchange="OrdersApp.updateField(${item.id}, 'deliveryDate', this.value)"
-                class="liquid-input px-2 py-1 text-[11px] font-bold text-slate-900 font-numeric">
+                class="ord-inp-delivdate liquid-input px-2 py-1 text-[11px] font-bold text-slate-900 font-numeric">
             </td>
 
             <!-- 6. Cant. (Chiles) -->
             <td class="py-2.5 px-2 text-right w-20">
               <input type="number" min="0" step="1" value="${item.qty}"
                 onchange="OrdersApp.updateField(${item.id}, 'qty', parseInt(this.value, 10) || 0)"
-                class="w-full text-right liquid-input px-2 py-1 text-xs font-extrabold text-slate-900 font-numeric">
+                class="ord-inp-qty w-full text-right liquid-input px-2 py-1 text-xs font-extrabold text-slate-900 font-numeric">
             </td>
 
             <!-- 7. Total ($ MXN) -->
             <td class="py-2.5 px-2 text-right w-28">
               <input type="number" min="0" step="any" value="${item.price}"
                 onchange="OrdersApp.updateField(${item.id}, 'price', parseFloat(this.value) || 0)"
-                class="w-full text-right liquid-input px-2 py-1 text-xs sm:text-sm font-extrabold text-slate-900 font-numeric">
+                class="ord-inp-price w-full text-right liquid-input px-2 py-1 text-xs sm:text-sm font-extrabold text-slate-900 font-numeric">
             </td>
 
             <!-- 8. Estatus Pago -->
@@ -913,13 +1021,13 @@
               <input type="text" value="${escapeHtml(item.notes || '')}"
                 placeholder="Revolut, Efectivo..."
                 onchange="OrdersApp.updateField(${item.id}, 'notes', this.value)"
-                class="w-full liquid-input px-2 py-1 text-[11px] text-slate-600">
+                class="ord-inp-notes w-full liquid-input px-2 py-1 text-[11px] text-slate-600">
             </td>
 
             <!-- 12. Acciones -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               <button onclick="OrdersApp.deleteOrder(${item.id})" title="Eliminar comanda"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50/60 transition-colors">
+                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50/60 transition-colors cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
               </button>
             </td>
@@ -970,14 +1078,94 @@
       this.renderTable();
     },
 
-    // 7. Direct Field Mutations & Status Toggles (Two-Way Reactive Synchronization)
+    // 7. Direct Field Mutations & Status Toggles (Targeted 60 FPS DOM Patching)
+    patchOrderRow: function (id) {
+      const order = this.orders.find(o => o.id === id);
+      if (!order) return;
+
+      const row = document.getElementById('order-row-' + id);
+      if (!row) {
+        // Row is outside current filter/page; refresh summaries & pills
+        this.renderKpiCards();
+        this.renderPipelinePills();
+        this.renderFilterPills();
+        return;
+      }
+
+      const isPaid = (order.paidStatus === 'Pagado');
+      const isPrepped = (order.prepStatus === 'Preparado');
+      const isDelivered = (order.deliveryStatus === 'Entregado');
+
+      // 1. Paid Status Button Patching
+      const paidBtn = row.querySelector('.ord-btn-paid');
+      if (paidBtn) {
+        paidBtn.className = isPaid
+          ? 'ord-btn-paid inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer'
+          : 'ord-btn-paid inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer';
+        paidBtn.title = isPaid ? 'Clic para marcar como No pagado' : 'Clic para marcar como Pagado';
+        paidBtn.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-emerald-600' : 'bg-amber-500'}"></span>
+          <span>${isPaid ? 'Pagado' : 'No pagado'}</span>
+        `;
+      }
+
+      // 2. Prep Status Button Patching
+      const prepBtn = row.querySelector('.ord-btn-prep');
+      if (prepBtn) {
+        prepBtn.className = isPrepped
+          ? 'ord-btn-prep inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/80 text-slate-800 border border-slate-300 hover:bg-white transition-all font-numeric cursor-pointer'
+          : 'ord-btn-prep inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer';
+        prepBtn.title = isPrepped ? 'Clic para marcar como No preparado' : 'Clic para marcar como Preparado';
+        prepBtn.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full ${isPrepped ? 'bg-slate-700' : 'bg-amber-500'}"></span>
+          <span>${isPrepped ? 'Preparado' : 'No preparado'}</span>
+        `;
+      }
+
+      // 3. Delivery Status Button Patching
+      const delivBtn = row.querySelector('.ord-btn-deliv');
+      if (delivBtn) {
+        delivBtn.className = isDelivered
+          ? 'ord-btn-deliv inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer'
+          : 'ord-btn-deliv inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100/90 text-rose-800 border border-rose-300 hover:bg-rose-200 transition-all font-numeric cursor-pointer';
+        delivBtn.title = isDelivered ? 'Clic para marcar como No entregado' : 'Clic para marcar como Entregado';
+        delivBtn.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full ${isDelivered ? 'bg-emerald-600' : 'bg-rose-500'}"></span>
+          <span>${isDelivered ? 'Entregado' : 'No entregado'}</span>
+        `;
+      }
+
+      // 4. Inputs Patching (never overwrite active typing input)
+      const custInp = row.querySelector('.ord-inp-customer');
+      if (custInp && document.activeElement !== custInp && custInp.value !== order.customer) {
+        custInp.value = order.customer;
+      }
+      const qtyInp = row.querySelector('.ord-inp-qty');
+      if (qtyInp && document.activeElement !== qtyInp && Number(qtyInp.value) !== Number(order.qty)) {
+        qtyInp.value = order.qty;
+      }
+      const priceInp = row.querySelector('.ord-inp-price');
+      if (priceInp && document.activeElement !== priceInp && Number(priceInp.value) !== Number(order.price)) {
+        priceInp.value = order.price;
+      }
+      const notesInp = row.querySelector('.ord-inp-notes');
+      if (notesInp && document.activeElement !== notesInp && notesInp.value !== (order.notes || '')) {
+        notesInp.value = order.notes || '';
+      }
+
+      // 5. Update KPI Cards & Pipeline Metrics
+      this.renderKpiCards();
+      this.renderPipelinePills();
+      this.renderFilterPills();
+    },
+
     updateField: function (id, field, value) {
       const order = this.orders.find(o => o.id === id);
       if (!order) return;
 
       order[field] = value;
       this.saveToStorage();
-      this.render();
+      this.patchOrderRow(id);
     },
 
     togglePaid: function (id) {
@@ -986,7 +1174,7 @@
 
       order.paidStatus = (order.paidStatus === 'Pagado') ? 'No pagado' : 'Pagado';
       this.saveToStorage();
-      this.render();
+      this.patchOrderRow(id);
 
       if (window.showToast) {
         window.showToast(`Comanda #${id} marcada como ${order.paidStatus}`, 'info');
@@ -999,7 +1187,7 @@
 
       order.prepStatus = (order.prepStatus === 'Preparado') ? 'No preparado' : 'Preparado';
       this.saveToStorage();
-      this.render();
+      this.patchOrderRow(id);
 
       if (window.showToast) {
         window.showToast(`Comanda #${id} marcada como ${order.prepStatus}`, 'info');
@@ -1012,7 +1200,7 @@
 
       order.deliveryStatus = (order.deliveryStatus === 'Entregado') ? 'No entregado' : 'Entregado';
       this.saveToStorage();
-      this.render();
+      this.patchOrderRow(id);
 
       if (window.showToast) {
         window.showToast(`Comanda #${id} marcada como ${order.deliveryStatus}`, 'info');
@@ -1215,6 +1403,29 @@
 
   // Expose globally
   window.OrdersApp = OrdersApp;
+  window.calculateTieredPrice = function (quantity, tiers) {
+    return OrdersApp.calculateTieredPrice(quantity, tiers);
+  };
+  window.openPricingTiersModal = function () {
+    const modal = document.getElementById('pricing-tiers-modal');
+    if (modal) {
+      OrdersApp.renderPricingTiersWidget();
+      modal.classList.remove('hidden');
+    }
+  };
+  window.closePricingTiersModal = function () {
+    const modal = document.getElementById('pricing-tiers-modal');
+    if (modal) modal.classList.add('hidden');
+  };
+  window.handlePricingTierChange = function (tierKey, rawValue) {
+    const val = parseFloat(rawValue) || 0;
+    const current = OrdersApp.getPricingTiers();
+    current[tierKey] = val;
+    OrdersApp.setPricingTiers(current);
+    if (typeof window.calculateSuggestedPrice === 'function') {
+      window.calculateSuggestedPrice();
+    }
+  };
 
   // Initialize on DOM ready
   if (document.readyState === 'loading') {

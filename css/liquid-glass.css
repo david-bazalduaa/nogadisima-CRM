@@ -479,20 +479,27 @@ select.liquid-select option {
   outline: none;
 }
 
-/* Glass Table Styles */
+/* 60 FPS Hardware-Accelerated Table Styles (Zero Scroll Stutter) */
 .liquid-table-head {
   background: rgba(255, 255, 255, 0.72);
   border-top: 1px solid rgba(255, 255, 255, 0.85);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
+table tbody tr,
 .liquid-table-row {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-  transition: background-color 0.15s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: 55px;
+  background: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.80);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: background-color 0.12s ease;
 }
 
+table tbody tr:hover,
 .liquid-table-row:hover {
-  background: rgba(255, 255, 255, 0.65);
+  background: #FFFFFF !important;
 }
 
 /* Custom Glass Scrollbar */
@@ -525,25 +532,41 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* Refined Subtle Status Dots */
+/* Refined Apple Status Jewels (Multi-User Realtime Cloud Badge) */
 .liquid-status-jewel {
-  width: 7px;
-  height: 7px;
+  width: 7.5px;
+  height: 7.5px;
   border-radius: 9999px;
-  background: radial-gradient(circle at 35% 35%, #2D6A4F, #166534) !important;
-  box-shadow: 0 0 8px 1px rgba(22, 101, 52, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.60) !important;
   display: inline-block;
   flex-shrink: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: radial-gradient(circle at 35% 35%, #22c55e, #15803d);
+  box-shadow: 0 0 8px 1.5px rgba(34, 197, 94, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.liquid-status-jewel.status-connected {
+  background: radial-gradient(circle at 35% 35%, #22c55e, #15803d) !important;
+  box-shadow: 0 0 8px 1.5px rgba(34, 197, 94, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.7) !important;
+}
+
+.liquid-status-jewel.status-syncing {
+  background: radial-gradient(circle at 35% 35%, #f59e0b, #b45309) !important;
+  box-shadow: 0 0 8px 1.5px rgba(245, 158, 11, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.7) !important;
+}
+
+.liquid-status-jewel.status-offline {
+  background: radial-gradient(circle at 35% 35%, #94a3b8, #475569) !important;
+  box-shadow: 0 0 4px 0 rgba(100, 116, 139, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Pulsing Status Glow */
 @keyframes glassPulse {
-  0%, 100% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.12); }
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(1.15); }
 }
 
 .animate-glass-pulse {
-  animation: glassPulse 2.8s infinite ease-in-out;
+  animation: glassPulse 2.4s infinite ease-in-out;
 }
 
 /* ==========================================================================

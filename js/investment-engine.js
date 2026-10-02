@@ -574,18 +574,18 @@
         const isPaid = (item.status === 'Pagado');
         const statusPill = isPaid
           ? `<button onclick="InvestmentApp.toggleStatus(${item.id})" title="Clic para alternar a Pendiente"
-              class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric">
+              class="exp-btn-status inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
               <span>Pagado</span>
              </button>`
           : `<button onclick="InvestmentApp.toggleStatus(${item.id})" title="Clic para alternar a Pagado"
-              class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric">
+              class="exp-btn-status inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer">
               <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
               <span>Pendiente</span>
              </button>`;
 
         rowsHtml += `
-          <tr class="liquid-table-row group">
+          <tr id="expense-row-${item.id}" data-expense-id="${item.id}" class="liquid-table-row group">
             <!-- 1. Fuente de Fondos -->
             <td class="py-2 px-3 text-left whitespace-nowrap">
               <div class="flex items-center space-x-2">
@@ -819,13 +819,41 @@
       }
     },
 
+    patchExpenseRow: function (id) {
+      const item = this.items.find(i => i.id === id);
+      if (!item) return;
+
+      const row = document.getElementById('expense-row-' + id);
+      if (!row) {
+        this.renderKpiCards();
+        this.renderSettlementMatrix();
+        return;
+      }
+
+      const isPaid = (item.status === 'Pagado');
+      const statusBtn = row.querySelector('.exp-btn-status');
+      if (statusBtn) {
+        statusBtn.className = isPaid
+          ? 'exp-btn-status inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-all font-numeric cursor-pointer'
+          : 'exp-btn-status inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100/90 text-amber-800 border border-amber-300 hover:bg-amber-200 transition-all font-numeric cursor-pointer';
+        statusBtn.title = isPaid ? 'Clic para alternar a Pendiente' : 'Clic para alternar a Pagado';
+        statusBtn.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-emerald-600' : 'bg-amber-500'}"></span>
+          <span>${isPaid ? 'Pagado' : 'Pendiente'}</span>
+        `;
+      }
+
+      this.renderKpiCards();
+      this.renderSettlementMatrix();
+    },
+
     toggleStatus: function (id) {
       const item = this.items.find(i => i.id === id);
       if (!item) return;
 
       item.status = (item.status === 'Pagado') ? 'Pendiente' : 'Pagado';
       this.saveToStorage();
-      this.render();
+      this.patchExpenseRow(id);
 
       if (window.showToast) {
         window.showToast(`Gasto #${id} marcado como ${item.status}`, 'info');

@@ -295,11 +295,11 @@
 
       <!-- Right: Action Pills -->
       <div class="flex items-center space-x-2">
-        <!-- Live Sync Pill -->
-        <div id="global-sync-badge" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 border border-white/90 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-default" title="Almacén de estado unificado sincronizado en tiempo real">
-          <span id="global-sync-dot" class="liquid-status-jewel animate-glass-pulse"></span>
-          <span id="global-sync-text">Sincronizado</span>
-        </div>
+        <!-- Live Sync Pill (Firebase Realtime Database) -->
+        <button id="global-sync-badge" type="button" onclick="openCloudSyncModal()" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 border border-white/90 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98" title="Firebase Realtime Database: Sincronización multiusuario en tiempo real">
+          <span id="global-sync-dot" class="liquid-status-jewel status-connected animate-glass-pulse"></span>
+          <span id="global-sync-text">En vivo (Sincronizado)</span>
+        </button>
 
         <!-- Export CSV Pill -->
         <button onclick="exportRecipeToCsv()" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 border border-white/90 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 cursor-pointer active:scale-98 whitespace-nowrap" title="Descargar escandallo en CSV">
@@ -853,13 +853,27 @@
 
         <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button onclick="openNewOrderModal()" 
-            class="liquid-btn-dark px-4 py-2 text-xs font-semibold space-x-2">
+            class="liquid-btn-dark px-4 py-2 text-xs font-semibold space-x-2 cursor-pointer active:scale-98">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
             <span>Registrar Pedido</span>
           </button>
 
+          <!-- Season Pricing Tiers Widget Trigger -->
+          <button type="button" onclick="openPricingTiersModal()" 
+            class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-2 text-xs font-semibold text-slate-700 hover:text-slate-950 transition-all cursor-pointer active:scale-98"
+            title="Configurar precios oficiales y paquetes de la temporada">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386a11.968 11.968 0 003.882-3.882c.486-.827.313-1.908-.386-2.607L9.568 3z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+            </svg>
+            <span>Tarifario PVP / Paquetes</span>
+            <span class="hidden md:inline-flex text-[10px] font-bold text-slate-900 px-1.5 py-0.5 rounded-md bg-white border border-slate-200/60 shadow-2xs font-numeric" id="quick-tier-summary">
+              1x $280 · 2x $540 · 4x $1,050
+            </span>
+          </button>
+
           <button onclick="OrdersApp.exportCsv()" 
-            class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all">
+            class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all cursor-pointer active:scale-98">
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Exportar CSV</span>
           </button>
@@ -1688,6 +1702,89 @@
     </div>
   </div>
 
+  <!-- ============================================================== -->
+  <!-- MODAL: TARIFARIO DE VENTA / PAQUETES (APPLE LIQUID GLASS)      -->
+  <!-- ============================================================== -->
+  <div id="pricing-tiers-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-6 sm:p-7 max-w-md w-full shadow-2xl">
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/60">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 font-heading">Tarifario de Venta & Paquetes</h3>
+            <span id="tier-modal-year-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-800 font-numeric border border-slate-200/80">
+              2026
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Precios oficiales para el cálculo automático de comandas de esta temporada.</p>
+        </div>
+        <button type="button" onclick="closePricingTiersModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-colors cursor-pointer" title="Cerrar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-3.5 text-xs font-sans">
+        <!-- 1. Individual (1 chile) -->
+        <div class="p-3.5 rounded-2xl bg-white/70 border border-white/90 shadow-2xs flex items-center justify-between gap-3">
+          <div>
+            <span class="block font-bold text-slate-800 text-sm">Individual (1 chile)</span>
+            <span class="text-[11px] text-slate-500">Precio retail estándar por pieza</span>
+          </div>
+          <div class="relative w-32 shrink-0">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-numeric font-bold">$</span>
+            <input type="number" id="tier-input-single" min="0" step="any" value="280"
+              oninput="handlePricingTierChange('single', this.value)"
+              class="w-full liquid-input pl-7 pr-3 py-2 text-right text-slate-900 font-numeric font-bold text-sm">
+          </div>
+        </div>
+
+        <!-- 2. Paquete de 2 chiles -->
+        <div class="p-3.5 rounded-2xl bg-white/70 border border-white/90 shadow-2xs flex items-center justify-between gap-3">
+          <div>
+            <span class="block font-bold text-slate-800 text-sm">Paquete de 2 chiles</span>
+            <span class="text-[11px] text-slate-500">Dúo con descuento por volumen</span>
+          </div>
+          <div class="relative w-32 shrink-0">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-numeric font-bold">$</span>
+            <input type="number" id="tier-input-pack2" min="0" step="any" value="540"
+              oninput="handlePricingTierChange('pack2', this.value)"
+              class="w-full liquid-input pl-7 pr-3 py-2 text-right text-slate-900 font-numeric font-bold text-sm">
+          </div>
+        </div>
+
+        <!-- 3. Paquete de 4 chiles -->
+        <div class="p-3.5 rounded-2xl bg-white/70 border border-white/90 shadow-2xs flex items-center justify-between gap-3">
+          <div>
+            <span class="block font-bold text-slate-800 text-sm">Paquete de 4 chiles</span>
+            <span class="text-[11px] text-slate-500">Familiar / Mejor valor</span>
+          </div>
+          <div class="relative w-32 shrink-0">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-numeric font-bold">$</span>
+            <input type="number" id="tier-input-pack4" min="0" step="any" value="1050"
+              oninput="handlePricingTierChange('pack4', this.value)"
+              class="w-full liquid-input pl-7 pr-3 py-2 text-right text-slate-900 font-numeric font-bold text-sm">
+          </div>
+        </div>
+
+        <!-- Dynamic Simulation Preview -->
+        <div class="mt-4 p-3.5 rounded-2xl bg-slate-100/70 border border-slate-200/60 text-[11px]">
+          <div class="font-bold text-slate-700 uppercase tracking-wider mb-2 text-[10px]">
+            Simulador de Paquetes en Comandas:
+          </div>
+          <div class="grid grid-cols-2 gap-1.5 font-numeric text-slate-600" id="tier-sim-grid">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-white/60 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closePricingTiersModal()" 
+            class="liquid-btn-dark px-5 py-2 text-xs font-semibold shadow-sm cursor-pointer">
+            Listo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================== -->
   <!-- MODAL: REGISTRAR NUEVO PEDIDO (GLASS)      -->
   <!-- ========================================== -->
@@ -1731,8 +1828,14 @@
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Total ($ MXN) *</label>
-            <input type="number" id="new-ord-price" min="0" step="any" value="280" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric font-bold">
+            <input type="number" id="new-ord-price" min="0" step="any" value="280" required class="w-full liquid-input px-3 py-2 text-slate-800 font-numeric font-bold" oninput="handleManualPriceOverride()">
           </div>
+        </div>
+
+        <!-- Dynamic Breakdown Badge (Tiered Packaging Engine) -->
+        <div id="order-pricing-hint" class="px-3 py-2 rounded-xl bg-slate-100/80 border border-slate-200/70 text-[11px] font-medium text-slate-600 flex items-center space-x-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+          <span id="order-pricing-hint-text">Calculado: 1 individual ($280)</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2247,12 +2350,94 @@
     </div>
   </div>
 
+  <!-- ============================================================== -->
+  <!-- CLOUD SYNC CONFIGURATION MODAL (FIREBASE REALTIME DATABASE)    -->
+  <!-- ============================================================== -->
+  <div id="cloud-sync-modal" class="fixed inset-0 z-100 hidden flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm transition-opacity duration-200" onclick="if(event.target === this) closeCloudSyncModal()">
+    <div class="liquid-card p-6 sm:p-7 max-w-lg w-full bg-white/95 backdrop-blur-2xl shadow-2xl border border-white/90 rounded-3xl space-y-5" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200/60">
+        <div class="flex items-center space-x-2.5">
+          <span id="modal-sync-dot" class="liquid-status-jewel status-connected animate-glass-pulse"></span>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 font-heading">Sincronización en la Nube</h3>
+            <p class="text-[11px] text-slate-500 font-medium">Firebase Realtime Database (Multi-Usuario Diego & Angy)</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCloudSyncModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Live Connection Health Card -->
+      <div class="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-medium">Estado de Conexión:</span>
+          <span id="modal-sync-status-badge" class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            <span id="modal-sync-status-text">En vivo (Sincronizado)</span>
+          </span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-medium">Nodo Raíz en la Nube:</span>
+          <code class="font-mono text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200 text-[11px]">/nogadisima_crm</code>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-medium">Caché Local de Respaldo:</span>
+          <span class="text-emerald-700 font-semibold text-[11px]">Activo (localStorage espejo)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500 font-medium">Última Sincronización:</span>
+          <span id="modal-last-sync-time" class="text-slate-700 font-numeric font-medium">Hace unos momentos</span>
+        </div>
+      </div>
+
+      <!-- Firebase Realtime Database Credentials Form -->
+      <form id="firebase-config-form" onsubmit="handleSaveFirebaseConfig(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Database URL (RTDB)</label>
+          <input type="text" id="fb-cfg-dburl" placeholder="https://TU_PROYECTO-default-rtdb.firebaseio.com" class="w-full liquid-input px-3 py-2 text-slate-800 font-mono text-[11px]">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Project ID</label>
+            <input type="text" id="fb-cfg-projectid" placeholder="nogadisima-crm" class="w-full liquid-input px-3 py-2 text-slate-800 font-mono text-[11px]">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">API Key</label>
+            <input type="text" id="fb-cfg-apikey" placeholder="AIzaSy..." class="w-full liquid-input px-3 py-2 text-slate-800 font-mono text-[11px]">
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-400 leading-normal">
+          Nota: También puedes editar directamente el bloque <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-600">firebaseConfig</code> en <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-600">js/global-store.js</code>.
+        </div>
+
+        <div class="pt-3 border-t border-slate-200/60 flex items-center justify-between gap-2">
+          <button type="button" onclick="handleForceCloudSync()" class="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100/80 rounded-xl transition-all cursor-pointer">
+            Forzar Sincronización
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" onclick="closeCloudSyncModal()" class="px-3.5 py-2 text-slate-600 hover:bg-slate-100/70 rounded-xl transition-colors font-semibold cursor-pointer">
+              Cerrar
+            </button>
+            <button type="submit" class="liquid-btn-dark px-4 py-2 font-semibold shadow-md space-x-1.5 cursor-pointer">
+              <span>Guardar & Conectar</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
   <!-- ============================================================== -->
   <!-- APPLICATION SCRIPTS (MODULAR ARCHITECTURE)                      -->
   <!-- ============================================================== -->
+  <!-- Firebase Cloud SDKs (Static CDN for Real-Time Multi-User Database) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
   <script src="js/background-canvas.js"></script>
   <script src="js/global-store.js"></script>
   <script src="js/recipe-engine.js"></script>

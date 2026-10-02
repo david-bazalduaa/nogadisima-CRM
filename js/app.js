@@ -393,6 +393,15 @@ window.openNewOrderModal = function() {
     const delivInput = document.getElementById('new-ord-delivery');
     if (dateInput && (!dateInput.value || !dateInput.value.startsWith(activeYear))) dateInput.value = defaultDate;
     if (delivInput && (!delivInput.value || !delivInput.value.startsWith(activeYear))) delivInput.value = `${activeYear}-09-16`;
+    
+    const qtyInput = document.getElementById('new-ord-qty');
+    if (qtyInput) {
+      if (!qtyInput.value || parseInt(qtyInput.value, 10) <= 0) {
+        qtyInput.value = 1;
+      }
+    }
+    window.calculateSuggestedPrice();
+
     const custInput = document.getElementById('new-ord-customer');
     if (custInput) custInput.focus();
   }
@@ -403,24 +412,61 @@ window.closeNewOrderModal = function() {
   if (modal) modal.classList.add('hidden');
   const form = document.getElementById('new-order-form');
   if (form) form.reset();
+  const hintEl = document.getElementById('order-pricing-hint');
+  if (hintEl) hintEl.classList.add('hidden');
 };
 
 window.calculateSuggestedPrice = function() {
   const qtyInput = document.getElementById('new-ord-qty');
   const priceInput = document.getElementById('new-ord-price');
+  const hintEl = document.getElementById('order-pricing-hint');
+  const hintTextEl = document.getElementById('order-pricing-hint-text');
   if (!qtyInput || !priceInput) return;
+
   const qty = parseInt(qtyInput.value, 10) || 1;
-  const priceMap = {
-    1: 280,
-    2: 540,
-    3: 820,
-    4: 1050,
-    5: 1330,
-    6: 1590,
-    7: 1850,
-    20: 4550
-  };
-  priceInput.value = priceMap[qty] !== undefined ? priceMap[qty] : (qty * 265);
+  const tiers = (window.OrdersApp && typeof window.OrdersApp.getPricingTiers === 'function')
+    ? window.OrdersApp.getPricingTiers()
+    : (window.NogaStore ? window.NogaStore.getPricingTiers() : { single: 280, pack2: 540, pack4: 1050 });
+
+  const calc = (window.OrdersApp && typeof window.OrdersApp.calculateTieredPrice === 'function')
+    ? window.OrdersApp.calculateTieredPrice(qty, tiers)
+    : { totalPrice: qty * 280, breakdownText: `Calculado: $${qty * 280}` };
+
+  priceInput.value = calc.totalPrice;
+
+  if (hintTextEl) {
+    hintTextEl.textContent = calc.breakdownText || `Calculado: $${calc.totalPrice.toLocaleString('es-MX')}`;
+  }
+  if (hintEl) {
+    hintEl.classList.remove('hidden');
+  }
+};
+
+window.handleManualPriceOverride = function() {
+  const qtyInput = document.getElementById('new-ord-qty');
+  const priceInput = document.getElementById('new-ord-price');
+  const hintTextEl = document.getElementById('order-pricing-hint-text');
+  const hintEl = document.getElementById('order-pricing-hint');
+  if (!qtyInput || !priceInput || !hintTextEl) return;
+
+  const qty = parseInt(qtyInput.value, 10) || 1;
+  const tiers = (window.OrdersApp && typeof window.OrdersApp.getPricingTiers === 'function')
+    ? window.OrdersApp.getPricingTiers()
+    : { single: 280, pack2: 540, pack4: 1050 };
+
+  const calc = (window.OrdersApp && typeof window.OrdersApp.calculateTieredPrice === 'function')
+    ? window.OrdersApp.calculateTieredPrice(qty, tiers)
+    : { totalPrice: qty * 280, breakdownText: '' };
+
+  const currentPrice = parseFloat(priceInput.value) || 0;
+
+  if (hintEl) hintEl.classList.remove('hidden');
+
+  if (Math.abs(currentPrice - calc.totalPrice) > 0.01) {
+    hintTextEl.textContent = `Precio manual personalizado ($${currentPrice.toLocaleString('es-MX')} · Tarifa regular: $${calc.totalPrice.toLocaleString('es-MX')})`;
+  } else {
+    hintTextEl.textContent = calc.breakdownText;
+  }
 };
 
 window.handleNewOrderSubmit = function(e) {
@@ -746,10 +792,19 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Close season dropdown on Escape key
+// Close dropdowns and floating modals on Escape key
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     window.closeSeasonDropdown();
+    if (typeof window.closeStorePopover === 'function') {
+      window.closeStorePopover();
+    }
+    if (typeof window.closeCloudSyncModal === 'function') {
+      window.closeCloudSyncModal();
+    }
+    if (typeof window.closePricingTiersModal === 'function') {
+      window.closePricingTiersModal();
+    }
   }
 });
 
