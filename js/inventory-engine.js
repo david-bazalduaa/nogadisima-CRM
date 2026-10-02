@@ -14,63 +14,7 @@
   // 1. VERIFIED BASELINE SEED DATA (STRICT DATA FIDELITY & CUSTODIAN CUSTODY)
   // =========================================================================
   const INITIAL_INVENTORY_ITEMS = [
-    // --- EMPAQUES & PRESENTACIÓN (CUSTODIA DIEGO & ANGY) ---
-    {
-      id: 'pkg-6',
-      name: 'Tarjetas nogadísima (agradecimiento)',
-      category: 'empaque',
-      stockDiego: 41,
-      stockAngy: 10,
-      stockActual: 51,
-      unit: 'pza',
-      minStock: 20,
-      packageSize: 70,
-      packagePrice: 280.50,
-      store: 'Lumen',
-      isCustom: false
-    },
-    {
-      id: 'pkg-8',
-      name: 'Tarjetas chile',
-      category: 'empaque',
-      stockDiego: 52,
-      stockAngy: 2,
-      stockActual: 54,
-      unit: 'pza',
-      minStock: 15,
-      packageSize: 70,
-      packagePrice: 280.50,
-      store: 'Lumen',
-      isCustom: false
-    },
-    {
-      id: 'pkg-2',
-      name: 'Bolsas kraft / blancas',
-      category: 'empaque',
-      stockDiego: 25,
-      stockAngy: 36,
-      stockActual: 61,
-      unit: 'pza',
-      minStock: 20,
-      packageSize: 58.24,
-      packagePrice: 208.00,
-      store: 'Mercado Libre',
-      isCustom: false
-    },
-    {
-      id: 'pkg-3',
-      name: 'Envases goplas (termoformados)',
-      category: 'empaque',
-      stockDiego: 89,
-      stockAngy: 28,
-      stockActual: 117,
-      unit: 'pza',
-      minStock: 30,
-      packageSize: 350,
-      packagePrice: 250.00,
-      store: 'Goplas',
-      isCustom: false
-    },
+    // --- 8 INSUMOS OFICIALES DE EMPAQUE (CONSONANCIA TOTAL CON RECETA) ---
     {
       id: 'pkg-1',
       name: 'Papel encerado',
@@ -86,22 +30,36 @@
       isCustom: false
     },
     {
-      id: 'pkg-9',
-      name: 'Envases mimi',
+      id: 'pkg-2',
+      name: 'Bolsas blancas de entrega',
       category: 'empaque',
-      stockDiego: 20,
-      stockAngy: 20,
-      stockActual: 40,
+      stockDiego: 25,
+      stockAngy: 36,
+      stockActual: 61,
       unit: 'pza',
-      minStock: 15,
-      packageSize: 100,
-      packagePrice: 120.00,
+      minStock: 20,
+      packageSize: 58.24,
+      packagePrice: 208.00,
+      store: 'Mercado Libre',
+      isCustom: false
+    },
+    {
+      id: 'pkg-3',
+      name: 'Envases termoformados (Marce)',
+      category: 'empaque',
+      stockDiego: 89,
+      stockAngy: 28,
+      stockActual: 117,
+      unit: 'pza',
+      minStock: 30,
+      packageSize: 350,
+      packagePrice: 250.00,
       store: 'Goplas',
       isCustom: false
     },
     {
       id: 'pkg-4',
-      name: 'Stickers grandes (decorativo chile)',
+      name: 'Sticker decorativo chile',
       category: 'empaque',
       stockDiego: 0,
       stockAngy: 24,
@@ -115,7 +73,7 @@
     },
     {
       id: 'pkg-5',
-      name: 'Stickers chicos (sello bolsa)',
+      name: 'Sticker de sello bolsa',
       category: 'empaque',
       stockDiego: 0,
       stockAngy: 34,
@@ -128,8 +86,22 @@
       isCustom: false
     },
     {
+      id: 'pkg-6',
+      name: 'Tarjetas de agradecimiento / presentación',
+      category: 'empaque',
+      stockDiego: 41,
+      stockAngy: 10,
+      stockActual: 51,
+      unit: 'pza',
+      minStock: 20,
+      packageSize: 70,
+      packagePrice: 280.50,
+      store: 'Lumen',
+      isCustom: false
+    },
+    {
       id: 'pkg-7',
-      name: 'Listón',
+      name: 'listón',
       category: 'empaque',
       stockDiego: 50,
       stockAngy: 0,
@@ -139,6 +111,20 @@
       packageSize: 50,
       packagePrice: 140.00,
       store: 'Amazon',
+      isCustom: false
+    },
+    {
+      id: 'pkg-8',
+      name: 'Envases Chiles',
+      category: 'empaque',
+      stockDiego: 0,
+      stockAngy: 0,
+      stockActual: 0,
+      unit: 'pza',
+      minStock: 15,
+      packageSize: 50,
+      packagePrice: 100.00,
+      store: 'Goplas',
       isCustom: false
     },
 
@@ -481,6 +467,24 @@
       }
     },
 
+    // Allowed packaging helper: strictly filters down to the 8 official packaging items
+    isAllowedPackagingName: function (name) {
+      const norm = (name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      return norm.includes('papel encerado') ||
+             norm.includes('bolsa') ||
+             norm.includes('termoformado') ||
+             norm.includes('goplas') ||
+             norm.includes('decorativo') ||
+             (norm.includes('sticker') && norm.includes('grande')) ||
+             norm.includes('sello') ||
+             (norm.includes('sticker') && norm.includes('chico')) ||
+             norm.includes('agradecimiento') ||
+             norm.includes('presentacion') ||
+             norm.includes('nogadisima') ||
+             norm.includes('liston') ||
+             norm.includes('envases chile');
+    },
+
     loadFromStorage: function () {
       try {
         const stored = localStorage.getItem(STORAGE_KEY_INVENTORY);
@@ -496,6 +500,11 @@
                 stockAngy: a,
                 stockActual: d + a
               };
+            });
+            // Purge deprecated packaging items immediately
+            this.items = this.items.filter(item => {
+              if (item.category !== 'empaque') return true;
+              return this.isAllowedPackagingName(item.name);
             });
             return;
           }
@@ -518,7 +527,7 @@
       }
     },
 
-    // 1. Two-Way Reactivity & Recipe Catalog Sync
+    // 1. Two-Way Reactivity & Recipe Catalog Sync (Recipe Budget as Single Source of Truth)
     syncWithRecipe: function () {
       const recipeData = (window.RecipeApp && window.RecipeApp.data)
         ? window.RecipeApp.data
@@ -526,46 +535,105 @@
 
       if (!recipeData || !Array.isArray(recipeData.categories)) return;
 
+      const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
       let hasChanges = false;
 
-      recipeData.categories.forEach(cat => {
-        cat.items.forEach(recItem => {
-          const recNorm = (recItem.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          let existing = this.items.find(i => {
-            if (i.id === recItem.id) return true;
-            const invNorm = (i.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            if (invNorm === recNorm) return true;
-            if (invNorm.includes('nuez') && recNorm.includes('nuez')) return true;
-            if (invNorm.includes('acitron') && recNorm.includes('acitron')) return true;
-            if (invNorm.includes('termoformado') && recNorm.includes('termoformado')) return true;
-            if (invNorm.includes('tarjeta') && recNorm.includes('tarjeta')) return true;
-            return false;
-          });
+      // A. Strictly filter packaging items to the 8 official items (removes Tarjetas chile, Envases mimi, etc.)
+      const initialCount = this.items.length;
+      this.items = this.items.filter(item => {
+        if (item.category !== 'empaque') return true;
+        return this.isAllowedPackagingName(item.name);
+      });
+      if (this.items.length !== initialCount) hasChanges = true;
 
+      // B. Kitchen Ingredients: Recipe Budget is the Source of Truth
+      const recipeIngredients = [];
+      recipeData.categories.forEach(cat => {
+        if (cat.id === 'empaque') return;
+        cat.items.forEach(recItem => {
+          recipeIngredients.push({ recItem, catId: cat.id });
+        });
+      });
+
+      recipeIngredients.forEach(({ recItem, catId }) => {
+        let existing = this.items.find(i => i.id === recItem.id || (i.category === catId && normalize(i.name) === normalize(recItem.name)));
+        if (!existing) {
+          // Look up baseline seed stock if it exists
+          const seedMatch = INITIAL_INVENTORY_ITEMS.find(s => s.id === recItem.id || normalize(s.name) === normalize(recItem.name));
+          const stockDiego = seedMatch ? (Number(seedMatch.stockDiego) || 0) : 0;
+          const stockAngy = seedMatch ? (Number(seedMatch.stockAngy) || 0) : 0;
+          const minStock = seedMatch ? (Number(seedMatch.minStock) || 0) : Math.ceil((Number(recItem.qty) || 1) * 1.5);
+
+          this.items.push({
+            id: recItem.id,
+            name: recItem.name,
+            category: catId,
+            stockDiego: stockDiego,
+            stockAngy: stockAngy,
+            stockActual: stockDiego + stockAngy,
+            unit: recItem.unit || 'gr',
+            minStock: minStock,
+            packageSize: Number(recItem.packageSize) || 1,
+            packagePrice: Number(recItem.generalPrice) || 0,
+            store: recItem.store || 'Proveedor',
+            isCustom: false
+          });
+          hasChanges = true;
+        } else {
+          // Update metadata from recipe as source of truth while strictly keeping custody stock
+          existing.id = recItem.id;
+          existing.name = recItem.name;
+          existing.category = catId;
+          existing.unit = recItem.unit || existing.unit;
+          if (recItem.packageSize) existing.packageSize = Number(recItem.packageSize);
+          if (recItem.generalPrice) existing.packagePrice = Number(recItem.generalPrice);
+          if (recItem.store) existing.store = recItem.store;
+          existing.stockActual = (Number(existing.stockDiego) || 0) + (Number(existing.stockAngy) || 0);
+        }
+      });
+
+      // Remove any food ingredient in inventory that was removed from recipe (unless marked isCustom)
+      this.items = this.items.filter(item => {
+        if (item.category === 'empaque') return true;
+        if (item.isCustom) return true;
+        return recipeIngredients.some(({ recItem }) => recItem.id === item.id || normalize(recItem.name) === normalize(item.name));
+      });
+
+      // C. Ensure all 8 packaging items from recipe / seed exist in inventory
+      const empaqueCat = recipeData.categories.find(c => c.id === 'empaque');
+      if (empaqueCat) {
+        empaqueCat.items.forEach(recItem => {
+          if (!this.isAllowedPackagingName(recItem.name)) return;
+          let existing = this.items.find(i => i.id === recItem.id || normalize(i.name) === normalize(recItem.name));
           if (!existing) {
+            const seedMatch = INITIAL_INVENTORY_ITEMS.find(s => s.id === recItem.id || normalize(s.name) === normalize(recItem.name));
+            const stockDiego = seedMatch ? (Number(seedMatch.stockDiego) || 0) : 0;
+            const stockAngy = seedMatch ? (Number(seedMatch.stockAngy) || 0) : 0;
             this.items.push({
               id: recItem.id,
               name: recItem.name,
-              category: cat.id,
-              stockDiego: 0,
-              stockAngy: 0,
-              stockActual: 0,
+              category: 'empaque',
+              stockDiego: stockDiego,
+              stockAngy: stockAngy,
+              stockActual: stockDiego + stockAngy,
               unit: recItem.unit || 'pza',
-              minStock: Math.ceil((recItem.qty || 1) * 1.5),
-              packageSize: recItem.packageSize || 1,
-              packagePrice: recItem.generalPrice || 0,
+              minStock: seedMatch ? seedMatch.minStock : 15,
+              packageSize: Number(recItem.packageSize) || 1,
+              packagePrice: Number(recItem.generalPrice) || 0,
               store: recItem.store || 'Proveedor',
               isCustom: false
             });
             hasChanges = true;
           } else {
-            // Update reference metadata
-            if (recItem.packageSize && !existing.packageSize) existing.packageSize = recItem.packageSize;
-            if (recItem.generalPrice && !existing.packagePrice) existing.packagePrice = recItem.generalPrice;
-            if (recItem.store && !existing.store) existing.store = recItem.store;
+            existing.id = recItem.id;
+            existing.name = recItem.name;
+            if (recItem.packageSize) existing.packageSize = Number(recItem.packageSize);
+            if (recItem.generalPrice) existing.packagePrice = Number(recItem.generalPrice);
+            if (recItem.store) existing.store = recItem.store;
+            existing.stockActual = (Number(existing.stockDiego) || 0) + (Number(existing.stockAngy) || 0);
           }
         });
-      });
+      }
 
       if (hasChanges) {
         this.saveToStorage(false);
@@ -715,6 +783,14 @@
 
       // Rule 7: Sticker decorativo chile (grande) (1 per chile: qty * 1)
       if (id === 'pkg-4' || /decorativo.*chile|sticker.*grande/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + (q * 1);
+        }, 0);
+      }
+
+      // Rule 8: Envases Chiles (1 per chile: qty * 1)
+      if (id === 'pkg-8' || /envase.*chile/i.test(name)) {
         return pendingOrders.reduce((sum, o) => {
           const q = Math.max(0, parseInt(o.qty, 10) || 0);
           return sum + (q * 1);
@@ -1139,14 +1215,22 @@
 
             <!-- 9. Acciones -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
-              ${item.isCustom ? `
-                <button onclick="InventoryApp.deleteCustomItem('${item.id}')" title="Eliminar insumo personalizado"
-                  class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+              <div class="inline-flex items-center space-x-1">
+                <button onclick="InventoryApp.openEditItemModal('${item.id}')" title="Editar parámetros del insumo"
+                  class="p-1 text-slate-500 hover:text-slate-900 hover:bg-white/80 rounded transition-colors border border-transparent hover:border-slate-200">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                  </svg>
                 </button>
-              ` : `
-                <span class="text-[10px] text-slate-400 font-medium">Oficial</span>
-              `}
+                ${item.isCustom ? `
+                  <button onclick="InventoryApp.deleteCustomItem('${item.id}')" title="Eliminar insumo personalizado"
+                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                  </button>
+                ` : `
+                  <span class="text-[10px] text-slate-400 font-medium">Oficial</span>
+                `}
+              </div>
             </td>
           </tr>
         `;
@@ -1197,6 +1281,166 @@
       if (window.showToast) {
         window.showToast(`Stock de "${item.name}" actualizado a ${formatNumber(parsed)} ${item.unit}`, 'info');
       }
+    },
+
+    openEditItemModal: function (id) {
+      const item = this.items.find(i => i.id === id);
+      if (!item) return;
+
+      this.activeEditItem = item;
+      const modal = document.getElementById('edit-inventory-item-modal');
+      if (!modal) return;
+
+      const nameInput = document.getElementById('edit-inv-name');
+      const catSelect = document.getElementById('edit-inv-category');
+      const unitInput = document.getElementById('edit-inv-unit');
+      const diegoInput = document.getElementById('edit-inv-diego');
+      const angyInput = document.getElementById('edit-inv-angy');
+      const minStockInput = document.getElementById('edit-inv-min-stock');
+      const storeInput = document.getElementById('edit-inv-store');
+      const pkgSizeInput = document.getElementById('edit-inv-pkg-size');
+      const pkgPriceInput = document.getElementById('edit-inv-pkg-price');
+
+      if (nameInput) nameInput.value = item.name || '';
+      if (catSelect) catSelect.value = item.category || 'nogada';
+      if (unitInput) unitInput.value = item.unit || 'gr';
+      if (diegoInput) diegoInput.value = item.stockDiego !== undefined ? item.stockDiego : (item.stockActual || 0);
+      if (angyInput) angyInput.value = item.stockAngy || 0;
+      if (minStockInput) minStockInput.value = item.minStock || 0;
+      if (storeInput) storeInput.value = item.store || 'Proveedor';
+      if (pkgSizeInput) pkgSizeInput.value = item.packageSize || 1;
+      if (pkgPriceInput) pkgPriceInput.value = item.packagePrice || 0;
+
+      modal.classList.remove('hidden');
+    },
+
+    closeEditItemModal: function () {
+      const modal = document.getElementById('edit-inventory-item-modal');
+      if (modal) modal.classList.add('hidden');
+      this.activeEditItem = null;
+    },
+
+    saveEditedItem: function (e) {
+      if (e) e.preventDefault();
+      if (!this.activeEditItem) return;
+
+      const item = this.items.find(i => i.id === this.activeEditItem.id);
+      if (!item) return;
+
+      const name = document.getElementById('edit-inv-name')?.value.trim() || item.name;
+      const category = document.getElementById('edit-inv-category')?.value || item.category;
+      const unit = document.getElementById('edit-inv-unit')?.value.trim() || item.unit;
+      const stockDiego = Math.max(0, parseFloat(document.getElementById('edit-inv-diego')?.value) || 0);
+      const stockAngy = Math.max(0, parseFloat(document.getElementById('edit-inv-angy')?.value) || 0);
+      const minStock = Math.max(0, parseFloat(document.getElementById('edit-inv-min-stock')?.value) || 0);
+      const store = document.getElementById('edit-inv-store')?.value.trim() || item.store;
+      const packageSize = Math.max(0.1, parseFloat(document.getElementById('edit-inv-pkg-size')?.value) || 1);
+      const packagePrice = Math.max(0, parseFloat(document.getElementById('edit-inv-pkg-price')?.value) || 0);
+
+      item.name = name;
+      item.category = category;
+      item.unit = unit;
+      item.stockDiego = stockDiego;
+      item.stockAngy = stockAngy;
+      item.stockActual = stockDiego + stockAngy;
+      item.minStock = minStock;
+      item.store = store;
+      item.packageSize = packageSize;
+      item.packagePrice = packagePrice;
+
+      // Two-Way Sync with Recipe Budget if item belongs to recipe
+      const recipe = (window.RecipeApp && window.RecipeApp.data) ? window.RecipeApp.data : null;
+      if (recipe && Array.isArray(recipe.categories)) {
+        let recFound = false;
+        for (const cat of recipe.categories) {
+          const recItem = cat.items.find(r => r.id === item.id || r.name.toLowerCase() === item.name.toLowerCase());
+          if (recItem) {
+            recItem.name = item.name;
+            recItem.unit = item.unit;
+            recItem.store = item.store;
+            recItem.packageSize = item.packageSize;
+            recItem.generalPrice = item.packagePrice;
+            recFound = true;
+            break;
+          }
+        }
+        if (recFound && typeof window.saveRecipeState === 'function') {
+          window.saveRecipeState(true);
+        }
+      }
+
+      this.saveToStorage(true);
+      this.render();
+      this.closeEditItemModal();
+
+      if (window.showToast) {
+        window.showToast(`Insumo "${item.name}" actualizado correctamente en Inventario y Receta`, 'info');
+      }
+    },
+
+    openNewItemModal: function () {
+      const modal = document.getElementById('new-inventory-item-modal');
+      if (!modal) return;
+      const form = document.getElementById('new-inv-form');
+      if (form) form.reset();
+      modal.classList.remove('hidden');
+    },
+
+    closeNewItemModal: function () {
+      const modal = document.getElementById('new-inventory-item-modal');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    saveNewItem: function (e) {
+      if (e) e.preventDefault();
+
+      const name = document.getElementById('new-inv-name')?.value.trim();
+      if (!name) return;
+
+      const category = document.getElementById('new-inv-category')?.value || 'nogada';
+      const unit = document.getElementById('new-inv-unit')?.value.trim() || 'gr';
+      const stockDiego = Math.max(0, parseFloat(document.getElementById('new-inv-diego')?.value) || 0);
+      const stockAngy = Math.max(0, parseFloat(document.getElementById('new-inv-angy')?.value) || 0);
+      const minStock = Math.max(0, parseFloat(document.getElementById('new-inv-min-stock')?.value) || 0);
+      const store = document.getElementById('new-inv-store')?.value.trim() || 'Proveedor';
+      const packageSize = Math.max(0.1, parseFloat(document.getElementById('new-inv-pkg-size')?.value) || 1);
+      const packagePrice = Math.max(0, parseFloat(document.getElementById('new-inv-pkg-price')?.value) || 0);
+
+      this.addNewCustomItem({
+        name,
+        category,
+        unit,
+        stockDiego,
+        stockAngy,
+        stockActual: stockDiego + stockAngy,
+        minStock,
+        store,
+        packageSize,
+        packagePrice
+      });
+
+      // If category is a kitchen category, add to recipe budget as well
+      const recipe = (window.RecipeApp && window.RecipeApp.data) ? window.RecipeApp.data : null;
+      if (recipe && Array.isArray(recipe.categories)) {
+        const cat = recipe.categories.find(c => c.id === category);
+        if (cat) {
+          cat.items.push({
+            id: `custom-${Date.now()}`,
+            name,
+            qty: 1,
+            unit,
+            packageSize,
+            generalPrice: packagePrice,
+            finalCost: 0,
+            store
+          });
+          if (typeof window.saveRecipeState === 'function') {
+            window.saveRecipeState(true);
+          }
+        }
+      }
+
+      this.closeNewItemModal();
     },
 
     setCustodyFilter: function (custody) {

@@ -69,7 +69,9 @@ const DEFAULT_RECIPE_DATA = {
         { id: 'pkg-3', name: 'Envases termoformados (Marce)', qty: 7, unit: 'pza', packageSize: 350, generalPrice: 250.00, finalCost: 5.00, store: 'Goplas' },
         { id: 'pkg-4', name: 'Sticker decorativo chile', qty: 7, unit: 'pza', packageSize: 210, generalPrice: 65.00, finalCost: 2.17, store: 'Goplas' },
         { id: 'pkg-5', name: 'Sticker de sello bolsa', qty: 7, unit: 'pza', packageSize: 46.6, generalPrice: 65.00, finalCost: 9.75, store: 'Goplas' },
-        { id: 'pkg-6', name: 'Tarjetas de agradecimiento / presentación', qty: 7, unit: 'pza', packageSize: 70, generalPrice: 280.50, finalCost: 28.00, store: 'Lumen' }
+        { id: 'pkg-6', name: 'Tarjetas de agradecimiento / presentación', qty: 7, unit: 'pza', packageSize: 70, generalPrice: 280.50, finalCost: 28.00, store: 'Lumen' },
+        { id: 'pkg-7', name: 'listón', qty: 7, unit: 'pza', packageSize: 50, generalPrice: 140.00, finalCost: 19.60, store: 'Amazon' },
+        { id: 'pkg-8', name: 'Envases Chiles', qty: 7, unit: 'pza', packageSize: 50, generalPrice: 100.00, finalCost: 14.00, store: 'Goplas' }
       ]
     }
   ]
@@ -88,6 +90,17 @@ function loadRecipeState() {
     const stored = localStorage.getItem(STORAGE_KEY_RECIPE);
     if (stored) {
       window.RecipeApp.data = JSON.parse(stored);
+      // Ensure the 8 official packaging items are present
+      const empaqueCat = window.RecipeApp.data.categories.find(c => c.id === 'empaque');
+      const defEmpaque = DEFAULT_RECIPE_DATA.categories.find(c => c.id === 'empaque');
+      if (empaqueCat && defEmpaque) {
+        defEmpaque.items.forEach(defItem => {
+          const exists = empaqueCat.items.some(i => i.id === defItem.id || i.name.toLowerCase() === defItem.name.toLowerCase());
+          if (!exists) {
+            empaqueCat.items.push(JSON.parse(JSON.stringify(defItem)));
+          }
+        });
+      }
     } else {
       window.RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
     }
