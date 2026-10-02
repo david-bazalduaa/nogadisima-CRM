@@ -38,9 +38,11 @@ function switchTab(tabId) {
   const pulsePresupuesto = document.getElementById('tab-pulse-presupuesto');
   const pulseInversion = document.getElementById('tab-pulse-inversion');
   const pulsePedidos = document.getElementById('tab-pulse-pedidos');
+  const pulseInventario = document.getElementById('tab-pulse-inventario');
   if (pulsePresupuesto) pulsePresupuesto.classList.toggle('hidden', tabId !== 'presupuesto');
   if (pulseInversion) pulseInversion.classList.toggle('hidden', tabId !== 'inversion');
   if (pulsePedidos) pulsePedidos.classList.toggle('hidden', tabId !== 'pedidos');
+  if (pulseInventario) pulseInventario.classList.toggle('hidden', tabId !== 'inventario');
 
   // Trigger reactive render when entering tabs
   if (tabId === 'inversion' && window.InvestmentApp && typeof window.InvestmentApp.render === 'function') {
@@ -48,6 +50,9 @@ function switchTab(tabId) {
   }
   if (tabId === 'pedidos' && window.OrdersApp && typeof window.OrdersApp.render === 'function') {
     window.OrdersApp.render();
+  }
+  if (tabId === 'inventario' && window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+    window.InventoryApp.render();
   }
   if (tabId === 'presupuesto' && typeof window.recalculateAll === 'function') {
     window.recalculateAll();
@@ -455,6 +460,73 @@ window.executeResetOrders = function() {
 };
 
 // ==========================================
+// 5. Inventory Modal Controllers
+// ==========================================
+window.openNewCustomItemModal = function() {
+  const modal = document.getElementById('new-custom-item-modal');
+  if (modal) {
+    const form = document.getElementById('new-custom-item-form');
+    if (form) form.reset();
+    modal.classList.remove('hidden');
+  }
+};
+
+window.closeNewCustomItemModal = function() {
+  const modal = document.getElementById('new-custom-item-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.handleNewCustomItemSubmit = function(e) {
+  if (e) e.preventDefault();
+
+  const nameInput = document.getElementById('custom-item-name');
+  const catInput = document.getElementById('custom-item-category');
+  const unitInput = document.getElementById('custom-item-unit');
+  const stockInput = document.getElementById('custom-item-stock');
+  const minStockInput = document.getElementById('custom-item-min-stock');
+  const pkgSizeInput = document.getElementById('custom-item-pkg-size');
+  const pkgPriceInput = document.getElementById('custom-item-pkg-price');
+  const storeInput = document.getElementById('custom-item-store');
+
+  if (!nameInput || !nameInput.value.trim()) {
+    if (window.showToast) window.showToast('Ingresa el nombre del insumo', 'warning');
+    return;
+  }
+
+  if (window.InventoryApp && typeof window.InventoryApp.addNewCustomItem === 'function') {
+    window.InventoryApp.addNewCustomItem({
+      name: nameInput.value.trim(),
+      category: catInput ? catInput.value : 'ingrediente',
+      unit: unitInput ? unitInput.value : 'pza',
+      stockActual: stockInput ? stockInput.value : 0,
+      minStock: minStockInput ? minStockInput.value : 10,
+      packageSize: pkgSizeInput ? pkgSizeInput.value : 1,
+      packagePrice: pkgPriceInput ? pkgPriceInput.value : 0,
+      store: storeInput ? storeInput.value.trim() : 'Proveedor Local'
+    });
+  }
+
+  window.closeNewCustomItemModal();
+};
+
+window.openResetInventoryModal = function() {
+  const modal = document.getElementById('reset-inventory-modal');
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.closeResetInventoryModal = function() {
+  const modal = document.getElementById('reset-inventory-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.executeResetInventory = function() {
+  if (window.InventoryApp && typeof window.InventoryApp.resetToSeedData === 'function') {
+    window.InventoryApp.resetToSeedData();
+  }
+  window.closeResetInventoryModal();
+};
+
+// ==========================================
 // 6. Initialize Application
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -469,5 +541,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (window.OrdersApp && typeof window.OrdersApp.init === 'function') {
     window.OrdersApp.init();
+  }
+  if (window.InventoryApp && typeof window.InventoryApp.init === 'function') {
+    window.InventoryApp.init();
   }
 });

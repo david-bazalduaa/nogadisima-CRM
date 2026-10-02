@@ -142,7 +142,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
           </svg>
           <span class="whitespace-nowrap">Inventario</span>
-          <span class="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/70 text-slate-500 border border-white/80">Pronto</span>
+          <span id="tab-pulse-inventario" class="ml-1 w-2 h-2 rounded-full bg-emerald-400 animate-glass-pulse hidden"></span>
         </button>
       </nav>
 
@@ -1129,51 +1129,264 @@
 
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 4: INVENTARIO (PLACEHOLDER)            -->
-    <!-- ========================================== -->
-    <div id="panel-inventario" class="hidden space-y-6 transition-all duration-300">
-      <div class="liquid-card p-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/60">
-          <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold mb-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-600 animate-glass-pulse"></span>
-              <span>Sprint 2</span>
-            </div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight font-heading">Control de Stock e Insumos Críticos</h2>
-            <p class="text-sm text-slate-500 mt-1">Existencias físicas de empaques, frutos secos, chiles poblanos y rendimiento de nogada.</p>
-          </div>
-          <div>
-            <span class="px-4 py-2 rounded-full liquid-pill text-slate-700 text-xs font-bold font-numeric">
-              34 Insumos Controlados
+    <!-- ============================================================== -->
+    <!-- TAB 4: INVENTARIO & REABASTECIMIENTO PROACTIVO                 -->
+    <!-- ============================================================== -->
+    <div id="panel-inventario" class="hidden space-y-7 transition-all duration-300">
+
+      <!-- View Title & Quick Actions -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-3">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">Inventario & Reabastecimiento Proactivo</h1>
+            <span id="catalog-items-count" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 text-slate-700 border border-white/90 font-numeric shadow-sm">
+              Cargando insumos...
             </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">
+            Deducción automatizada de demanda por pedidos activos, sincronización en tiempo real con receta y motor de proyección de compras para entregas a 7 días.
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-2.5 self-start md:self-auto">
+          <!-- Reset Seed Inventory Button -->
+          <button onclick="openResetInventoryModal()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-600 hover:text-slate-900 text-xs font-semibold transition-all" title="Restablecer existencias al balance físico auditado">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path>
+            </svg>
+            <span class="hidden sm:inline">Restablecer Stock</span>
+          </button>
+
+          <!-- Export CSV Button -->
+          <button onclick="InventoryApp.exportCsv()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-700 text-xs font-semibold hover:text-slate-900 transition-all" title="Descargar reporte de inventario y compras en CSV">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"></path>
+            </svg>
+            <span>Exportar CSV</span>
+          </button>
+
+          <!-- Add Custom Item Button -->
+          <button onclick="openNewCustomItemModal()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold bg-[#1E222B] text-white hover:bg-slate-800 transition-all duration-200 shadow-md border border-white/20">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+            </svg>
+            <span>+ Añadir Insumo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ---------------------------------------- -->
+      <!-- A. TOP KPI CARDS (LIQUID GLASS)          -->
+      <!-- ---------------------------------------- -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- KPI 1: Insumos Monitoreados -->
+        <div class="liquid-card p-5 group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Insumos Monitoreados</span>
+            <div class="w-9 h-9 rounded-2xl bg-white/80 text-slate-700 border border-white/90 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3.5">
+            <div id="inv-kpi-monitored" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-numeric">--</div>
+            <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+              <span>Catálogo vivo total</span>
+              <span class="font-semibold text-slate-700 bg-white/70 px-2 py-0.5 rounded-full text-[10px] border border-white/80">Receta + Empaques</span>
+            </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        <!-- KPI 2: Alertas de Reabastecimiento -->
+        <div onclick="InventoryApp.setActionFilter('urgente')" class="liquid-card p-5 group cursor-pointer hover:border-rose-300/80 transition-all" title="Haz clic para ver insumos urgentes y sugeridos">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-700">Alertas de Restock (7 Días)</span>
+            <div class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200/80 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path>
+              </svg>
             </div>
-            <h3 class="text-base font-bold text-slate-800">Frutos Secos en Gramos</h3>
-            <p class="text-xs text-slate-500 mt-1.5 font-numeric">Control de Nuez (1,521g), Piñón (494g), Almendra (854g) y Acitrón (900g).</p>
           </div>
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-poblano-50 text-poblano-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <div class="mt-3.5">
+            <div id="inv-kpi-alerts-count" class="text-3xl sm:text-4xl font-extrabold text-rose-600 tracking-tight font-numeric">--</div>
+            <div class="mt-1 flex items-center justify-between text-xs text-rose-700">
+              <span id="inv-kpi-alerts-sub">Déficit proyectado</span>
+              <span class="font-semibold text-rose-800 bg-rose-100/70 px-2 py-0.5 rounded-full text-[10px] border border-rose-200/80">Filtrar tabla</span>
             </div>
-            <h3 class="text-base font-bold text-slate-800">Empaques & Presentación</h3>
-            <p class="text-xs text-slate-500 mt-1.5 font-numeric">Stock de bolsas blancas (61 pzas), papel encerado (112 pzas) y envases (117 pzas).</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-white/50 backdrop-blur-md border border-white/80 shadow-sm">
-            <div class="w-10 h-10 rounded-2xl bg-granada-100 text-granada-700 flex items-center justify-center font-bold mb-4">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-            </div>
-            <h3 class="text-base font-bold text-slate-800">Perecederos & Carnes</h3>
-            <p class="text-xs text-slate-500 mt-1.5 font-numeric">Rotación FIFO de carne de res molida (2,800g), cerdo (550g) y poblanos frescos.</p>
           </div>
         </div>
-      </div>
+
+        <!-- KPI 3: Demanda Próximos 7 Días -->
+        <div class="liquid-card p-5 group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Demanda Próximos 7 Días</span>
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3.5">
+            <div id="inv-kpi-demand-chiles" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-numeric">--</div>
+            <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+              <span>Compromisos en cocina</span>
+              <span class="font-semibold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-full text-[10px] border border-emerald-200/80">Pedidos activos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI 4: Costo Estimado de Restock -->
+        <div class="liquid-card p-5 group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Costo Estimado de Restock</span>
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200/80 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-3.5">
+            <div id="inv-kpi-restock-cost" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-numeric">$0.00</div>
+            <div class="mt-1 flex items-center justify-between text-xs text-slate-500">
+              <span>Inversión requerida</span>
+              <span class="font-semibold text-slate-700 bg-white/70 px-2 py-0.5 rounded-full text-[10px] border border-white/80">Precios Presupuesto</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- B. RESTOCK RECOMENDADO & ALERTAS DE COMPRA (TABLA)   -->
+      <!-- ---------------------------------------------------- -->
+      <section class="liquid-card p-5 sm:p-6 space-y-4">
+        <!-- Section Header & Filter Controls -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/60">
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <h2 class="text-lg font-bold text-slate-900 font-heading">Restock Recomendado & Alertas de Compra</h2>
+              <span id="alerts-filter-summary" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/80 text-slate-600 border border-white/90 font-numeric shadow-xs">
+                Analizando demanda...
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Priorización de compras calculada según existencias actuales menos requerimientos de pedidos agendados para la próxima semana.
+            </p>
+          </div>
+
+          <!-- Controls: Filters & Search -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Search Input -->
+            <div class="relative">
+              <input type="text" placeholder="Buscar insumo o tienda..."
+                oninput="InventoryApp.setSearch(this.value)"
+                class="liquid-input pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 w-44 sm:w-56"
+                title="Filtrar por nombre o proveedor">
+              <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+              </svg>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="inline-flex items-center p-1 rounded-full bg-white/60 border border-white/80 shadow-xs space-x-1">
+              <button onclick="InventoryApp.setActionFilter('todos')" class="inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-filter="todos">
+                Todos
+              </button>
+              <button onclick="InventoryApp.setActionFilter('urgente')" class="inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-rose-700 hover:text-rose-900 transition-all" data-filter="urgente">
+                Solo Críticos
+              </button>
+              <button onclick="InventoryApp.setActionFilter('ingrediente')" class="inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-filter="ingrediente">
+                Ingredientes
+              </button>
+              <button onclick="InventoryApp.setActionFilter('empaque')" class="inv-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-filter="empaque">
+                Empaques
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto rounded-2xl border border-white/80 bg-white/40 backdrop-blur-md shadow-xs">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-white/80 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-white/90">
+              <tr>
+                <th class="py-3 px-3">Insumo / Material</th>
+                <th class="py-3 px-2 text-center">Tipo</th>
+                <th class="py-3 px-2 text-right">Stock Físico Actual</th>
+                <th class="py-3 px-2 text-right">Demanda 7 Días</th>
+                <th class="py-3 px-2 text-right">Déficit / Sobrante</th>
+                <th class="py-3 px-2 text-right">Compra Sugerida</th>
+                <th class="py-3 px-2 text-left">Proveedor Habitual</th>
+                <th class="py-3 px-3 text-right">Costo Estimado & Estatus</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-alerts-table-body" class="divide-y divide-white/60">
+              <!-- Rendered dynamically by InventoryApp.renderRestockAlertsTable() -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- C. CATÁLOGO MAESTRO DE INVENTARIO FÍSICO            -->
+      <!-- ---------------------------------------------------- -->
+      <section class="liquid-card p-5 sm:p-6 space-y-4">
+        <!-- Section Header & Category Filter Tabs -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/60">
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <h2 class="text-lg font-bold text-slate-900 font-heading">Catálogo Maestro de Inventario Físico</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100/80 text-emerald-800 border border-emerald-200/80 font-numeric">
+                Auto-guardado activo
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Edita el stock actual directamente en las casillas. Las deducciones de pedidos se calculan automáticamente.
+            </p>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="inline-flex items-center p-1 rounded-full bg-white/60 border border-white/80 shadow-xs space-x-1 flex-wrap">
+            <button onclick="InventoryApp.setCatalogFilter('todos')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="todos">
+              Todos
+            </button>
+            <button onclick="InventoryApp.setCatalogFilter('nogada')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="nogada">
+              Nogada
+            </button>
+            <button onclick="InventoryApp.setCatalogFilter('relleno')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="relleno">
+              Relleno
+            </button>
+            <button onclick="InventoryApp.setCatalogFilter('extras')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="extras">
+              Extras & Montaje
+            </button>
+            <button onclick="InventoryApp.setCatalogFilter('empaque')" class="cat-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all" data-cat="empaque">
+              Empaque
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto rounded-2xl border border-white/80 bg-white/40 backdrop-blur-md shadow-xs">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-white/80 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-white/90">
+              <tr>
+                <th class="py-3 px-3">Insumo</th>
+                <th class="py-3 px-2 text-center">Categoría</th>
+                <th class="py-3 px-2 text-right">Stock Actual</th>
+                <th class="py-3 px-2 text-center">Unidad</th>
+                <th class="py-3 px-2 text-right">Stock Reservado (Pedidos)</th>
+                <th class="py-3 px-2 text-right">Stock Disponible Real</th>
+                <th class="py-3 px-2 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-catalog-table-body" class="divide-y divide-white/60">
+              <!-- Rendered dynamically by InventoryApp.renderMasterCatalogTable() -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </div>
 
   </div>
@@ -1414,6 +1627,113 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: ADD CUSTOM INVENTORY ITEM (GLASS)   -->
+  <!-- ========================================== -->
+  <div id="new-custom-item-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-6 sm:p-7 max-w-lg w-full">
+      <div class="flex items-center justify-between pb-4 border-b border-white/60 mb-5">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 font-heading">Añadir Insumo Personalizado</h3>
+            <p class="text-xs text-slate-500">Registra un nuevo ingrediente o material de empaque en el catálogo.</p>
+          </div>
+        </div>
+        <button onclick="closeNewCustomItemModal()" class="text-slate-400 hover:text-slate-700 transition-colors p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="new-custom-item-form" onsubmit="handleNewCustomItemSubmit(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nombre del Insumo / Material *</label>
+          <input type="text" id="custom-item-name" required placeholder="Ej. Canela en rama, Envase mini..." class="w-full liquid-input px-3 py-2 text-xs">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Categoría *</label>
+            <select id="custom-item-category" class="w-full liquid-input px-3 py-2 text-xs">
+              <option value="ingrediente">Ingrediente</option>
+              <option value="empaque">Empaque / Presentación</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Unidad de Medida *</label>
+            <select id="custom-item-unit" class="w-full liquid-input px-3 py-2 text-xs">
+              <option value="pza">Pieza (pza)</option>
+              <option value="gr">Gramos (gr)</option>
+              <option value="ml">Mililitros (ml)</option>
+              <option value="kg">Kilogramos (kg)</option>
+              <option value="L">Litros (L)</option>
+              <option value="cda">Cucharada (cda)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Stock Físico Inicial</label>
+            <input type="number" id="custom-item-stock" step="any" min="0" value="0" class="w-full liquid-input px-3 py-2 text-xs text-right font-numeric">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Stock Mínimo de Seguridad</label>
+            <input type="number" id="custom-item-min-stock" step="any" min="0" value="10" class="w-full liquid-input px-3 py-2 text-xs text-right font-numeric">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tamaño de Presentación / Paquete</label>
+            <input type="number" id="custom-item-pkg-size" step="any" min="0.1" value="1" class="w-full liquid-input px-3 py-2 text-xs text-right font-numeric">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Precio por Presentación ($ MXN)</label>
+            <input type="number" id="custom-item-pkg-price" step="any" min="0" value="0" class="w-full liquid-input px-3 py-2 text-xs text-right font-numeric">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Proveedor Habitual</label>
+          <input type="text" id="custom-item-store" placeholder="Ej. Central de Abastos, Lumen, Costco..." class="w-full liquid-input px-3 py-2 text-xs">
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-white/60">
+          <button type="button" onclick="closeNewCustomItemModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" class="liquid-btn-dark px-5 py-2 font-semibold">
+            Guardar Insumo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIRM RESET INVENTORY (GLASS)    -->
+  <!-- ========================================== -->
+  <div id="reset-inventory-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
+    <div class="liquid-card p-7 max-w-sm w-full text-center">
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restablecer Inventario Auditado?</h3>
+      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán las existencias físicas iniciales verificadas (Tarjetas 51, Bolsas 61, Envases 117, Nuez 1,521g, Carnes, etc.).</p>
+      <div class="flex items-center justify-center space-x-3 mt-6">
+        <button onclick="closeResetInventoryModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button onclick="executeResetInventory()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
+          Restaurar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
@@ -1425,6 +1745,7 @@
   <script src="js/recipe-engine.js"></script>
   <script src="js/investment-engine.js"></script>
   <script src="js/orders-engine.js"></script>
+  <script src="js/inventory-engine.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
