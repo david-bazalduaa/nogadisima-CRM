@@ -60,6 +60,7 @@ function switchTab(tabId) {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+window.switchTab = switchTab;
 
 // 2. Dynamic Liquid Glass Recipe Category Cards Renderer
 window.renderRecipeCards = function() {
@@ -345,6 +346,14 @@ window.handleNewExpenseSubmit = function(e) {
   }
 
   window.closeNewExpenseModal();
+
+  // Trigger Action Flow B: Prompt user to optionally allocate expense to inventory
+  window.showExpenseToInventoryPrompt({
+    product,
+    store,
+    price,
+    source
+  });
 };
 
 window.openResetInvestmentsModal = function() {
@@ -527,7 +536,198 @@ window.executeResetInventory = function() {
 };
 
 // ==========================================
-// 6. Initialize Application
+// 6. Cross-Tab Workflow Controllers (Flow A & B)
+// ==========================================
+
+// Action Flow A: Restock Directo -> Inversión Bridges
+window.openRestockModal = function(id) {
+  if (window.InventoryApp && typeof window.InventoryApp.openRestockModal === 'function') {
+    window.InventoryApp.openRestockModal(id);
+  }
+};
+
+window.closeRestockModal = function() {
+  if (window.InventoryApp && typeof window.InventoryApp.closeRestockModal === 'function') {
+    window.InventoryApp.closeRestockModal();
+  }
+};
+
+window.executeRestockOnly = function() {
+  if (window.InventoryApp && typeof window.InventoryApp.executeRestockOnly === 'function') {
+    window.InventoryApp.executeRestockOnly();
+  }
+};
+
+window.executeRestockAndRedirect = function() {
+  if (window.InventoryApp && typeof window.InventoryApp.executeRestockAndRedirect === 'function') {
+    window.InventoryApp.executeRestockAndRedirect();
+  }
+};
+
+// Action Flow B: Inversión -> Inventario Banner & Modal
+let lastRecordedExpense = null;
+let expensePromptTimer = null;
+
+window.showExpenseToInventoryPrompt = function(expense) {
+  lastRecordedExpense = expense;
+  const promptEl = document.getElementById('expense-to-inventory-prompt');
+  if (!promptEl) return;
+
+  const badge = document.getElementById('prompt-expense-badge');
+  if (badge) {
+    const formattedPrice = (typeof expense.price === 'number') ? `$${expense.price.toFixed(2)}` : `$${expense.price}`;
+    badge.textContent = `${expense.product} (${formattedPrice})`;
+  }
+
+  promptEl.classList.remove('hidden');
+
+  if (expensePromptTimer) clearTimeout(expensePromptTimer);
+  expensePromptTimer = setTimeout(() => {
+    window.dismissExpenseToInventory();
+  }, 12000);
+};
+
+window.dismissExpenseToInventory = function() {
+  const promptEl = document.getElementById('expense-to-inventory-prompt');
+  if (promptEl) promptEl.classList.add('hidden');
+  if (expensePromptTimer) {
+    clearTimeout(expensePromptTimer);
+    expensePromptTimer = null;
+  }
+};
+
+window.openInventoryAllocationFromExpense = function() {
+  window.dismissExpenseToInventory();
+  if (!lastRecordedExpense) return;
+
+  // Switch smoothly to Inventario tab
+  if (typeof switchTab === 'function') {
+    switchTab('inventario');
+  }
+
+  const modal = document.getElementById('allocate-expense-stock-modal');
+  if (!modal) return;
+
+  // Populate reference details
+  const prodEl = document.getElementById('alloc-exp-summary-product');
+  const priceEl = document.getElementById('alloc-exp-summary-price');
+  const storeEl = document.getElementById('alloc-exp-summary-store');
+  const sourceEl = document.getElementById('alloc-exp-summary-source');
+
+  const formattedPrice = (typeof lastRecordedExpense.price === 'number') ? `$${lastRecordedExpense.price.toFixed(2)} MXN` : `$${lastRecordedExpense.price} MXN`;
+  if (prodEl) prodEl.textContent = lastRecordedExpense.product;
+  if (priceEl) priceEl.textContent = formattedPrice;
+  if (storeEl) storeEl.textContent = `Proveedor: ${lastRecordedExpense.store || 'Proveedor habitual'}`;
+  if (sourceEl) sourceEl.textContent = `Fuente: ${lastRecordedExpense.source || 'Digs'}`;
+
+  // Populate item selector dropdown from InventoryApp.items
+  const select = document.getElementById('alloc-expense-item-select');
+  if (select && window.InventoryApp && Array.isArray(window.InventoryApp.items)) {
+    select.innerHTML = '';
+    const items = window.InventoryApp.items;
+
+    const targetNorm = (lastRecordedExpense.product || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let matchedId = '';
+    let bestScore = 0;
+
+    items.forEach(it => {
+      const opt = document.createElement('option');
+      opt.value = it.id;
+      opt.textContent = `${it.name} (${it.category}) — Actual: ${it.stockActual || 0} ${it.unit}`;
+      select.appendChild(opt);
+
+      const itNorm = (it.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (itNorm === targetNorm) {
+        matchedId = it.id;
+        bestScore = 100;
+      } else if (bestScore < 80 && (itNorm.includes(targetNorm) || targetNorm.includes(itNorm))) {
+        matchedId = it.id;
+        bestScore = 80;
+      } else if (bestScore < 50) {
+        const keywords = ['nuez', 'acitron', 'bolsa', 'envase', 'tarjeta', 'sticker', 'carne', 'chile', 'crema', 'queso', 'granada', 'almendra', 'puerco', 'res', 'liston', 'mimi', 'goplas'];
+        for (const kw of keywords) {
+          if (targetNorm.includes(kw) && itNorm.includes(kw)) {
+            matchedId = it.id;
+            bestScore = 50;
+            break;
+          }
+        }
+      }
+    });
+
+    if (matchedId) {
+      select.value = matchedId;
+    }
+  }
+
+  // Sync unit and default quantity
+  window.handleAllocItemChange();
+
+  // Set default custodian based on funding source:
+  // 'Digs' -> Diego, 'Angy' -> Angy
+  const radioDiego = document.getElementById('alloc-custody-diego');
+  const radioAngy = document.getElementById('alloc-custody-angy');
+  if (lastRecordedExpense.source === 'Angy') {
+    if (radioAngy) radioAngy.checked = true;
+  } else {
+    if (radioDiego) radioDiego.checked = true;
+  }
+
+  modal.classList.remove('hidden');
+};
+
+window.handleAllocItemChange = function() {
+  const select = document.getElementById('alloc-expense-item-select');
+  const unitLabel = document.getElementById('alloc-expense-unit');
+  const qtyInput = document.getElementById('alloc-expense-qty');
+  if (!select || !window.InventoryApp || !Array.isArray(window.InventoryApp.items)) return;
+
+  const selectedItem = window.InventoryApp.items.find(i => i.id === select.value);
+  if (selectedItem) {
+    if (unitLabel) unitLabel.textContent = selectedItem.unit || 'pza';
+    if (qtyInput) {
+      qtyInput.value = selectedItem.packageSize > 0 ? selectedItem.packageSize : 1;
+    }
+  }
+};
+
+window.closeAllocateExpenseStockModal = function() {
+  const modal = document.getElementById('allocate-expense-stock-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+window.handleAllocateExpenseStockSubmit = function() {
+  const select = document.getElementById('alloc-expense-item-select');
+  const qtyInput = document.getElementById('alloc-expense-qty');
+  const isDiego = document.getElementById('alloc-custody-diego')?.checked;
+  const custodian = isDiego ? 'diego' : 'angy';
+
+  if (!select || !qtyInput) return;
+  const itemId = select.value;
+  const qty = parseFloat(qtyInput.value) || 0;
+
+  if (qty <= 0) {
+    if (window.showToast) window.showToast('Ingresa una cantidad válida mayor a cero', 'warning');
+    return;
+  }
+
+  if (window.InventoryApp && typeof window.InventoryApp.allocateStockFromExpense === 'function') {
+    const success = window.InventoryApp.allocateStockFromExpense(itemId, custodian, qty);
+    if (success) {
+      const custodianName = custodian === 'diego' ? 'Diego' : 'Angy';
+      const item = window.InventoryApp.items.find(i => i.id === itemId);
+      const unit = item ? item.unit : 'pza';
+      if (window.showToast) {
+        window.showToast(`Stock sumado exitosamente a la custodia de ${custodianName} (+${qty} ${unit})`, 'info');
+      }
+    }
+  }
+
+  window.closeAllocateExpenseStockModal();
+};
+
+// ==========================================
+// 7. Initialize Application
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   if (window.NogaStore && typeof window.NogaStore.init === 'function') {

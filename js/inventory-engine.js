@@ -8,17 +8,19 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY_INVENTORY = 'nogadisima_inventory_v2';
+  const STORAGE_KEY_INVENTORY = 'nogadisima_inventory_v3';
 
   // =========================================================================
-  // 1. VERIFIED BASELINE SEED DATA (STRICT DATA FIDELITY)
+  // 1. VERIFIED BASELINE SEED DATA (STRICT DATA FIDELITY & CUSTODIAN CUSTODY)
   // =========================================================================
   const INITIAL_INVENTORY_ITEMS = [
-    // --- EMPAQUES & PRESENTACIÓN ---
+    // --- EMPAQUES & PRESENTACIÓN (CUSTODIA DIEGO & ANGY) ---
     {
       id: 'pkg-6',
-      name: 'Tarjetas de presentación / agradecimiento',
+      name: 'Tarjetas nogadísima (agradecimiento)',
       category: 'empaque',
+      stockDiego: 41,
+      stockAngy: 10,
       stockActual: 51,
       unit: 'pza',
       minStock: 20,
@@ -28,9 +30,25 @@
       isCustom: false
     },
     {
-      id: 'pkg-2',
-      name: 'Bolsas blancas de entrega',
+      id: 'pkg-8',
+      name: 'Tarjetas chile',
       category: 'empaque',
+      stockDiego: 52,
+      stockAngy: 2,
+      stockActual: 54,
+      unit: 'pza',
+      minStock: 15,
+      packageSize: 70,
+      packagePrice: 280.50,
+      store: 'Lumen',
+      isCustom: false
+    },
+    {
+      id: 'pkg-2',
+      name: 'Bolsas kraft / blancas',
+      category: 'empaque',
+      stockDiego: 25,
+      stockAngy: 36,
       stockActual: 61,
       unit: 'pza',
       minStock: 20,
@@ -41,8 +59,10 @@
     },
     {
       id: 'pkg-3',
-      name: 'Envases termoformados (Marce / Goplas)',
+      name: 'Envases goplas (termoformados)',
       category: 'empaque',
+      stockDiego: 89,
+      stockAngy: 28,
       stockActual: 117,
       unit: 'pza',
       minStock: 30,
@@ -55,6 +75,8 @@
       id: 'pkg-1',
       name: 'Papel encerado',
       category: 'empaque',
+      stockDiego: 100,
+      stockAngy: 12,
       stockActual: 112,
       unit: 'pza',
       minStock: 25,
@@ -64,21 +86,25 @@
       isCustom: false
     },
     {
-      id: 'pkg-5',
-      name: 'Sticker de sello bolsa',
+      id: 'pkg-9',
+      name: 'Envases mimi',
       category: 'empaque',
-      stockActual: 34,
+      stockDiego: 20,
+      stockAngy: 20,
+      stockActual: 40,
       unit: 'pza',
       minStock: 15,
-      packageSize: 46.6,
-      packagePrice: 65.00,
+      packageSize: 100,
+      packagePrice: 120.00,
       store: 'Goplas',
       isCustom: false
     },
     {
       id: 'pkg-4',
-      name: 'Sticker decorativo chile',
+      name: 'Stickers grandes (decorativo chile)',
       category: 'empaque',
+      stockDiego: 0,
+      stockAngy: 24,
       stockActual: 24,
       unit: 'pza',
       minStock: 15,
@@ -88,9 +114,25 @@
       isCustom: false
     },
     {
+      id: 'pkg-5',
+      name: 'Stickers chicos (sello bolsa)',
+      category: 'empaque',
+      stockDiego: 0,
+      stockAngy: 34,
+      stockActual: 34,
+      unit: 'pza',
+      minStock: 15,
+      packageSize: 46.6,
+      packagePrice: 65.00,
+      store: 'Goplas',
+      isCustom: false
+    },
+    {
       id: 'pkg-7',
       name: 'Listón',
       category: 'empaque',
+      stockDiego: 50,
+      stockAngy: 0,
       stockActual: 50,
       unit: 'pza',
       minStock: 15,
@@ -100,11 +142,13 @@
       isCustom: false
     },
 
-    // --- INGREDIENTES CLAVE ---
+    // --- INGREDIENTES CLAVE (PRODUCCIÓN EN COCINA - DIEGO) ---
     {
       id: 'nog-5',
       name: 'Nuez de Castilla',
       category: 'nogada',
+      stockDiego: 1521,
+      stockAngy: 0,
       stockActual: 1521,
       unit: 'gr',
       minStock: 500,
@@ -117,6 +161,8 @@
       id: 'nog-3',
       name: 'Acitrón',
       category: 'nogada',
+      stockDiego: 900,
+      stockAngy: 0,
       stockActual: 900,
       unit: 'gr',
       minStock: 300,
@@ -129,6 +175,8 @@
       id: 'rel-8',
       name: 'Almendra fileteada',
       category: 'relleno',
+      stockDiego: 854,
+      stockAngy: 0,
       stockActual: 854,
       unit: 'gr',
       minStock: 200,
@@ -141,6 +189,8 @@
       id: 'rel-9',
       name: 'Piñón rosa',
       category: 'relleno',
+      stockDiego: 494,
+      stockAngy: 0,
       stockActual: 494,
       unit: 'gr',
       minStock: 200,
@@ -153,6 +203,8 @@
       id: 'rel-2',
       name: 'Carne de res molida',
       category: 'relleno',
+      stockDiego: 2800,
+      stockAngy: 0,
       stockActual: 2800,
       unit: 'gr',
       minStock: 800,
@@ -165,6 +217,8 @@
       id: 'rel-3',
       name: 'Carne de puerco molida',
       category: 'relleno',
+      stockDiego: 550,
+      stockAngy: 0,
       stockActual: 550,
       unit: 'gr',
       minStock: 500,
@@ -177,6 +231,8 @@
       id: 'ext-1',
       name: 'Chiles poblanos seleccionados',
       category: 'extras',
+      stockDiego: 30,
+      stockAngy: 0,
       stockActual: 30,
       unit: 'pza',
       minStock: 15,
@@ -189,6 +245,8 @@
       id: 'nog-1',
       name: 'Queso Philadelphia',
       category: 'nogada',
+      stockDiego: 420,
+      stockAngy: 0,
       stockActual: 420,
       unit: 'gr',
       minStock: 280,
@@ -201,6 +259,8 @@
       id: 'nog-2',
       name: 'Crema',
       category: 'nogada',
+      stockDiego: 1000,
+      stockAngy: 0,
       stockActual: 1000,
       unit: 'ml',
       minStock: 450,
@@ -213,6 +273,8 @@
       id: 'nog-7',
       name: 'Jerez',
       category: 'nogada',
+      stockDiego: 3000,
+      stockAngy: 0,
       stockActual: 3000,
       unit: 'ml',
       minStock: 500,
@@ -225,6 +287,8 @@
       id: 'nog-4',
       name: 'Queso de cabra',
       category: 'nogada',
+      stockDiego: 350,
+      stockAngy: 0,
       stockActual: 350,
       unit: 'gr',
       minStock: 140,
@@ -237,6 +301,8 @@
       id: 'nog-6',
       name: 'Leche evaporada',
       category: 'nogada',
+      stockDiego: 1000,
+      stockAngy: 0,
       stockActual: 1000,
       unit: 'gr',
       minStock: 250,
@@ -249,6 +315,8 @@
       id: 'rel-4',
       name: 'Manzana panochera',
       category: 'relleno',
+      stockDiego: 12,
+      stockAngy: 0,
       stockActual: 12,
       unit: 'pza',
       minStock: 4,
@@ -261,6 +329,8 @@
       id: 'rel-5',
       name: 'Durazno criollo',
       category: 'relleno',
+      stockDiego: 18,
+      stockAngy: 0,
       stockActual: 18,
       unit: 'pza',
       minStock: 6,
@@ -273,6 +343,8 @@
       id: 'rel-10',
       name: 'Cebolla blanca',
       category: 'relleno',
+      stockDiego: 1200,
+      stockAngy: 0,
       stockActual: 1200,
       unit: 'gr',
       minStock: 400,
@@ -285,6 +357,8 @@
       id: 'rel-11',
       name: 'Diente de ajo',
       category: 'relleno',
+      stockDiego: 10,
+      stockAngy: 0,
       stockActual: 10,
       unit: 'pza',
       minStock: 3,
@@ -297,6 +371,8 @@
       id: 'rel-12',
       name: 'Puré de tomate',
       category: 'relleno',
+      stockDiego: 680,
+      stockAngy: 0,
       stockActual: 680,
       unit: 'ml',
       minStock: 340,
@@ -309,6 +385,8 @@
       id: 'ext-2',
       name: 'Granada roja desgranada',
       category: 'extras',
+      stockDiego: 600,
+      stockAngy: 0,
       stockActual: 600,
       unit: 'gr',
       minStock: 600,
@@ -321,6 +399,8 @@
       id: 'ext-3',
       name: 'Perejil liso fresco',
       category: 'extras',
+      stockDiego: 4,
+      stockAngy: 0,
       stockActual: 4,
       unit: 'cda',
       minStock: 2,
@@ -333,6 +413,8 @@
       id: 'rel-1',
       name: 'Azúcar blanca',
       category: 'relleno',
+      stockDiego: 1000,
+      stockAngy: 0,
       stockActual: 1000,
       unit: 'gr',
       minStock: 200,
@@ -405,7 +487,16 @@
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            this.items = parsed;
+            this.items = parsed.map(item => {
+              const d = item.stockDiego !== undefined ? Number(item.stockDiego) : (Number(item.stockActual) || 0);
+              const a = item.stockAngy !== undefined ? Number(item.stockAngy) : 0;
+              return {
+                ...item,
+                stockDiego: d,
+                stockAngy: a,
+                stockActual: d + a
+              };
+            });
             return;
           }
         }
@@ -456,6 +547,8 @@
               id: recItem.id,
               name: recItem.name,
               category: cat.id,
+              stockDiego: 0,
+              stockAngy: 0,
               stockActual: 0,
               unit: recItem.unit || 'pza',
               minStock: Math.ceil((recItem.qty || 1) * 1.5),
@@ -811,9 +904,10 @@
               ${catBadge}
             </td>
 
-            <!-- 3. Stock Físico Actual -->
-            <td class="py-3 px-2 text-right font-numeric font-bold text-slate-800">
-              ${formatNumber(item.stockActual)} <span class="text-slate-500 font-normal text-xs">${item.unit}</span>
+            <!-- 3. Stock Físico Actual (con desglose de custodia) -->
+            <td class="py-3 px-2 text-right font-numeric">
+              <div class="font-bold text-slate-800">${formatNumber(item.stockActual)} <span class="text-slate-500 font-normal text-xs">${item.unit}</span></div>
+              <div class="text-[10px] text-slate-400 font-medium tracking-tight">D: ${formatNumber(item.stockDiego || 0)} • A: ${formatNumber(item.stockAngy || 0)}</div>
             </td>
 
             <!-- 4. Demanda 7 Días -->
@@ -845,23 +939,41 @@
                 <div class="mt-0.5">${statusBadge}</div>
               </div>
             </td>
+
+            <!-- 9. Acción Primaria: Restock Realizado -->
+            <td class="py-3 px-2 text-center whitespace-nowrap">
+              <button onclick="InventoryApp.openRestockModal('${item.id}')"
+                class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1E222B] text-white hover:bg-slate-800 transition-all shadow-xs border border-white/20 hover:scale-[1.02]"
+                title="Registrar entrada de restock y transferir a Inversión">
+                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                </svg>
+                <span>Restock Realizado</span>
+              </button>
+            </td>
           </tr>
         `;
       }).join('');
     },
 
-    // Table C: Catálogo Maestro de Inventario Físico (Editable on-hand stock)
+    // Table C: Catálogo Maestro de Inventario Físico (Editable on-hand stock with custody)
     renderMasterCatalogTable: function () {
       const tbody = document.getElementById('inventory-catalog-table-body');
       if (!tbody) return;
 
       const m = this.getMetrics();
       const catFilter = this.filters.catalogFilter;
+      const custodyFilter = this.filters.custodyFilter || 'todos';
 
       let itemsToDisplay = m.itemAnalysis.filter(item => {
         if (catFilter !== 'todos') {
           if (catFilter === 'empaque' && item.category !== 'empaque') return false;
           if (catFilter !== 'empaque' && item.category !== catFilter) return false;
+        }
+        if (custodyFilter === 'diego') {
+          if ((Number(item.stockDiego) || 0) <= 0) return false;
+        } else if (custodyFilter === 'angy') {
+          if ((Number(item.stockAngy) || 0) <= 0) return false;
         }
         return true;
       });
@@ -888,7 +1000,7 @@
         if (item.category === 'empaque') catLabel = 'Empaque';
 
         return `
-          <tr class="liquid-table-row hover:bg-white/60 transition-colors">
+          <tr id="catalog-row-${item.id}" class="liquid-table-row hover:bg-white/60 transition-all duration-300">
             <!-- 1. Insumo -->
             <td class="py-2.5 px-3 font-bold text-slate-900">
               <div class="flex items-center">
@@ -904,32 +1016,47 @@
               </span>
             </td>
 
-            <!-- 3. Stock Actual (Inline Editable Input) -->
-            <td class="py-2.5 px-2 text-right w-36">
-              <input type="number" step="any" min="0" value="${item.stockActual}"
-                onchange="InventoryApp.updateStock('${item.id}', this.value)"
-                onblur="InventoryApp.updateStock('${item.id}', this.value)"
+            <!-- 3. Stock Diego (# Diego) -->
+            <td class="py-2.5 px-2 text-right w-24 sm:w-28">
+              <input type="number" step="any" min="0" value="${item.stockDiego || 0}"
+                onchange="InventoryApp.updateCustodianStock('${item.id}', 'diego', this.value)"
+                onblur="InventoryApp.updateCustodianStock('${item.id}', 'diego', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}"
-                class="w-full text-right liquid-input px-2.5 py-1 text-xs font-extrabold text-slate-900 font-numeric"
-                title="Haz clic para ajustar existencias físicas">
+                class="w-full text-right liquid-input px-2 py-1 text-xs font-bold text-slate-800 font-numeric"
+                title="Stock bajo custodia de Diego">
             </td>
 
-            <!-- 4. Unidad -->
+            <!-- 4. Stock Angy (# Angy) -->
+            <td class="py-2.5 px-2 text-right w-24 sm:w-28">
+              <input type="number" step="any" min="0" value="${item.stockAngy || 0}"
+                onchange="InventoryApp.updateCustodianStock('${item.id}', 'angy', this.value)"
+                onblur="InventoryApp.updateCustodianStock('${item.id}', 'angy', this.value)"
+                onkeydown="if(event.key==='Enter'){this.blur();}"
+                class="w-full text-right liquid-input px-2 py-1 text-xs font-bold text-slate-800 font-numeric"
+                title="Stock bajo custodia de Angy">
+            </td>
+
+            <!-- 5. Stock Total (Diego + Angy) -->
+            <td class="py-2.5 px-2 text-right font-numeric font-extrabold text-slate-900 text-xs">
+              ${formatNumber(item.stockActual)}
+            </td>
+
+            <!-- 6. Unidad -->
             <td class="py-2.5 px-2 text-center text-xs text-slate-500 font-medium">
               ${item.unit}
             </td>
 
-            <!-- 5. Stock Reservado (Pedidos Activos) -->
+            <!-- 7. Stock Reservado (Pedidos Activos) -->
             <td class="py-2.5 px-2 text-right font-numeric font-bold text-amber-700">
               ${formatNumber(item.reserved)} <span class="text-xs text-slate-400 font-normal">${item.unit}</span>
             </td>
 
-            <!-- 6. Stock Disponible Real -->
+            <!-- 8. Stock Disponible Real -->
             <td class="py-2.5 px-2 text-right font-numeric font-extrabold ${item.availableStock < 0 ? 'text-rose-600' : 'text-emerald-700'}">
               ${formatNumber(item.availableStock)} <span class="text-xs font-normal ${item.availableStock < 0 ? 'text-rose-400' : 'text-emerald-500'}">${item.unit}</span>
             </td>
 
-            <!-- 7. Acciones -->
+            <!-- 9. Acciones -->
             <td class="py-2.5 px-2 text-center whitespace-nowrap">
               ${item.isCustom ? `
                 <button onclick="InventoryApp.deleteCustomItem('${item.id}')" title="Eliminar insumo personalizado"
@@ -945,19 +1072,63 @@
       }).join('');
     },
 
-    // 6. User Mutations & Storage Updates
+    // 6. User Mutations & Custodian Storage Updates
+    updateCustodianStock: function (id, custodian, newStock) {
+      const item = this.items.find(i => i.id === id);
+      if (!item) return;
+
+      const parsed = Math.max(0, parseFloat(newStock) || 0);
+      if (custodian === 'diego') {
+        item.stockDiego = parsed;
+      } else if (custodian === 'angy') {
+        item.stockAngy = parsed;
+      }
+
+      item.stockActual = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+      this.saveToStorage(true);
+      this.render();
+
+      const custodianName = custodian === 'diego' ? 'Diego' : 'Angy';
+      if (window.showToast) {
+        window.showToast(`Stock de ${custodianName} para "${item.name}" actualizado a ${formatNumber(parsed)} ${item.unit} (Total: ${formatNumber(item.stockActual)} ${item.unit})`, 'info');
+      }
+    },
+
     updateStock: function (id, newStock) {
       const item = this.items.find(i => i.id === id);
       if (!item) return;
 
       const parsed = Math.max(0, parseFloat(newStock) || 0);
-      item.stockActual = parsed;
+      const totalOld = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+      if (totalOld > 0) {
+        const ratioDiego = (Number(item.stockDiego) || 0) / totalOld;
+        item.stockDiego = Math.round(parsed * ratioDiego * 10) / 10;
+        item.stockAngy = Math.round((parsed - item.stockDiego) * 10) / 10;
+      } else {
+        item.stockDiego = parsed;
+        item.stockAngy = 0;
+      }
+      item.stockActual = item.stockDiego + item.stockAngy;
+
       this.saveToStorage(true);
       this.render();
 
       if (window.showToast) {
         window.showToast(`Stock de "${item.name}" actualizado a ${formatNumber(parsed)} ${item.unit}`, 'info');
       }
+    },
+
+    setCustodyFilter: function (custody) {
+      this.filters.custodyFilter = custody || 'todos';
+      document.querySelectorAll('.custody-filter-btn').forEach(btn => {
+        const c = btn.getAttribute('data-custody');
+        if (c === this.filters.custodyFilter) {
+          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-[#1E222B] text-white shadow-xs transition-all';
+        } else {
+          btn.className = 'custody-filter-btn px-3 py-1 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all';
+        }
+      });
+      this.renderMasterCatalogTable();
     },
 
     setActionFilter: function (filterName) {
@@ -991,13 +1162,198 @@
       this.renderMasterCatalogTable();
     },
 
+    // 7. Action Flow A: Restock Directo -> Inversión
+    openRestockModal: function (id) {
+      const m = this.getMetrics();
+      const item = m.itemAnalysis.find(i => i.id === id);
+      if (!item) return;
+
+      this.activeRestockItem = item;
+
+      const modal = document.getElementById('restock-confirmation-modal');
+      if (!modal) return;
+
+      const nameEl = document.getElementById('restock-item-name');
+      const storeEl = document.getElementById('restock-item-store');
+      const currentStockEl = document.getElementById('restock-current-stock');
+      const demandEl = document.getElementById('restock-demand');
+      const qtyInput = document.getElementById('restock-qty-input');
+      const unitLabel = document.getElementById('restock-unit-label');
+      const priceInput = document.getElementById('restock-price-input');
+
+      if (nameEl) nameEl.textContent = item.name;
+      if (storeEl) storeEl.textContent = item.store || 'Proveedor General';
+      if (currentStockEl) {
+        currentStockEl.textContent = `${formatNumber(item.stockActual)} ${item.unit} (Diego: ${formatNumber(item.stockDiego || 0)} | Angy: ${formatNumber(item.stockAngy || 0)})`;
+      }
+      if (demandEl) demandEl.textContent = `${formatNumber(item.demand7d)} ${item.unit}`;
+
+      const suggestedQty = item.suggestedPurchaseQty > 0 ? item.suggestedPurchaseQty : (item.deficit > 0 ? item.deficit : (item.packageSize || 1));
+      if (qtyInput) qtyInput.value = suggestedQty;
+      if (unitLabel) unitLabel.textContent = item.unit;
+
+      const suggestedPrice = item.estimatedCost > 0 ? item.estimatedCost : (Number(item.packagePrice) || 0);
+      if (priceInput) priceInput.value = suggestedPrice.toFixed(2);
+
+      const radioDiego = document.getElementById('restock-custody-diego');
+      const radioAngy = document.getElementById('restock-custody-angy');
+      if ((item.stockAngy || 0) > (item.stockDiego || 0)) {
+        if (radioAngy) radioAngy.checked = true;
+      } else {
+        if (radioDiego) radioDiego.checked = true;
+      }
+
+      modal.classList.remove('hidden');
+    },
+
+    closeRestockModal: function () {
+      const modal = document.getElementById('restock-confirmation-modal');
+      if (modal) modal.classList.add('hidden');
+      this.activeRestockItem = null;
+    },
+
+    executeRestockOnly: function () {
+      if (!this.activeRestockItem) return;
+      const item = this.items.find(i => i.id === this.activeRestockItem.id);
+      if (!item) return;
+
+      const qtyInput = document.getElementById('restock-qty-input');
+      const addedQty = Math.max(0, parseFloat(qtyInput ? qtyInput.value : 0) || 0);
+      if (addedQty <= 0) {
+        if (window.showToast) window.showToast('Ingresa una cantidad válida mayor a cero', 'warning');
+        return;
+      }
+
+      const isDiego = document.getElementById('restock-custody-diego')?.checked;
+      const custodian = isDiego ? 'diego' : 'angy';
+
+      if (custodian === 'diego') {
+        item.stockDiego = (Number(item.stockDiego) || 0) + addedQty;
+      } else {
+        item.stockAngy = (Number(item.stockAngy) || 0) + addedQty;
+      }
+      item.stockActual = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+
+      this.saveToStorage(true);
+      this.render();
+      this.closeRestockModal();
+
+      const custodianName = custodian === 'diego' ? 'Diego' : 'Angy';
+      if (window.showToast) {
+        window.showToast(`Restock aplicado: +${formatNumber(addedQty)} ${item.unit} sumados a la posesión de ${custodianName}`, 'info');
+      }
+    },
+
+    executeRestockAndRedirect: function () {
+      if (!this.activeRestockItem) return;
+      const item = this.items.find(i => i.id === this.activeRestockItem.id);
+      if (!item) return;
+
+      const qtyInput = document.getElementById('restock-qty-input');
+      const priceInput = document.getElementById('restock-price-input');
+      const addedQty = Math.max(0, parseFloat(qtyInput ? qtyInput.value : 0) || 0);
+      const expenseAmount = Math.max(0, parseFloat(priceInput ? priceInput.value : 0) || 0);
+
+      const isDiego = document.getElementById('restock-custody-diego')?.checked;
+      const custodian = isDiego ? 'diego' : 'angy';
+      const fundingSource = isDiego ? 'Digs' : 'Angy';
+
+      if (addedQty > 0) {
+        if (custodian === 'diego') {
+          item.stockDiego = (Number(item.stockDiego) || 0) + addedQty;
+        } else {
+          item.stockAngy = (Number(item.stockAngy) || 0) + addedQty;
+        }
+        item.stockActual = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+        this.saveToStorage(true);
+        this.render();
+      }
+
+      const itemName = item.name;
+      const itemStore = item.store || 'Proveedor';
+
+      this.closeRestockModal();
+
+      // Switch active tab to 'inversion'
+      if (typeof window.switchTab === 'function') {
+        window.switchTab('inversion');
+      }
+
+      // Pre-fill and open new expense modal in Inversión tab
+      setTimeout(() => {
+        if (typeof window.openNewExpenseModal === 'function') {
+          window.openNewExpenseModal();
+
+          const prodInput = document.getElementById('new-exp-product');
+          const storeInput = document.getElementById('new-exp-store');
+          const priceInputEl = document.getElementById('new-exp-price');
+          const sourceSelect = document.getElementById('new-exp-source');
+          const statusSelect = document.getElementById('new-exp-status');
+          const monthSelect = document.getElementById('new-exp-month');
+
+          if (prodInput) prodInput.value = itemName;
+          if (storeInput) storeInput.value = itemStore;
+          if (priceInputEl) priceInputEl.value = expenseAmount > 0 ? expenseAmount.toFixed(2) : '';
+          if (sourceSelect) {
+            sourceSelect.value = fundingSource;
+            if (typeof window.toggleContributorField === 'function') {
+              window.toggleContributorField(fundingSource);
+            }
+          }
+          if (statusSelect) statusSelect.value = 'Pagado';
+          if (monthSelect) monthSelect.value = 'Septiembre 2026';
+        }
+
+        if (window.showToast) {
+          window.showToast(`Stock sumado a ${custodian === 'diego' ? 'Diego' : 'Angy'}. Verifica y guarda el gasto en Inversión.`, 'info');
+        }
+      }, 150);
+    },
+
+    // 8. Action Flow B: Inversión -> Inventario Allocation
+    allocateStockFromExpense: function (itemId, custodian, qty) {
+      const item = this.items.find(i => i.id === itemId);
+      if (!item) return false;
+
+      const added = Math.max(0, parseFloat(qty) || 0);
+      if (added <= 0) return false;
+
+      if (custodian === 'diego') {
+        item.stockDiego = (Number(item.stockDiego) || 0) + added;
+      } else {
+        item.stockAngy = (Number(item.stockAngy) || 0) + added;
+      }
+      item.stockActual = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+
+      this.saveToStorage(true);
+      this.render();
+
+      setTimeout(() => {
+        const row = document.getElementById(`catalog-row-${item.id}`);
+        if (row) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          row.classList.add('bg-emerald-100/80', 'ring-2', 'ring-emerald-500/80');
+          setTimeout(() => {
+            row.classList.remove('bg-emerald-100/80', 'ring-2', 'ring-emerald-500/80');
+          }, 3000);
+        }
+      }, 200);
+
+      return true;
+    },
+
     addNewCustomItem: function (itemData) {
       const newId = 'custom-' + Date.now();
+      const diegoStock = Math.max(0, parseFloat(itemData.stockDiego !== undefined ? itemData.stockDiego : itemData.stockActual) || 0);
+      const angyStock = Math.max(0, parseFloat(itemData.stockAngy) || 0);
+
       const newItem = {
         id: newId,
         name: itemData.name.trim(),
         category: itemData.category || 'ingrediente',
-        stockActual: Math.max(0, parseFloat(itemData.stockActual) || 0),
+        stockDiego: diegoStock,
+        stockAngy: angyStock,
+        stockActual: diegoStock + angyStock,
         unit: itemData.unit || 'pza',
         minStock: Math.max(0, parseFloat(itemData.minStock) || 10),
         packageSize: Math.max(0.1, parseFloat(itemData.packageSize) || 1),
