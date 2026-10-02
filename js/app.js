@@ -685,13 +685,57 @@ window.handleAllocateExpenseStockSubmit = function() {
 };
 
 // ==========================================
-// 7. Multi-Year Season Management Controller
+// 7. Multi-Year Season Dropdown Controller
 // ==========================================
+window.toggleSeasonDropdown = function(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('season-dropdown-menu');
+  const chevron = document.getElementById('season-dropdown-chevron');
+  if (!menu) return;
+  const isHidden = menu.classList.contains('hidden');
+  if (isHidden) {
+    menu.classList.remove('hidden');
+    if (chevron) chevron.classList.add('rotate-180');
+  } else {
+    menu.classList.add('hidden');
+    if (chevron) chevron.classList.remove('rotate-180');
+  }
+};
+
+window.closeSeasonDropdown = function() {
+  const menu = document.getElementById('season-dropdown-menu');
+  const chevron = document.getElementById('season-dropdown-chevron');
+  if (menu && !menu.classList.contains('hidden')) {
+    menu.classList.add('hidden');
+    if (chevron) chevron.classList.remove('rotate-180');
+  }
+};
+
+window.selectAppYear = function(year) {
+  window.closeSeasonDropdown();
+  window.setAppYear(year);
+};
+
 window.setAppYear = function(year) {
   if (window.NogaStore && typeof window.NogaStore.setYear === 'function') {
     window.NogaStore.setYear(year);
   }
 };
+
+// Global click outside listener to close season dropdown
+document.addEventListener('click', (e) => {
+  const wrapper = document.getElementById('season-dropdown-wrapper');
+  if (wrapper && !wrapper.contains(e.target)) {
+    window.closeSeasonDropdown();
+  }
+});
+
+// Close season dropdown on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    window.closeSeasonDropdown();
+  }
+});
 
 // ==========================================
 // 8. Initialize Application

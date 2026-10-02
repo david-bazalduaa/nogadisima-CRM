@@ -759,7 +759,7 @@
           ? `No hay pedidos registrados para la temporada ${activeYear}`
           : 'No se encontraron comandas';
         let emptyDesc = isSeasonEmpty
-          ? `No hay pedidos registrados para la temporada ${activeYear}. Registra el primer pedido para activar la producción.`
+          ? `No hay pedidos registrados para la temporada ${activeYear}.`
           : 'Ajusta los filtros o busca por nombre de cliente.';
         let emptyAction = isSeasonEmpty
           ? `<button onclick="openNewOrderModal()" class="mt-3 px-4 py-2 text-xs font-semibold liquid-btn-dark shadow-sm">

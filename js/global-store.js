@@ -1,16 +1,20 @@
 /**
- * NOGADÍSIMA — UNIFIED MULTI-YEAR GLOBAL REACTIVE STATE STORE & EVENT BUS
+ * NOGADÍSIMA — SCALABLE MULTI-YEAR GLOBAL REACTIVE STATE STORE (2026 - 2030)
  * Centralized Single Source of Truth for Recipe, Investment, Orders, Inventory & Profit Draws
- * Supports Multi-Year Season Scoping (2026 vs. 2027) with Dynamic State Isolation
- * Persists Unified Database Schema to localStorage under 'nogadisima_db_v2'
+ * Supports 5-Year Rolling Horizon (2026, 2027, 2028, 2029, 2030) with Dynamic State Isolation
+ * Persists Unified Multiverse Database to localStorage under 'nogadisima_multiverse_v1'
  */
 
 (function (window) {
   'use strict';
 
+  // 5-Year Rolling Horizon Constants
+  const SUPPORTED_YEARS = ['2026', '2027', '2028', '2029', '2030'];
+
   // Storage Keys
   const STORAGE_KEYS = {
-    DB_V2: 'nogadisima_db_v2',
+    MULTIVERSE_V1: 'nogadisima_multiverse_v1',
+    DB_V2: 'nogadisima_db_v2', // backward-compatible mirror
     ACTIVE_YEAR: 'nogadisima_active_year',
     // 100% backward-compatible legacy keys for historical fallback & 2026 mirror
     RECIPE_LEGACY: 'nogadisima_recipe_engine_v5',
@@ -22,7 +26,9 @@
   };
 
   const NogaStore = {
-    // 1. Centralized Multi-Year Database Schema
+    SUPPORTED_YEARS: SUPPORTED_YEARS,
+
+    // 1. Centralized Multi-Year Master Database Schema
     db: {
       activeYear: '2026',
       years: {
@@ -35,6 +41,30 @@
           cutoffDay: 30
         },
         '2027': {
+          recipe: null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: [],
+          cutoffDay: 30
+        },
+        '2028': {
+          recipe: null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: [],
+          cutoffDay: 30
+        },
+        '2029': {
+          recipe: null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: [],
+          cutoffDay: 30
+        },
+        '2030': {
           recipe: null,
           investments: [],
           orders: [],
@@ -64,7 +94,7 @@
       this._bindStorageListener();
       this.updateYearSelectorUI(this.getActiveYear());
       this.updateYearDependentFormElements(this.getActiveYear());
-      console.log('NogaStore: Multi-Year Global Reactive State Store initialized (Active: ' + this.getActiveYear() + ')');
+      console.log('NogaStore: Scalable Multi-Year Store initialized (Active: ' + this.getActiveYear() + ')');
     },
 
     getActiveYear: function () {
@@ -72,12 +102,26 @@
     },
 
     // 3. Multi-Year Season Initialization & Seeding Engine
+    generateFutureYears: function (yearList, baseRecipe, baselineInventory) {
+      const result = {};
+      yearList.forEach(year => {
+        result[year] = {
+          recipe: baseRecipe ? JSON.parse(JSON.stringify(baseRecipe)) : null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: this.initializeEmptyInventoryFromRecipe(baseRecipe, baselineInventory),
+          cutoffDay: 30
+        };
+      });
+      return result;
+    },
+
     ensureSeedData: function () {
       let mutated = false;
       const y26 = this.db.years['2026'];
-      const y27 = this.db.years['2027'];
 
-      // --- 2026 BASELINE SEEDING ---
+      // --- 2026 BASELINE SEEDING (100% Historical Real Data) ---
       if (!y26.recipe && window.DEFAULT_RECIPE_DATA) {
         y26.recipe = JSON.parse(JSON.stringify(window.DEFAULT_RECIPE_DATA));
         mutated = true;
@@ -99,38 +143,54 @@
         mutated = true;
       }
 
-      // --- 2027 NEW SEASON INITIALIZATION ---
-      // 1. "Presupuesto de Receta": CLONED from the 2026 baseline recipe as starting point
-      if (!y27.recipe) {
-        const sourceRecipe = y26.recipe || window.DEFAULT_RECIPE_DATA;
-        if (sourceRecipe) {
-          y27.recipe = JSON.parse(JSON.stringify(sourceRecipe));
+      const baselineRecipe = y26.recipe || window.DEFAULT_RECIPE_DATA;
+      const baselineInv = (y26.inventory && y26.inventory.length > 0) ? y26.inventory : (window.INITIAL_INVENTORY_ITEMS || []);
+
+      // --- FUTURE SEASONS (2027 through 2030) ---
+      const futureYears = ['2027', '2028', '2029', '2030'];
+      futureYears.forEach(year => {
+        if (!this.db.years[year]) {
+          this.db.years[year] = {
+            recipe: null,
+            investments: [],
+            orders: [],
+            profitDraws: [],
+            inventory: [],
+            cutoffDay: 30
+          };
           mutated = true;
         }
-      }
-      // 2. "Inversión & Gastos": COMPLETELY EMPTY
-      if (!Array.isArray(y27.investments)) {
-        y27.investments = [];
-        mutated = true;
-      }
-      // 3. "Control de Pedidos": COMPLETELY EMPTY
-      if (!Array.isArray(y27.orders)) {
-        y27.orders = [];
-        mutated = true;
-      }
-      // 4. "Gastos de Ganancia": COMPLETELY EMPTY
-      if (!Array.isArray(y27.profitDraws)) {
-        y27.profitDraws = [];
-        mutated = true;
-      }
-      // 5. "Inventario & Reabastecimiento": COMPLETELY EMPTY / ZERO STOCK
-      if (!Array.isArray(y27.inventory) || y27.inventory.length === 0) {
-        const baseInv = (y26.inventory && y26.inventory.length > 0) ? y26.inventory : (window.INITIAL_INVENTORY_ITEMS || []);
-        y27.inventory = this.initializeEmptyInventoryFromRecipe(y27.recipe || y26.recipe, baseInv);
-        mutated = true;
-      }
 
-      // Sync active state pointer
+        const yFuture = this.db.years[year];
+
+        // 1. "Presupuesto de Receta": Cloned baseline recipe for future season costing
+        if (!yFuture.recipe && baselineRecipe) {
+          yFuture.recipe = JSON.parse(JSON.stringify(baselineRecipe));
+          mutated = true;
+        }
+        // 2. "Inversión & Gastos": COMPLETELY EMPTY
+        if (!Array.isArray(yFuture.investments)) {
+          yFuture.investments = [];
+          mutated = true;
+        }
+        // 3. "Control de Pedidos": COMPLETELY EMPTY
+        if (!Array.isArray(yFuture.orders)) {
+          yFuture.orders = [];
+          mutated = true;
+        }
+        // 4. "Gastos de Ganancia": COMPLETELY EMPTY
+        if (!Array.isArray(yFuture.profitDraws)) {
+          yFuture.profitDraws = [];
+          mutated = true;
+        }
+        // 5. "Inventario & Reabastecimiento": COMPLETELY EMPTY / ZERO STOCK
+        if (!Array.isArray(yFuture.inventory) || yFuture.inventory.length === 0) {
+          yFuture.inventory = this.initializeEmptyInventoryFromRecipe(yFuture.recipe || baselineRecipe, baselineInv);
+          mutated = true;
+        }
+      });
+
+      // Synchronize active year state pointer
       this._syncStatePointer();
 
       if (mutated) {
@@ -200,16 +260,16 @@
       this.state.cutoffDay = yData.cutoffDay || 30;
     },
 
-    // 4. Smooth Year Switching Engine (2026 vs. 2027)
+    // 4. Smooth Year Switching Engine (2026 through 2030)
     setYear: function (targetYear, showToast = true) {
-      if (targetYear !== '2026' && targetYear !== '2027') {
-        console.warn('NogaStore: Invalid year target:', targetYear);
+      if (!SUPPORTED_YEARS.includes(targetYear)) {
+        console.warn('NogaStore: Unsupported year target:', targetYear);
         return;
       }
 
       const prevYear = this.getActiveYear();
 
-      // Step A: Preserve any unsaved in-memory edits for the outgoing year
+      // Step A: Preserve any unsaved in-memory edits for outgoing year
       this._captureCurrentAppState(prevYear);
 
       // Step B: Set new active year
@@ -319,30 +379,32 @@
       }
     },
 
-    // 5. Header Interactive Season Pill Visual State
+    // 5. Header Interactive Season Dropdown Visual State (2026 - 2030)
     updateYearSelectorUI: function (activeYear) {
       const year = activeYear || this.getActiveYear();
-      const btn2026 = document.getElementById('season-btn-2026');
-      const btn2027 = document.getElementById('season-btn-2027');
 
-      const activeClasses = ['bg-white', 'text-slate-900', 'shadow-sm', 'font-bold', 'rounded-lg'];
-      const inactiveClasses = ['text-slate-500', 'hover:text-slate-800', 'font-semibold'];
-
-      if (btn2026 && btn2027) {
-        if (year === '2026') {
-          btn2026.classList.remove(...inactiveClasses);
-          btn2026.classList.add(...activeClasses);
-
-          btn2027.classList.remove(...activeClasses);
-          btn2027.classList.add(...inactiveClasses);
-        } else {
-          btn2027.classList.remove(...inactiveClasses);
-          btn2027.classList.add(...activeClasses);
-
-          btn2026.classList.remove(...activeClasses);
-          btn2026.classList.add(...inactiveClasses);
-        }
+      // Update active label on trigger pill
+      const labelEl = document.getElementById('season-active-label');
+      if (labelEl) {
+        labelEl.textContent = year;
       }
+
+      // Update dropdown option items
+      SUPPORTED_YEARS.forEach(y => {
+        const optBtn = document.getElementById(`season-opt-${y}`);
+        if (optBtn) {
+          const checkIcon = optBtn.querySelector('.season-check-icon');
+          if (y === year) {
+            optBtn.classList.add('bg-slate-100', 'text-slate-900', 'font-semibold');
+            optBtn.classList.remove('text-slate-700', 'hover:bg-slate-100/70', 'font-medium');
+            if (checkIcon) checkIcon.classList.remove('hidden');
+          } else {
+            optBtn.classList.remove('bg-slate-100', 'text-slate-900', 'font-semibold');
+            optBtn.classList.add('text-slate-700', 'hover:bg-slate-100/70', 'font-medium');
+            if (checkIcon) checkIcon.classList.add('hidden');
+          }
+        }
+      });
     },
 
     // Updates cutoff selects and date inputs according to active year
@@ -416,13 +478,20 @@
       }
     },
 
-    // 7. Storage Persistence Engine
+    // 7. Storage Persistence Engine (Multiverse v1)
     loadAll: function () {
       let loadedDb = null;
       try {
-        const dbStr = localStorage.getItem(STORAGE_KEYS.DB_V2);
-        if (dbStr) {
-          loadedDb = JSON.parse(dbStr);
+        // Priority 1: Check master multiverse storage key
+        const multiStr = localStorage.getItem(STORAGE_KEYS.MULTIVERSE_V1);
+        if (multiStr) {
+          loadedDb = JSON.parse(multiStr);
+        } else {
+          // Priority 2: Fallback to nogadisima_db_v2
+          const db2Str = localStorage.getItem(STORAGE_KEYS.DB_V2);
+          if (db2Str) {
+            loadedDb = JSON.parse(db2Str);
+          }
         }
       } catch (e) {
         console.warn('NogaStore: Error parsing database from localStorage', e);
@@ -430,14 +499,25 @@
 
       if (loadedDb && loadedDb.years) {
         this.db = loadedDb;
-        if (!this.db.years['2026']) this.db.years['2026'] = {};
-        if (!this.db.years['2027']) this.db.years['2027'] = {};
+        // Ensure all 5 rolling horizon years exist
+        SUPPORTED_YEARS.forEach(y => {
+          if (!this.db.years[y]) {
+            this.db.years[y] = {
+              recipe: null,
+              investments: [],
+              orders: [],
+              profitDraws: [],
+              inventory: [],
+              cutoffDay: 30
+            };
+          }
+        });
 
         // Stored active year preference
         const storedActiveYear = localStorage.getItem(STORAGE_KEYS.ACTIVE_YEAR);
-        if (storedActiveYear === '2026' || storedActiveYear === '2027') {
+        if (SUPPORTED_YEARS.includes(storedActiveYear)) {
           this.db.activeYear = storedActiveYear;
-        } else if (!this.db.activeYear) {
+        } else if (!SUPPORTED_YEARS.includes(this.db.activeYear)) {
           this.db.activeYear = '2026';
         }
       } else {
@@ -507,11 +587,14 @@
           this.db.years[year].cutoffDay = this.state.cutoffDay;
         }
 
-        // Persist primary database
-        localStorage.setItem(STORAGE_KEYS.DB_V2, JSON.stringify(this.db));
+        // Persist primary multiverse root database
+        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, JSON.stringify(this.db));
         localStorage.setItem(STORAGE_KEYS.ACTIVE_YEAR, year);
 
-        // Keep 2026 legacy keys mirrored for 100% backward-compatibility
+        // Keep nogadisima_db_v2 synced for backward compatibility
+        localStorage.setItem(STORAGE_KEYS.DB_V2, JSON.stringify(this.db));
+
+        // Keep 2026 legacy keys mirrored for 100% historical data preservation
         if (year === '2026') {
           if (this.state.recipe) {
             localStorage.setItem(STORAGE_KEYS.RECIPE_LEGACY, JSON.stringify(this.state.recipe));
@@ -567,7 +650,9 @@
       this.state.investments = items;
       this.save();
       this.emit('investment:changed', { source: notifyOrigin, items });
-      this._triggerSyncFeedback('Inversión & Gastos', showToastNotification);
+      if (!String(notifyOrigin).includes('init') && showToastNotification) {
+        this._triggerSyncFeedback('Inversión & Gastos', showToastNotification);
+      }
 
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
@@ -581,7 +666,9 @@
       this.state.orders = orders;
       this.save();
       this.emit('orders:changed', { source: notifyOrigin, orders });
-      this._triggerSyncFeedback('Control de Pedidos', showToastNotification);
+      if (!String(notifyOrigin).includes('init') && showToastNotification) {
+        this._triggerSyncFeedback('Control de Pedidos', showToastNotification);
+      }
 
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
@@ -595,7 +682,9 @@
       this.state.profitDraws = draws;
       this.save();
       this.emit('profitDraws:changed', { source: notifyOrigin, draws });
-      this._triggerSyncFeedback('Gastos de la Ganancia', showToastNotification);
+      if (!String(notifyOrigin).includes('init') && showToastNotification) {
+        this._triggerSyncFeedback('Gastos de la Ganancia', showToastNotification);
+      }
 
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
@@ -606,7 +695,7 @@
       this.state.recipe = recipe;
       this.save();
       this.emit('recipe:changed', { source: notifyOrigin, recipe });
-      if (showToastNotification) {
+      if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Presupuesto de Receta', true);
       }
       if (window.InventoryApp && typeof window.InventoryApp.syncWithRecipe === 'function') {
@@ -621,7 +710,7 @@
       this.state.inventory = items;
       this.save();
       this.emit('inventory:changed', { source: notifyOrigin, items });
-      if (showToastNotification) {
+      if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Inventario', true);
       }
     },
@@ -706,23 +795,29 @@
       const badgeEl = document.getElementById('global-sync-badge');
       const badgeDot = document.getElementById('global-sync-dot');
 
-      if (badgeText && badgeEl) {
-        badgeText.textContent = `Sincronizado: ${sourceLabel} actualizado`;
-        badgeEl.classList.add('ring-2', 'ring-emerald-400/50', 'bg-emerald-50/80', 'text-emerald-900');
-        if (badgeDot) badgeDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-ping';
+      if (badgeEl) {
+        badgeEl.setAttribute('title', `Sincronizado: ${sourceLabel} actualizado en tiempo real`);
+        badgeEl.classList.add('bg-emerald-50/90', 'border-emerald-300/70');
+        if (badgeText) badgeText.textContent = 'Sincronizado';
+        if (badgeDot) {
+          badgeDot.classList.remove('animate-glass-pulse');
+          badgeDot.classList.add('animate-pulse');
+        }
 
         clearTimeout(this._syncTimeout);
         this._syncTimeout = setTimeout(() => {
-          badgeText.textContent = 'Sistema Sincronizado';
-          badgeEl.classList.remove('ring-2', 'ring-emerald-400/50', 'bg-emerald-50/80', 'text-emerald-900');
-          if (badgeDot) badgeDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-glass-pulse';
-        }, 3200);
+          badgeEl.classList.remove('bg-emerald-50/90', 'border-emerald-300/70');
+          if (badgeDot) {
+            badgeDot.classList.remove('animate-pulse');
+            badgeDot.classList.add('animate-glass-pulse');
+          }
+        }, 1800);
       }
 
       if (showToastNotification && window.showToast) {
         clearTimeout(this._toastDebounce);
         this._toastDebounce = setTimeout(() => {
-          window.showToast(`Sincronizado: ${sourceLabel} actualizado`, 'info');
+          window.showToast(`Sincronizado: ${sourceLabel}`, 'info');
         }, 150);
       }
     },
@@ -732,7 +827,7 @@
       window.addEventListener('storage', (e) => {
         if (!e.key) return;
 
-        if (e.key === STORAGE_KEYS.DB_V2) {
+        if (e.key === STORAGE_KEYS.MULTIVERSE_V1 || e.key === STORAGE_KEYS.DB_V2) {
           try {
             const remoteDb = JSON.parse(e.newValue || '{}');
             if (remoteDb && remoteDb.years) {
@@ -746,7 +841,7 @@
           } catch (err) {}
         } else if (e.key === STORAGE_KEYS.ACTIVE_YEAR) {
           const newYear = e.newValue;
-          if (newYear === '2026' || newYear === '2027') {
+          if (SUPPORTED_YEARS.includes(newYear)) {
             this.setYear(newYear, false);
           }
         }
