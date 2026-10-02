@@ -12,13 +12,14 @@
 // Replace placeholders with your Firebase project credentials or configure via UI
 // =========================================================================
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDes9ttO4upPk9gONemkayd7QRNiR7t1zY",
+  authDomain: "nogadisima-crm.firebaseapp.com",
+  databaseURL: "https://nogadisima-crm-default-rtdb.firebaseio.com",
+  projectId: "nogadisima-crm",
+  storageBucket: "nogadisima-crm.firebasestorage.app",
+  messagingSenderId: "187372187162",
+  appId: "1:187372187162:web:76dbb7600586279660aba3",
+  measurementId: "G-ZPWSG9C6VD"
 };
 
 (function (window) {
@@ -1035,6 +1036,13 @@ const firebaseConfig = {
           console.warn('NogaStore: Error en listener de Firebase Realtime Database:', error);
           this.updateConnectionStatus('offline');
         });
+
+        // 3. Optional Analytics initialization
+        if (typeof firebase.analytics === 'function') {
+          try {
+            firebase.analytics();
+          } catch (e) {}
+        }
 
         console.log('NogaStore: Firebase Realtime Database conectado y escuchando en /nogadisima_crm');
       } catch (err) {
