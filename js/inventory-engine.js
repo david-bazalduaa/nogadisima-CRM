@@ -572,139 +572,204 @@
       }
     },
 
-    // 2. Consumption Allocation Logic
-    // Packaging Demand per Order (Q chiles)
-    calculatePackagingDemandForOrder: function (orderQty) {
-      const q = Math.max(0, parseInt(orderQty, 10) || 0);
-      if (q === 0) return {};
+    // 2. Consumption Allocation & Reserved Stock Engine
+    // -------------------------------------------------------------------------
 
-      const bagsAndRibbons = Math.ceil(q / 2);
-      return {
-        'Bolsas blancas de entrega': bagsAndRibbons,
-        'Listón': bagsAndRibbons,
-        'Sticker de sello bolsa': bagsAndRibbons,
-        'Tarjetas de presentación / agradecimiento': bagsAndRibbons,
-        'Tarjetas de agradecimiento / presentación': bagsAndRibbons,
-        'Envases termoformados (Marce)': q * 2,
-        'Envases termoformados (Marce / Goplas)': q * 2,
-        'Papel encerado': q * 1,
-        'Sticker decorativo chile': q * 1
-      };
-    },
-
-    // Kitchen Ingredients Demand per Order (Q chiles)
-    calculateIngredientsDemandForOrder: function (orderQty) {
-      const q = Math.max(0, parseInt(orderQty, 10) || 0);
-      if (q === 0) return {};
-
-      const recipeData = (window.RecipeApp && window.RecipeApp.data)
-        ? window.RecipeApp.data
-        : (window.NogaStore ? window.NogaStore.getRecipe() : null);
-
-      const yieldPortions = (recipeData && Number(recipeData.yieldPortions) > 0)
-        ? Number(recipeData.yieldPortions)
-        : 6.5;
-
-      const demandMap = {};
-
-      if (recipeData && Array.isArray(recipeData.categories)) {
-        recipeData.categories.forEach(cat => {
-          if (cat.id === 'empaque') return; // Handled separately
-          cat.items.forEach(item => {
-            const unitConsumption = (Number(item.qty) || 0) / yieldPortions;
-            const totalForOrder = q * unitConsumption;
-            demandMap[item.id] = (demandMap[item.id] || 0) + totalForOrder;
-            demandMap[item.name.toLowerCase()] = (demandMap[item.name.toLowerCase()] || 0) + totalForOrder;
-          });
-        });
-      }
-
-      return demandMap;
-    },
-
-    // 3. Predictive 7-Day Lookahead Window & Active Demand Calculation
-    getUpcomingOrders: function () {
+    // Unified Active Pending Orders:
+    // Held ONLY for active orders where deliveryStatus !== 'Entregado' OR prepStatus !== 'Preparado'
+    getPendingOrders: function () {
       const orders = (window.OrdersApp && Array.isArray(window.OrdersApp.orders))
         ? window.OrdersApp.orders
         : (window.NogaStore ? window.NogaStore.getOrders() : []);
 
-      // Filter unfulfilled orders (not yet delivered or not yet prepped)
-      const pendingOrders = orders.filter(o => o.prepStatus === 'No preparado' || o.deliveryStatus === 'No entregado');
-      return pendingOrders;
+      return orders.filter(o => {
+        const q = Math.max(0, parseInt(o.qty, 10) || 0);
+        if (q <= 0) return false;
+        return o.deliveryStatus !== 'Entregado' || o.prepStatus !== 'Preparado';
+      });
+    },
+
+    getUpcomingOrders: function () {
+      return this.getPendingOrders();
+    },
+
+    // Kitchen Recipe Matching Helper (direct ID match, then normalized name match, then keyword fallback)
+    findMatchingRecipeItem: function (invItem, recipeData) {
+      if (!invItem || !recipeData || !Array.isArray(recipeData.categories)) return null;
+
+      // 1. Direct ID match across nogada, relleno, extras
+      for (const cat of recipeData.categories) {
+        if (cat.id === 'empaque') continue;
+        const item = cat.items.find(it => it.id === invItem.id);
+        if (item) return item;
+      }
+
+      const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      const invNorm = normalize(invItem.name);
+
+      // 2. Exact normalized name match within same category first
+      if (invItem.category) {
+        const sameCat = recipeData.categories.find(c => c.id === invItem.category);
+        if (sameCat) {
+          const matchSame = sameCat.items.find(recItem => normalize(recItem.name) === invNorm);
+          if (matchSame) return matchSame;
+        }
+      }
+
+      // 3. Exact normalized name match across any category
+      for (const cat of recipeData.categories) {
+        if (cat.id === 'empaque') continue;
+        for (const recItem of cat.items) {
+          if (normalize(recItem.name) === invNorm) return recItem;
+        }
+      }
+
+      // 4. Keyword / Substring Fallback Match
+      for (const cat of recipeData.categories) {
+        if (cat.id === 'empaque') continue;
+        for (const recItem of cat.items) {
+          const recNorm = normalize(recItem.name);
+          if (invNorm.includes('nuez') && recNorm.includes('nuez') && !recNorm.includes('moscada') && !invNorm.includes('moscada')) return recItem;
+          if (invNorm.includes('acitron') && recNorm.includes('acitron')) return recItem;
+          if (invNorm.includes('chile poblano') && recNorm.includes('chile poblano')) return recItem;
+          if (invNorm.includes('philadelphia') && recNorm.includes('philadelphia')) return recItem;
+          if (invNorm.includes('res') && recNorm.includes('res')) return recItem;
+          if (invNorm.includes('puerco') && recNorm.includes('puerco')) return recItem;
+          if (invNorm.includes('granada') && recNorm.includes('granada')) return recItem;
+          if (invNorm.includes('durazno') && recNorm.includes('durazno')) return recItem;
+          if (invNorm.includes('manzana') && recNorm.includes('manzana')) return recItem;
+          if (invNorm.includes('cebolla') && recNorm.includes('cebolla')) return recItem;
+          if (invNorm.includes('ajo') && recNorm.includes('ajo')) return recItem;
+          if (invNorm.includes('tomate') && recNorm.includes('tomate')) return recItem;
+          if (invNorm.includes('cabra') && recNorm.includes('cabra')) return recItem;
+          if (invNorm.includes('perejil') && recNorm.includes('perejil')) return recItem;
+          if (invNorm.includes('azucar') && recNorm.includes('azucar')) return recItem;
+          if (invNorm.includes('almendra') && recNorm.includes('almendra')) return recItem;
+          if (invNorm.includes('pinon') && recNorm.includes('pinon')) return recItem;
+          if (invNorm.includes('crema') && recNorm.includes('crema')) return recItem;
+          if (invNorm.includes('jerez') && recNorm.includes('jerez')) return recItem;
+          if (invNorm.includes('leche evaporada') && recNorm.includes('leche evaporada')) return recItem;
+        }
+      }
+
+      return null;
+    },
+
+    // Robust Packaging Allocation per Pending Order:
+    // Accumulate across active pending orders using explicit rules & regex
+    calculatePackagingReservedForItem: function (invItem, pendingOrders) {
+      if (!invItem || invItem.category !== 'empaque' || !Array.isArray(pendingOrders) || pendingOrders.length === 0) {
+        return 0;
+      }
+
+      const name = invItem.name || '';
+      const id = invItem.id || '';
+
+      // Rule 1: Bolsas blancas / kraft (Capacity: 2 chiles per bag -> Math.ceil(qty / 2))
+      if (id === 'pkg-2' || /bolsa/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + Math.ceil(q / 2);
+        }, 0);
+      }
+
+      // Rule 2: Listón (1 per bag: Math.ceil(qty / 2))
+      if (id === 'pkg-7' || /list[oó]n/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + Math.ceil(q / 2);
+        }, 0);
+      }
+
+      // Rule 3: Tarjetas de presentación / agradecimiento (1 per bag: Math.ceil(qty / 2))
+      if (id === 'pkg-6' || /tarjeta.*(nogad[ií]sima|agradecimiento|presentaci[oó]n)/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + Math.ceil(q / 2);
+        }, 0);
+      }
+
+      // Rule 4: Sticker de sello bolsa (chico) (1 per bag: Math.ceil(qty / 2))
+      if (id === 'pkg-5' || /sello.*bolsa|sticker.*chico/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + Math.ceil(q / 2);
+        }, 0);
+      }
+
+      // Rule 5: Envases termoformados (Goplas / Marce) (2 per chile: qty * 2)
+      if (id === 'pkg-3' || /envase.*(termoformado|goplas|marce)/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + (q * 2);
+        }, 0);
+      }
+
+      // Rule 6: Papel encerado (1 per chile: qty * 1)
+      if (id === 'pkg-1' || /papel.*encerado/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + (q * 1);
+        }, 0);
+      }
+
+      // Rule 7: Sticker decorativo chile (grande) (1 per chile: qty * 1)
+      if (id === 'pkg-4' || /decorativo.*chile|sticker.*grande/i.test(name)) {
+        return pendingOrders.reduce((sum, o) => {
+          const q = Math.max(0, parseInt(o.qty, 10) || 0);
+          return sum + (q * 1);
+        }, 0);
+      }
+
+      return 0;
+    },
+
+    // Kitchen Ingredients Allocation per Pending Order:
+    // Unit Usage = recipeBatchQuantity / recipeYield
+    // Stock Reservado = Total Pending Chiles * Unit Usage
+    calculateIngredientReservedForItem: function (invItem, pendingOrders, recipeData) {
+      if (!invItem || invItem.category === 'empaque' || !Array.isArray(pendingOrders) || pendingOrders.length === 0) {
+        return 0;
+      }
+
+      const recipe = recipeData || (window.RecipeApp && window.RecipeApp.data) || (window.NogaStore ? window.NogaStore.getRecipe() : null);
+      if (!recipe) return 0;
+
+      const recItem = this.findMatchingRecipeItem(invItem, recipe);
+      if (!recItem) return 0;
+
+      const yieldPortions = (recipe && Number(recipe.yieldPortions) > 0) ? Number(recipe.yieldPortions) : 6.5;
+      const batchQty = Number(recItem.qty) || 0;
+      if (batchQty <= 0) return 0;
+
+      const unitUsage = batchQty / yieldPortions;
+      const totalPendingChiles = pendingOrders.reduce((sum, o) => sum + (Math.max(0, parseInt(o.qty, 10) || 0)), 0);
+
+      const totalReserved = totalPendingChiles * unitUsage;
+      return Math.round(totalReserved * 10) / 10;
     },
 
     // Complete Demand Breakdown for Items
     calculateDemandMap: function () {
-      const upcomingOrders = this.getUpcomingOrders();
+      const pendingOrders = this.getPendingOrders();
       const itemDemandMap = {}; // itemId -> { reservedAll: number, lookahead7d: number }
-
-      this.items.forEach(item => {
-        itemDemandMap[item.id] = { reservedAll: 0, lookahead7d: 0 };
-      });
 
       const recipeData = (window.RecipeApp && window.RecipeApp.data)
         ? window.RecipeApp.data
         : (window.NogaStore ? window.NogaStore.getRecipe() : null);
 
-      const yieldPortions = (recipeData && Number(recipeData.yieldPortions) > 0)
-        ? Number(recipeData.yieldPortions)
-        : 6.5;
+      this.items.forEach(invItem => {
+        let reserved = 0;
+        if (invItem.category === 'empaque') {
+          reserved = this.calculatePackagingReservedForItem(invItem, pendingOrders);
+        } else {
+          reserved = this.calculateIngredientReservedForItem(invItem, pendingOrders, recipeData);
+        }
 
-      upcomingOrders.forEach(order => {
-        const q = Math.max(0, parseInt(order.qty, 10) || 0);
-        if (q === 0) return;
-
-        const isUnprepped = (order.prepStatus === 'No preparado');
-        const pkgDemand = this.calculatePackagingDemandForOrder(q);
-
-        this.items.forEach(invItem => {
-          let orderRequirement = 0;
-
-          // Check packaging formulas
-          if (invItem.category === 'empaque') {
-            for (const [pkgName, requiredQty] of Object.entries(pkgDemand)) {
-              const normPkg = pkgName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-              const normInv = invItem.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-              if (normInv.includes(normPkg) || normPkg.includes(normInv)) {
-                orderRequirement = requiredQty;
-                break;
-              }
-            }
-          } else {
-            // Kitchen Ingredient formula
-            if (recipeData && Array.isArray(recipeData.categories)) {
-              for (const cat of recipeData.categories) {
-                if (cat.id === 'empaque') continue;
-                for (const recItem of cat.items) {
-                  let isMatch = (recItem.id === invItem.id);
-                  if (!isMatch) {
-                    const normRec = (recItem.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    const normInv = (invItem.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    if (normRec === normInv) {
-                      isMatch = true;
-                    } else if (normInv.includes('nuez') && normRec.includes('nuez')) {
-                      isMatch = true;
-                    } else if (normInv.includes('acitron') && normRec.includes('acitron')) {
-                      isMatch = true;
-                    }
-                  }
-                  if (isMatch) {
-                    orderRequirement += q * ((Number(recItem.qty) || 0) / yieldPortions);
-                  }
-                }
-              }
-            }
-          }
-
-          if (orderRequirement > 0) {
-            // Reserved demand for currently active kitchen preparation
-            if (isUnprepped) {
-              itemDemandMap[invItem.id].reservedAll += orderRequirement;
-            }
-            // Upcoming 7-day lookahead pipeline demand
-            itemDemandMap[invItem.id].lookahead7d += orderRequirement;
-          }
-        });
+        itemDemandMap[invItem.id] = {
+          reservedAll: reserved,
+          lookahead7d: reserved
+        };
       });
 
       return itemDemandMap;
@@ -713,8 +778,8 @@
     // 4. Financial & Operational Inventory Metrics
     getMetrics: function () {
       const demandMap = this.calculateDemandMap();
-      const upcomingOrders = this.getUpcomingOrders();
-      const demand7DaysChiles = upcomingOrders.reduce((sum, o) => sum + (parseInt(o.qty, 10) || 0), 0);
+      const pendingOrders = this.getPendingOrders();
+      const demand7DaysChiles = pendingOrders.reduce((sum, o) => sum + (parseInt(o.qty, 10) || 0), 0);
 
       let urgentAlertsCount = 0;
       let suggestedAlertsCount = 0;
@@ -722,32 +787,38 @@
 
       const itemAnalysis = this.items.map(item => {
         const demand = demandMap[item.id] || { reservedAll: 0, lookahead7d: 0 };
-        const demand7d = demand.lookahead7d;
-        const reserved = demand.reservedAll;
-        const availableStock = item.stockActual - reserved;
-        const projectedBalance = item.stockActual - demand7d;
+        const reserved = demand.reservedAll || 0;
+        const demand7d = demand.lookahead7d || reserved;
+
+        // Stock Total: Stock Diego (#) + Stock Angy (#)
+        const totalStock = (Number(item.stockDiego) || 0) + (Number(item.stockAngy) || 0);
+        item.stockActual = totalStock;
+
+        // Disponible Real = Stock Total - Stock Reservado
+        const availableStock = Math.round((totalStock - reserved) * 10) / 10;
+        const projectedBalance = availableStock;
 
         let status = 'saludable'; // 'saludable', 'sugerido', 'urgente'
         let deficit = 0;
         let suggestedPurchaseQty = 0;
         let estimatedCost = 0;
 
-        if (projectedBalance < 0) {
+        if (availableStock <= 0) {
           status = 'urgente';
-          deficit = Math.abs(projectedBalance);
+          deficit = Math.abs(availableStock);
           urgentAlertsCount += 1;
 
           // Purchase quantity based on package unit or deficit
           const pkgSize = Math.max(0.1, Number(item.packageSize) || 1);
           const pkgPrice = Math.max(0, Number(item.packagePrice) || 0);
-          const packagesNeeded = Math.ceil(deficit / pkgSize);
+          const packagesNeeded = Math.max(1, Math.ceil(deficit / pkgSize));
           suggestedPurchaseQty = packagesNeeded * pkgSize;
           estimatedCost = packagesNeeded * pkgPrice;
           totalRestockCost += estimatedCost;
-        } else if (projectedBalance < item.minStock) {
+        } else if (availableStock < item.minStock) {
           status = 'sugerido';
           suggestedAlertsCount += 1;
-          const deficitToMin = item.minStock - projectedBalance;
+          const deficitToMin = item.minStock - availableStock;
           const pkgSize = Math.max(0.1, Number(item.packageSize) || 1);
           const pkgPrice = Math.max(0, Number(item.packagePrice) || 0);
           const packagesNeeded = Math.ceil(deficitToMin / pkgSize);
@@ -999,6 +1070,16 @@
         if (item.category === 'extras') catLabel = 'Extras';
         if (item.category === 'empaque') catLabel = 'Empaque';
 
+        // Balance Badges & Highlights
+        const isDeficit = (item.availableStock <= 0);
+        const availableBadge = isDeficit
+          ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md font-numeric font-extrabold text-xs bg-rose-500/15 text-rose-700 border border-rose-200/90 shadow-2xs">${formatNumber(item.availableStock)} <span class="ml-1 text-[11px] font-normal text-rose-600/90">${item.unit}</span></span>`
+          : `<span class="inline-flex items-center px-2 py-0.5 rounded-md font-numeric font-extrabold text-xs bg-emerald-500/15 text-emerald-800 border border-emerald-200/90 shadow-2xs">${formatNumber(item.availableStock)} <span class="ml-1 text-[11px] font-normal text-emerald-700/90">${item.unit}</span></span>`;
+
+        const reservedBadge = item.reserved > 0
+          ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md font-numeric font-bold text-xs bg-amber-500/15 text-amber-800 border border-amber-200/80 shadow-2xs">${formatNumber(item.reserved)} <span class="ml-1 text-[11px] font-normal text-amber-700/80">${item.unit}</span></span>`
+          : `<span class="font-numeric font-semibold text-slate-400 text-xs">0 <span class="text-[11px] font-normal text-slate-400/80">${item.unit}</span></span>`;
+
         return `
           <tr id="catalog-row-${item.id}" class="liquid-table-row hover:bg-white/60 transition-all duration-300">
             <!-- 1. Insumo -->
@@ -1047,13 +1128,13 @@
             </td>
 
             <!-- 7. Stock Reservado (Pedidos Activos) -->
-            <td class="py-2.5 px-2 text-right font-numeric font-bold text-amber-700">
-              ${formatNumber(item.reserved)} <span class="text-xs text-slate-400 font-normal">${item.unit}</span>
+            <td class="py-2.5 px-2 text-right">
+              ${reservedBadge}
             </td>
 
             <!-- 8. Stock Disponible Real -->
-            <td class="py-2.5 px-2 text-right font-numeric font-extrabold ${item.availableStock < 0 ? 'text-rose-600' : 'text-emerald-700'}">
-              ${formatNumber(item.availableStock)} <span class="text-xs font-normal ${item.availableStock < 0 ? 'text-rose-400' : 'text-emerald-500'}">${item.unit}</span>
+            <td class="py-2.5 px-2 text-right">
+              ${availableBadge}
             </td>
 
             <!-- 9. Acciones -->

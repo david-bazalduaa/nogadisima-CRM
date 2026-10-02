@@ -190,6 +190,9 @@
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
       }
+      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+        window.InventoryApp.render();
+      }
     },
 
     setOrders: function (orders, notifyOrigin = 'system', showToastNotification = true) {
@@ -200,6 +203,9 @@
 
       if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
+      }
+      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+        window.InventoryApp.render();
       }
     },
 
@@ -220,6 +226,12 @@
       this.emit('recipe:changed', { source: notifyOrigin, recipe });
       if (showToastNotification) {
         this._triggerSyncFeedback('Presupuesto de Receta', true);
+      }
+      if (window.InventoryApp && typeof window.InventoryApp.syncWithRecipe === 'function') {
+        window.InventoryApp.syncWithRecipe();
+      }
+      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+        window.InventoryApp.render();
       }
     },
 
