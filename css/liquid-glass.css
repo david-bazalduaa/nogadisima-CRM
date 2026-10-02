@@ -98,17 +98,50 @@
    ========================================================================== */
 .liquid-dark-card {
   position: relative;
-  background: linear-gradient(145deg, rgba(28, 31, 38, 0.88) 0%, rgba(20, 22, 28, 0.84) 100%);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(28, 32, 42, 0.75) 0%, rgba(15, 18, 25, 0.85) 100%) !important;
+  backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) contrast(105%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 1.75rem !important;
   box-shadow: 
-    0 20px 48px -8px rgba(0, 0, 0, 0.35),
-    0 4px 16px 0 rgba(0, 0, 0, 0.16),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.20),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.30);
+    0 20px 45px -10px rgba(0, 0, 0, 0.32),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.40) !important;
   color: var(--charcoal-text-light);
+  overflow: hidden;
+}
+
+/* Apple Liquid Progress Bar (Track & Fill) */
+.apple-liquid-track {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(8px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.apple-liquid-fill {
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.85) 0%, rgba(16, 185, 129, 0.95) 100%) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.40) !important;
+}
+
+/* Apple Financial Frosted Teal / Emerald Text Gradient */
+.text-apple-emerald {
+  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Ethereal Apple Status Jewel */
+.liquid-status-jewel {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(52, 211, 153, 0.95), rgba(16, 185, 129, 0.60)) !important;
+  box-shadow: 0 0 10px 1px rgba(52, 211, 153, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.60) !important;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -149,22 +182,28 @@
     inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* 2. Active Liquid Glass Pill (Smoked Charcoal / Dark Graphite) */
+/* 2. Active Liquid Glass Pill (Apple Capsule Control) */
 .liquid-pill-active {
-  background: linear-gradient(135deg, rgba(32, 36, 44, 0.94) 0%, rgba(20, 23, 30, 0.92) 100%) !important;
-  color: #F8FAFC !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: linear-gradient(135deg, rgba(30, 36, 48, 0.78) 0%, rgba(18, 22, 30, 0.88) 100%) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
   box-shadow: 
-    0 8px 22px -4px rgba(0, 0, 0, 0.28),
-    0 2px 6px 0 rgba(0, 0, 0, 0.12),
-    inset 0 1px 2px 0 rgba(255, 255, 255, 0.35) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    0 8px 24px -4px rgba(0, 0, 0, 0.25), 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35), 
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40) !important;
+  color: #FFFFFF !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.025em !important;
 }
 
 .liquid-pill-active:hover {
-  background: linear-gradient(135deg, rgba(40, 45, 55, 0.96) 0%, rgba(26, 30, 38, 0.94) 100%) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
+  background: linear-gradient(135deg, rgba(38, 45, 60, 0.84) 0%, rgba(22, 27, 36, 0.92) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  box-shadow: 
+    0 10px 28px -4px rgba(0, 0, 0, 0.30), 
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45), 
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40) !important;
   color: #FFFFFF !important;
   transform: translateY(-1px);
 }
@@ -178,26 +217,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(32, 36, 44, 0.92) 0%, rgba(20, 23, 30, 0.88) 100%);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: linear-gradient(135deg, rgba(30, 36, 48, 0.82) 0%, rgba(18, 22, 30, 0.90) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 14px;
   box-shadow: 
     0 4px 14px -2px rgba(0, 0, 0, 0.22),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.28);
-  color: #F8FAFC;
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.32);
+  color: #FFFFFF;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   user-select: none;
 }
 
 .liquid-btn-dark:hover {
-  background: linear-gradient(135deg, rgba(42, 47, 57, 0.96) 0%, rgba(26, 30, 39, 0.92) 100%);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, rgba(38, 45, 60, 0.88) 0%, rgba(22, 27, 36, 0.94) 100%);
+  border-color: rgba(255, 255, 255, 0.32);
   box-shadow: 
     0 6px 18px -2px rgba(0, 0, 0, 0.28),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.38);
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.42);
   transform: translateY(-1px);
   color: #FFFFFF;
 }
@@ -209,32 +248,99 @@
     inset 0 1px 2px 0 rgba(0, 0, 0, 0.30);
 }
 
-/* Subtle Glass Form Inputs & Selects */
+/* Authentic Apple Liquid Glass for dark pill elements */
+.bg-\[\#1E222B\] {
+  background: linear-gradient(135deg, rgba(30, 36, 48, 0.80) 0%, rgba(18, 22, 30, 0.88) 100%) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.22), inset 0 1px 1px 0 rgba(255, 255, 255, 0.32) !important;
+}
+
+/* ==========================================================================
+   Apple Control Center: Liquid Select Controls & Dropdown Menus
+   ========================================================================== */
+select,
+select.liquid-input,
+select.liquid-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.70) !important;
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.03), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.90) !important;
+  border-radius: 0.85rem !important;
+  padding-right: 2.25rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 0.85rem 0.85rem !important;
+  color: #1E293B !important;
+  font-weight: 500 !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+select:hover,
+select.liquid-input:hover,
+select.liquid-select:hover {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 
+    0 6px 18px rgba(0, 0, 0, 0.05), 
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+}
+
+select:focus,
+select.liquid-input:focus,
+select.liquid-select:focus {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(52, 211, 153, 0.40) !important;
+  box-shadow: 
+    0 0 0 3px rgba(16, 185, 129, 0.20),
+    0 6px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95) !important;
+  outline: none !important;
+}
+
+select option,
+select.liquid-input option,
+select.liquid-select option {
+  background-color: #FFFFFF !important;
+  color: #1E222B !important;
+  font-weight: 500 !important;
+  padding: 8px 12px !important;
+}
+
+/* Subtle Glass Form Inputs (Text, Number, Date, etc.) */
 .liquid-input {
-  background: rgba(255, 255, 255, 0.40);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.70);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  border-radius: 0.85rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.90);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #1E293B;
 }
 
 .liquid-input:hover {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.75);
   border-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 
-    0 3px 10px 0 rgba(0, 0, 0, 0.04),
-    inset 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
 }
 
 .liquid-input:focus {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(30, 34, 43, 0.50);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(52, 211, 153, 0.40);
   box-shadow: 
-    0 0 0 3px rgba(30, 34, 43, 0.12),
-    0 4px 14px -2px rgba(0, 0, 0, 0.06),
-    inset 0 1px 2px 0 rgba(255, 255, 255, 0.85);
+    0 0 0 3px rgba(16, 185, 129, 0.20),
+    0 6px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
   outline: none;
 }
 

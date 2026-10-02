@@ -14,17 +14,17 @@ function switchTab(tabId) {
     if (id === tabId) {
       if (panelEl) panelEl.classList.remove('hidden');
       if (desktopBtn) {
-        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 liquid-pill-active';
+        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium tracking-wide transition-all duration-200 liquid-pill-active text-white';
         const svg = desktopBtn.querySelector('svg');
         if (svg) svg.className = 'w-4 h-4 text-white';
       }
       if (mobileBtn) {
-        mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#1E222B] text-white font-numeric shadow-sm border border-white/20';
+        mobileBtn.className = 'whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide text-white font-numeric shadow-sm liquid-pill-active';
       }
     } else {
       if (panelEl) panelEl.classList.add('hidden');
       if (desktopBtn) {
-        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200';
+        desktopBtn.className = 'tab-btn flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium tracking-wide text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all duration-200';
         const svg = desktopBtn.querySelector('svg');
         if (svg) svg.className = 'w-4 h-4 text-slate-400';
       }
