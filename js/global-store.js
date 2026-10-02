@@ -575,24 +575,66 @@
       this.db.activeYear = '2026';
     },
 
-    save: function () {
+    // 7. Active Tab Detection Helper
+    getActiveTab: function () {
+      const panels = ['presupuesto', 'inversion', 'pedidos', 'inventario'];
+      for (let i = 0; i < panels.length; i++) {
+        const el = document.getElementById(`panel-${panels[i]}`);
+        if (el && !el.classList.contains('hidden')) return panels[i];
+      }
+      return 'presupuesto';
+    },
+
+    // 8. High-Performance Debounced Persistence Architecture
+    _saveTimer: null,
+    _pendingSave: false,
+
+    save: function (immediate = false) {
+      // 1. Immediately sync in-memory active year pointers (0ms latency for queries)
+      const year = this.getActiveYear();
+      if (this.db.years && this.db.years[year]) {
+        this.db.years[year].recipe = this.state.recipe;
+        this.db.years[year].investments = this.state.investments;
+        this.db.years[year].orders = this.state.orders;
+        this.db.years[year].profitDraws = this.state.profitDraws;
+        this.db.years[year].inventory = this.state.inventory;
+        this.db.years[year].cutoffDay = this.state.cutoffDay;
+      }
+
+      this._pendingSave = true;
+
+      if (immediate) {
+        this._flushSave();
+        return;
+      }
+
+      // Batch multiple rapid keystrokes/actions into a single non-blocking disk flush (250ms)
+      if (!this._saveTimer) {
+        this._saveTimer = setTimeout(() => {
+          this._saveTimer = null;
+          this._flushSave();
+        }, 250);
+      }
+    },
+
+    _flushSave: function () {
+      if (!this._pendingSave) return;
+      this._pendingSave = false;
+      if (this._saveTimer) {
+        clearTimeout(this._saveTimer);
+        this._saveTimer = null;
+      }
+
       try {
         const year = this.getActiveYear();
-        if (this.db.years[year]) {
-          this.db.years[year].recipe = this.state.recipe;
-          this.db.years[year].investments = this.state.investments;
-          this.db.years[year].orders = this.state.orders;
-          this.db.years[year].profitDraws = this.state.profitDraws;
-          this.db.years[year].inventory = this.state.inventory;
-          this.db.years[year].cutoffDay = this.state.cutoffDay;
-        }
+        const serializedDb = JSON.stringify(this.db);
 
         // Persist primary multiverse root database
-        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, JSON.stringify(this.db));
+        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, serializedDb);
         localStorage.setItem(STORAGE_KEYS.ACTIVE_YEAR, year);
 
         // Keep nogadisima_db_v2 synced for backward compatibility
-        localStorage.setItem(STORAGE_KEYS.DB_V2, JSON.stringify(this.db));
+        localStorage.setItem(STORAGE_KEYS.DB_V2, serializedDb);
 
         // Keep 2026 legacy keys mirrored for 100% historical data preservation
         if (year === '2026') {
@@ -620,7 +662,7 @@
       }
     },
 
-    // 8. Reactive State Accessors (Year-Scoped)
+    // 9. Reactive State Accessors (Year-Scoped)
     getInvestments: function () {
       return this.state.investments;
     },
@@ -645,79 +687,84 @@
       return this.state.cutoffDay;
     },
 
-    // 9. Reactive State Mutators (Dispatch Cross-Tab Events)
-    setInvestments: function (items, notifyOrigin = 'system', showToastNotification = true) {
+    // 10. Reactive State Mutators (Active-Tab-Scoped Re-rendering)
+    setInvestments: function (items, notifyOrigin = 'system', showToastNotification = true, immediateSave = false) {
       this.state.investments = items;
-      this.save();
+      this.save(immediateSave);
       this.emit('investment:changed', { source: notifyOrigin, items });
       if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Inversión & Gastos', showToastNotification);
       }
 
-      if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
+      const activeTab = this.getActiveTab();
+      if (activeTab === 'inversion' && window.InvestmentApp && typeof window.InvestmentApp.render === 'function') {
+        window.InvestmentApp.render();
+      } else if (activeTab === 'pedidos' && window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
-      }
-      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+      } else if (activeTab === 'inventario' && window.InventoryApp && typeof window.InventoryApp.render === 'function') {
         window.InventoryApp.render();
       }
     },
 
-    setOrders: function (orders, notifyOrigin = 'system', showToastNotification = true) {
+    setOrders: function (orders, notifyOrigin = 'system', showToastNotification = true, immediateSave = false) {
       this.state.orders = orders;
-      this.save();
+      this.save(immediateSave);
       this.emit('orders:changed', { source: notifyOrigin, orders });
       if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Control de Pedidos', showToastNotification);
       }
 
-      if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
+      const activeTab = this.getActiveTab();
+      if (activeTab === 'pedidos' && window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
-      }
-      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
-        window.InventoryApp.render();
       }
     },
 
-    setProfitDraws: function (draws, notifyOrigin = 'system', showToastNotification = true) {
+    setProfitDraws: function (draws, notifyOrigin = 'system', showToastNotification = true, immediateSave = false) {
       this.state.profitDraws = draws;
-      this.save();
+      this.save(immediateSave);
       this.emit('profitDraws:changed', { source: notifyOrigin, draws });
       if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Gastos de la Ganancia', showToastNotification);
       }
 
-      if (window.OrdersApp && typeof window.OrdersApp.render === 'function') {
+      const activeTab = this.getActiveTab();
+      if (activeTab === 'pedidos' && window.OrdersApp && typeof window.OrdersApp.render === 'function') {
         window.OrdersApp.render();
       }
     },
 
-    setRecipe: function (recipe, notifyOrigin = 'system', showToastNotification = false) {
+    setRecipe: function (recipe, notifyOrigin = 'system', showToastNotification = false, immediateSave = false) {
       this.state.recipe = recipe;
-      this.save();
+      this.save(immediateSave);
       this.emit('recipe:changed', { source: notifyOrigin, recipe });
       if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Presupuesto de Receta', true);
       }
-      if (window.InventoryApp && typeof window.InventoryApp.syncWithRecipe === 'function') {
-        window.InventoryApp.syncWithRecipe();
-      }
-      if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
-        window.InventoryApp.render();
+
+      const activeTab = this.getActiveTab();
+      if (activeTab === 'inventario') {
+        if (window.InventoryApp && typeof window.InventoryApp.syncWithRecipe === 'function') {
+          window.InventoryApp.syncWithRecipe();
+        }
+        if (window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+          window.InventoryApp.render();
+        }
       }
     },
 
-    setInventory: function (items, notifyOrigin = 'system', showToastNotification = false) {
+    setInventory: function (items, notifyOrigin = 'system', showToastNotification = false, immediateSave = false) {
       this.state.inventory = items;
-      this.save();
+      this.save(immediateSave);
       this.emit('inventory:changed', { source: notifyOrigin, items });
       if (!String(notifyOrigin).includes('init') && showToastNotification) {
         this._triggerSyncFeedback('Inventario', true);
       }
     },
 
-    setCutoffDay: function (day, notifyOrigin = 'system') {
+    setCutoffDay: function (day, notifyOrigin = 'system', immediateSave = false) {
       this.state.cutoffDay = day;
-      this.save();
+      this.save(immediateSave);
       this.emit('cutoffDay:changed', { source: notifyOrigin, day });
     },
 
@@ -844,6 +891,17 @@
           if (SUPPORTED_YEARS.includes(newYear)) {
             this.setYear(newYear, false);
           }
+        }
+      });
+
+      // Guarantee immediate flush when closing window or switching browser tabs
+      window.addEventListener('beforeunload', () => {
+        this._flushSave();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          this._flushSave();
         }
       });
     }

@@ -1490,9 +1490,13 @@
       this.renderRestockAlertsTable();
     },
 
+    _searchTimeout: null,
     setSearch: function (query) {
       this.filters.search = query || '';
-      this.renderRestockAlertsTable();
+      clearTimeout(this._searchTimeout);
+      this._searchTimeout = setTimeout(() => {
+        this.renderRestockAlertsTable();
+      }, 120);
     },
 
     setCatalogFilter: function (category) {

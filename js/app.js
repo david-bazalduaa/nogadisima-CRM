@@ -52,6 +52,9 @@ function switchTab(tabId) {
     window.OrdersApp.render();
   }
   if (tabId === 'inventario' && window.InventoryApp && typeof window.InventoryApp.render === 'function') {
+    if (typeof window.InventoryApp.syncWithRecipe === 'function') {
+      window.InventoryApp.syncWithRecipe();
+    }
     window.InventoryApp.render();
   }
   if (tabId === 'presupuesto' && typeof window.recalculateAll === 'function') {

@@ -123,10 +123,10 @@ function loadRecipeState() {
   }
 }
 
-function saveRecipeState(notify = false) {
+function saveRecipeState(notify = false, immediate = false) {
   try {
     if (window.NogaStore) {
-      window.NogaStore.setRecipe(window.RecipeApp.data, 'recipe-module', notify);
+      window.NogaStore.setRecipe(window.RecipeApp.data, 'recipe-module', notify, immediate);
     } else {
       localStorage.setItem(STORAGE_KEY_RECIPE, JSON.stringify(window.RecipeApp.data));
     }

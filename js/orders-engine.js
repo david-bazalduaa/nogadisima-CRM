@@ -690,10 +690,14 @@
       this.render();
     },
 
+    _searchTimeout: null,
     setSearch: function (query) {
       this.filters.search = query;
       this.pagination.currentPage = 1;
-      this.renderTable();
+      clearTimeout(this._searchTimeout);
+      this._searchTimeout = setTimeout(() => {
+        this.renderTable();
+      }, 120);
     },
 
     resetFilters: function () {
