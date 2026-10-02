@@ -877,28 +877,6 @@ window.openStoreSearchPopover = function(event, itemId) {
     titleEl.textContent = `"${ingredientName}"`;
   }
 
-  // Visual enhancement for Amazon button if product has a direct purchase link
-  const normalized = ingredientName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const isDirectAmazon = (normalized.includes('liston') || itemId === 'pkg-7');
-  const amazonBtn = popover.querySelector("button[onclick*='amazon']");
-  if (amazonBtn) {
-    let badge = amazonBtn.querySelector('.direct-link-badge');
-    if (isDirectAmazon) {
-      amazonBtn.title = 'Abrir producto exacto ya adquirido en Amazon';
-      amazonBtn.classList.add('border-amber-400', 'bg-amber-50/80', 'text-amber-950');
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'direct-link-badge ml-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-500 text-white uppercase tracking-wider shadow-2xs';
-        badge.textContent = 'Comprado';
-        amazonBtn.appendChild(badge);
-      }
-    } else {
-      amazonBtn.title = 'Buscar en Amazon México';
-      amazonBtn.classList.remove('border-amber-400', 'bg-amber-50/80', 'text-amber-950');
-      if (badge) badge.remove();
-    }
-  }
-
   // Display popover and compute smart floating position
   popover.classList.remove('hidden');
 

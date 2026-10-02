@@ -603,18 +603,9 @@
 
             <!-- 2. Tienda / Proveedor -->
             <td class="py-2 px-2 text-left">
-              <div class="flex items-center space-x-1">
-                <input type="text" value="${escapeHtml(item.store)}"
-                  onchange="InvestmentApp.updateField(${item.id}, 'store', this.value)"
-                  class="w-full liquid-input px-2.5 py-1 text-xs text-slate-800 font-medium">
-                ${(item.store === 'Amazon' && (item.url || (item.product || '').toLowerCase().includes('list'))) ? `
-                  <a href="${item.url || 'https://www.amazon.com.mx/dp/B0FGNJ78YG?ref=ppx_yo2ov_dt_b_fed_asin_title'}" target="_blank" rel="noopener noreferrer"
-                    title="Ver producto comprado en Amazon México"
-                    class="p-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100/70 rounded transition-colors shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                  </a>
-                ` : ''}
-              </div>
+              <input type="text" value="${escapeHtml(item.store)}"
+                onchange="InvestmentApp.updateField(${item.id}, 'store', this.value)"
+                class="w-full liquid-input px-2.5 py-1 text-xs text-slate-800 font-medium">
             </td>
 
             <!-- 3. Concepto / Insumo -->
