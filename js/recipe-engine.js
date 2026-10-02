@@ -464,25 +464,6 @@ function collapseAllCategories() {
   window.renderRecipeCards();
 }
 
-function confirmResetRecipe() {
-  const modal = document.getElementById('reset-recipe-modal');
-  if (modal) modal.classList.remove('hidden');
-}
-
-function closeResetRecipeModal() {
-  const modal = document.getElementById('reset-recipe-modal');
-  if (modal) modal.classList.add('hidden');
-}
-
-function executeResetRecipe() {
-  localStorage.removeItem(STORAGE_KEY_RECIPE);
-  window.RecipeApp.data = JSON.parse(JSON.stringify(DEFAULT_RECIPE_DATA));
-  saveRecipeState();
-  window.renderRecipeCards();
-  closeResetRecipeModal();
-  if (window.showToast) window.showToast('Receta restablecida a los valores estándar', 'info');
-}
-
 function exportRecipeToCsv() {
   const rows = [];
   rows.push(['Sección', 'Ingrediente / Insumo', 'Cantidad Receta', 'Unidad', 'Precio General Paquete (MXN)', 'Costo en Receta (MXN)', 'Proveedor']);

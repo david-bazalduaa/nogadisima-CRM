@@ -446,7 +446,7 @@
       const badgeAll = document.getElementById('badge-filter-all');
       if (badgeAll) {
         if (qf) {
-          badgeAll.textContent = 'Restablecer Filtro';
+          badgeAll.textContent = 'Limpiar Filtro';
           badgeAll.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#1E222B] text-white font-numeric cursor-pointer shadow-xs hover:bg-slate-800 transition-all';
         } else {
           badgeAll.textContent = '95 Pedidos';

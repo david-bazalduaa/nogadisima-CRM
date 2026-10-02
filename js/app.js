@@ -356,23 +356,6 @@ window.handleNewExpenseSubmit = function(e) {
   });
 };
 
-window.openResetInvestmentsModal = function() {
-  const modal = document.getElementById('reset-investments-modal');
-  if (modal) modal.classList.remove('hidden');
-};
-
-window.closeResetInvestmentsModal = function() {
-  const modal = document.getElementById('reset-investments-modal');
-  if (modal) modal.classList.add('hidden');
-};
-
-window.executeResetInvestments = function() {
-  if (window.InvestmentApp && typeof window.InvestmentApp.resetToSeedData === 'function') {
-    window.InvestmentApp.resetToSeedData();
-  }
-  window.closeResetInvestmentsModal();
-};
-
 // ==========================================
 // 5. Control de Pedidos Modal & Helpers
 // ==========================================
@@ -451,23 +434,6 @@ window.handleNewOrderSubmit = function(e) {
   window.closeNewOrderModal();
 };
 
-window.openResetOrdersModal = function() {
-  const modal = document.getElementById('reset-orders-modal');
-  if (modal) modal.classList.remove('hidden');
-};
-
-window.closeResetOrdersModal = function() {
-  const modal = document.getElementById('reset-orders-modal');
-  if (modal) modal.classList.add('hidden');
-};
-
-window.executeResetOrders = function() {
-  if (window.OrdersApp && typeof window.OrdersApp.resetToSeedData === 'function') {
-    window.OrdersApp.resetToSeedData();
-  }
-  window.closeResetOrdersModal();
-};
-
 // ==========================================
 // 5. Inventory Modal Controllers
 // ==========================================
@@ -516,23 +482,6 @@ window.handleNewCustomItemSubmit = function(e) {
   }
 
   window.closeNewCustomItemModal();
-};
-
-window.openResetInventoryModal = function() {
-  const modal = document.getElementById('reset-inventory-modal');
-  if (modal) modal.classList.remove('hidden');
-};
-
-window.closeResetInventoryModal = function() {
-  const modal = document.getElementById('reset-inventory-modal');
-  if (modal) modal.classList.add('hidden');
-};
-
-window.executeResetInventory = function() {
-  if (window.InventoryApp && typeof window.InventoryApp.resetToSeedData === 'function') {
-    window.InventoryApp.resetToSeedData();
-  }
-  window.closeResetInventoryModal();
 };
 
 // ==========================================

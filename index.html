@@ -161,14 +161,6 @@
           </svg>
           <span>Exportar</span>
         </button>
-
-        <!-- Reset Default Recipe Pill -->
-        <button onclick="confirmResetRecipe()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-600 hover:text-slate-900 text-xs font-medium" title="Restablecer receta predeterminada de 7 piezas">
-          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          <span class="hidden sm:inline">Restablecer</span>
-        </button>
       </div>
 
     </header>
@@ -431,11 +423,6 @@
             class="liquid-pill px-3.5 py-2 inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all">
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Exportar CSV</span>
-          </button>
-
-          <button onclick="openResetInvestmentsModal()" 
-            class="p-2 text-slate-400 hover:text-amber-600 rounded-xl hover:bg-white/60 transition-colors" title="Restaurar datos base">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
           </button>
         </div>
       </div>
@@ -722,11 +709,6 @@
             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Exportar CSV</span>
           </button>
-
-          <button onclick="openResetOrdersModal()" 
-            class="p-2 text-slate-400 hover:text-amber-600 rounded-xl hover:bg-white/60 transition-colors" title="Restaurar datos base">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-          </button>
         </div>
       </div>
 
@@ -773,7 +755,7 @@
         <!-- KPI 3: Total Ventas / Total Pedidos (Quick Filter) -->
         <div id="card-filter-all" onclick="OrdersApp.quickFilter('all')" 
           class="liquid-card p-5 sm:p-6 flex flex-col justify-between cursor-pointer hover:bg-white/80 transition-all duration-200 group select-none"
-          title="Clic para restablecer y ver todas las 95 comandas">
+          title="Clic para ver todas las 95 comandas">
           <div>
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-800 transition-colors">Total Ventas / Pedidos</span>
@@ -1150,14 +1132,6 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center space-x-2.5 self-start md:self-auto">
-          <!-- Reset Seed Inventory Button -->
-          <button onclick="openResetInventoryModal()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-600 hover:text-slate-900 text-xs font-semibold transition-all" title="Restablecer existencias al balance físico auditado">
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path>
-            </svg>
-            <span class="hidden sm:inline">Restablecer Stock</span>
-          </button>
-
           <!-- Export CSV Button -->
           <button onclick="InventoryApp.exportCsv()" class="inline-flex items-center space-x-1.5 px-3.5 py-2 liquid-pill text-slate-700 text-xs font-semibold hover:text-slate-900 transition-all" title="Descargar reporte de inventario y compras en CSV">
             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -1411,27 +1385,6 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: CONFIRM RESET RECIPE (FROSTED GLASS)-->
-  <!-- ========================================== -->
-  <div id="reset-recipe-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
-    <div class="liquid-card p-7 max-w-sm w-full text-center">
-      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-      </div>
-      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restablecer Receta Predeterminada?</h3>
-      <p class="text-xs text-slate-500 mt-1.5">Se restaurarán las cantidades y precios estándar del lote de 7 piezas ($85.77/chile).</p>
-      <div class="flex items-center justify-center space-x-3 mt-6">
-        <button onclick="closeResetRecipeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
-          Cancelar
-        </button>
-        <button onclick="executeResetRecipe()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
-          Restablecer
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
   <!-- MODAL: REGISTRAR NUEVO GASTO (FROSTED GLASS)-->
   <!-- ========================================== -->
   <div id="new-expense-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
@@ -1513,27 +1466,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: CONFIRM RESET INVESTMENTS (GLASS)   -->
-  <!-- ========================================== -->
-  <div id="reset-investments-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
-    <div class="liquid-card p-7 max-w-sm w-full text-center">
-      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-      </div>
-      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restaurar Balance de Inversión?</h3>
-      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán los 108 gastos auditados originales ($26,579.75 MXN) distribuidos entre Nogadísima, Digs, Angy y Otros.</p>
-      <div class="flex items-center justify-center space-x-3 mt-6">
-        <button onclick="closeResetInvestmentsModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
-          Cancelar
-        </button>
-        <button onclick="executeResetInvestments()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
-          Restaurar
-        </button>
-      </div>
     </div>
   </div>
 
@@ -1626,27 +1558,6 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: CONFIRM RESET ORDERS (GLASS)        -->
-  <!-- ========================================== -->
-  <div id="reset-orders-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
-    <div class="liquid-card p-7 max-w-sm w-full text-center">
-      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-      </div>
-      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restaurar Pedidos Base?</h3>
-      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán las 95 comandas oficiales ($86,625.00 MXN en facturación y 332 chiles) y los 3 gastos de ganancia base ($2,008.30 MXN).</p>
-      <div class="flex items-center justify-center space-x-3 mt-6">
-        <button onclick="closeResetOrdersModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
-          Cancelar
-        </button>
-        <button onclick="executeResetOrders()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
-          Restaurar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
   <!-- MODAL: ADD CUSTOM INVENTORY ITEM (GLASS)   -->
   <!-- ========================================== -->
   <div id="new-custom-item-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
@@ -1729,27 +1640,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- MODAL: CONFIRM RESET INVENTORY (GLASS)    -->
-  <!-- ========================================== -->
-  <div id="reset-inventory-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xl hidden">
-    <div class="liquid-card p-7 max-w-sm w-full text-center">
-      <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 mx-auto flex items-center justify-center mb-4 shadow-sm">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>
-      </div>
-      <h3 class="text-base font-bold text-slate-900 font-heading">¿Restablecer Inventario Auditado?</h3>
-      <p class="text-xs text-slate-500 mt-1.5">Se restablecerán las existencias físicas iniciales verificadas (Tarjetas 51, Bolsas 61, Envases 117, Nuez 1,521g, Carnes, etc.).</p>
-      <div class="flex items-center justify-center space-x-3 mt-6">
-        <button onclick="closeResetInventoryModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-white/60 rounded-xl transition-colors">
-          Cancelar
-        </button>
-        <button onclick="executeResetInventory()" class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-md transition-colors">
-          Restaurar
-        </button>
-      </div>
     </div>
   </div>
 

@@ -507,7 +507,7 @@
                 <p class="font-bold text-slate-700 text-sm">No se encontraron registros</p>
                 <p class="text-xs text-slate-400">Prueba ajustando los filtros de búsqueda, mes o fuente de fondos.</p>
                 <button onclick="InvestmentApp.resetFilters()" class="mt-2 px-3 py-1.5 text-xs font-semibold liquid-pill text-slate-700">
-                  Restablecer Filtros
+                  Limpiar Filtros
                 </button>
               </div>
             </td>
