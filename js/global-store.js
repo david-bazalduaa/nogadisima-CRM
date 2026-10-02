@@ -1222,7 +1222,7 @@ const firebaseConfig = {
         }
         if (badge) {
           badge.setAttribute('title', 'Conectado a Firebase Realtime Database: Sincronización en vivo');
-          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/80 hover:bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-2xs backdrop-blur-md text-[11px] font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
@@ -1239,7 +1239,7 @@ const firebaseConfig = {
         }
         if (badge) {
           badge.setAttribute('title', 'Sincronizando cambios en la nube...');
-          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-amber-50/80 hover:bg-amber-50 text-amber-800 border border-amber-300/80 shadow-2xs backdrop-blur-md text-[11px] font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-50/80 hover:bg-amber-50 text-amber-800 border border-amber-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
@@ -1256,7 +1256,7 @@ const firebaseConfig = {
         }
         if (badge) {
           badge.setAttribute('title', 'Modo local: Cambios guardados en memoria local');
-          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-100/80 hover:bg-slate-100 text-slate-600 border border-slate-300/80 shadow-2xs backdrop-blur-md text-[11px] font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
+          badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100/80 hover:bg-slate-100 text-slate-600 border border-slate-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300';
