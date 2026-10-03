@@ -230,6 +230,26 @@ h1, h2, h3, .font-heading {
   transform: translateY(-2px);
 }
 
+/* Static Cards & Floating Suggestion Prompt: Prevent movement / jumping on hover */
+#expense-to-inventory-prompt,
+#expense-to-inventory-prompt:hover {
+  transform: translateX(-50%) !important;
+}
+
+#expense-to-inventory-prompt:hover {
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+}
+
+/* Modal Dialog Cards: Prevent shifting on hover */
+[id$="-modal"] .liquid-card,
+[id$="-modal"] .liquid-card:hover,
+.liquid-card-static,
+.liquid-card-static:hover {
+  transform: none !important;
+}
+
+
 /* ==========================================================================
    3. Apple iOS Control Center Selection Architecture
    (Elimination of Flat Dark Charcoal Blob #1E222B)
