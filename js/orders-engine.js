@@ -174,8 +174,11 @@
       perPage: 20
     },
     pricingTiers: { single: 280, pack2: 540, pack4: 1050 },
+    _isInitialized: false,
 
     init: function () {
+      if (this._isInitialized) return;
+      this._isInitialized = true;
       this.loadFromStorage();
       this.loadProfitExpensesFromStorage();
       this.pricingTiers = this.getPricingTiers();

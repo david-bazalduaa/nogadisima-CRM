@@ -175,8 +175,11 @@
       currentPage: 1,
       perPage: 25
     },
+    _isInitialized: false,
 
     init: function () {
+      if (this._isInitialized) return;
+      this._isInitialized = true;
       this.loadFromStorage();
       this.render();
 

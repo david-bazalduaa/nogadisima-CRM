@@ -451,8 +451,11 @@
       search: '',
       catalogFilter: 'todos' // 'todos', 'nogada', 'relleno', 'extras', 'empaque'
     },
+    _isInitialized: false,
 
     init: function () {
+      if (this._isInitialized) return;
+      this._isInitialized = true;
       this.loadFromStorage();
       this.syncWithRecipe();
       this.setActionFilter(this.filters.actionFilter);

@@ -25,11 +25,16 @@ const firebaseConfig = {
 (function (window) {
   'use strict';
 
+  // Global Outbound Write Lock Guard (Firebase Realtime Database as SSOT)
+  let isCloudHydrated = false;
+  window.isCloudHydrated = false;
+
   // 5-Year Rolling Horizon Constants
   const SUPPORTED_YEARS = ['2026', '2027', '2028', '2029', '2030'];
 
   // Storage Keys
   const STORAGE_KEYS = {
+    MULTIVERSE_V2: 'nogadisima_multiverse_v2',
     MULTIVERSE_V1: 'nogadisima_multiverse_v1',
     DB_V2: 'nogadisima_db_v2', // backward-compatible mirror
     ACTIVE_YEAR: 'nogadisima_active_year',
@@ -46,12 +51,19 @@ const firebaseConfig = {
   const NogaStore = {
     SUPPORTED_YEARS: SUPPORTED_YEARS,
 
+    // Outbound Write Lock & State Hydration Flags
+    isCloudHydrated: false,
+    _isInitialized: false,
+    _isFirebaseInitialized: false,
+    _clientId: 'client_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now(),
+    _lastWrittenTimestamp: 0,
+
     // Firebase Cloud Synchronization Properties
     _firebaseApp: null,
     _firebaseDb: null,
     _dbRef: null,
     _connectedRef: null,
-    _connectionStatus: 'offline', // 'connected' | 'syncing' | 'offline'
+    _connectionStatus: 'connecting', // 'connected' | 'syncing' | 'connecting' | 'offline'
     _isReceivingRemoteSync: false,
     _isPerformingCloudSave: false,
     _cloudSaveTimer: null,
@@ -126,13 +138,32 @@ const firebaseConfig = {
     _listeners: {},
 
     init: function () {
+      if (this._isInitialized) return;
+      this._isInitialized = true;
+
+      // 1. Force outbound write lock guard
+      isCloudHydrated = false;
+      window.isCloudHydrated = false;
+      this.isCloudHydrated = false;
+
+      // 2. Load cached local database if available (for instant offline render)
       this.loadAll();
-      this.ensureSeedData();
+      this._syncStatePointer();
       this._bindStorageListener();
-      this.updateYearSelectorUI(this.getActiveYear());
-      this.updateYearDependentFormElements(this.getActiveYear());
-      this._initFirebase();
-      console.log('NogaStore: Scalable Multi-Year Store initialized (Active: ' + this.getActiveYear() + ')');
+
+      const runBoot = () => {
+        this.updateConnectionStatus('connecting', 'Conectando...');
+        this.updateYearSelectorUI(this.getActiveYear());
+        this.updateYearDependentFormElements(this.getActiveYear());
+        this._initFirebase();
+        console.log('NogaStore: Multi-Year Store booted (Active: ' + this.getActiveYear() + '). Waiting for cloud hydration.');
+      };
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        runBoot();
+      } else {
+        window.addEventListener('DOMContentLoaded', runBoot, { once: true });
+      }
     },
 
     getActiveYear: function () {
@@ -140,6 +171,64 @@ const firebaseConfig = {
     },
 
     // 3. Multi-Year Season Initialization & Seeding Engine
+    // Historical Master Dataset Seeder (Case 2: First-time cloud deployment only)
+    seedVerifiedHistoricalData: function () {
+      console.info('NogaStore: Seeding verified historical dataset (2026 baseline)...');
+
+      const baselineRecipe = (window.DEFAULT_RECIPE_DATA)
+        ? JSON.parse(JSON.stringify(window.DEFAULT_RECIPE_DATA))
+        : null;
+
+      const baselineInvestments = (window.INITIAL_INVESTMENTS && Array.isArray(window.INITIAL_INVESTMENTS))
+        ? JSON.parse(JSON.stringify(window.INITIAL_INVESTMENTS))
+        : [];
+
+      const baselineOrders = (window.INITIAL_ORDERS && Array.isArray(window.INITIAL_ORDERS))
+        ? JSON.parse(JSON.stringify(window.INITIAL_ORDERS))
+        : [];
+
+      const baselineProfitDraws = (window.INITIAL_PROFIT_EXPENSES && Array.isArray(window.INITIAL_PROFIT_EXPENSES))
+        ? JSON.parse(JSON.stringify(window.INITIAL_PROFIT_EXPENSES))
+        : [];
+
+      const baselineInventory = (window.INITIAL_INVENTORY_ITEMS && Array.isArray(window.INITIAL_INVENTORY_ITEMS))
+        ? JSON.parse(JSON.stringify(window.INITIAL_INVENTORY_ITEMS))
+        : [];
+
+      this.db = {
+        activeYear: '2026',
+        lastUpdated: Date.now(),
+        updatedBy: this._clientId,
+        years: {
+          '2026': {
+            recipe: baselineRecipe,
+            investments: baselineInvestments,
+            orders: baselineOrders,
+            profitDraws: baselineProfitDraws,
+            inventory: baselineInventory,
+            cutoffDay: 30,
+            pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
+          }
+        }
+      };
+
+      // Populate future rolling horizon years (2027 through 2030)
+      ['2027', '2028', '2029', '2030'].forEach(year => {
+        this.db.years[year] = {
+          recipe: baselineRecipe ? JSON.parse(JSON.stringify(baselineRecipe)) : null,
+          investments: [],
+          orders: [],
+          profitDraws: [],
+          inventory: this.initializeEmptyInventoryFromRecipe(baselineRecipe, baselineInventory),
+          cutoffDay: 30,
+          pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
+        };
+      });
+
+      this._syncStatePointer();
+      this._persistLocalMirrors();
+    },
+
     generateFutureYears: function (yearList, baseRecipe, baselineInventory) {
       const result = {};
       yearList.forEach(year => {
@@ -157,7 +246,8 @@ const firebaseConfig = {
 
     ensureSeedData: function () {
       let mutated = false;
-      const y26 = this.db.years['2026'];
+      const y26 = this.db.years ? this.db.years['2026'] : null;
+      if (!y26) return;
 
       // --- 2026 BASELINE SEEDING (100% Historical Real Data) ---
       if (!y26.recipe && window.DEFAULT_RECIPE_DATA) {
@@ -198,7 +288,8 @@ const firebaseConfig = {
             orders: [],
             profitDraws: [],
             inventory: [],
-            cutoffDay: 30
+            cutoffDay: 30,
+            pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
           };
           mutated = true;
         }
@@ -239,8 +330,9 @@ const firebaseConfig = {
       // Synchronize active year state pointer
       this._syncStatePointer();
 
+      // Only save locally; never trigger cloud save from ensureSeedData if not hydrated
       if (mutated) {
-        this.save();
+        this._persistLocalMirrors();
       }
     },
 
@@ -532,19 +624,25 @@ const firebaseConfig = {
       }
     },
 
-    // 7. Storage Persistence Engine (Multiverse v1)
+    // 7. Storage Persistence Engine (Multiverse v2 & v1 Fallback)
     loadAll: function () {
       let loadedDb = null;
       try {
-        // Priority 1: Check master multiverse storage key
-        const multiStr = localStorage.getItem(STORAGE_KEYS.MULTIVERSE_V1);
-        if (multiStr) {
-          loadedDb = JSON.parse(multiStr);
+        // Priority 1: Check master multiverse v2 storage key
+        const multi2Str = localStorage.getItem(STORAGE_KEYS.MULTIVERSE_V2);
+        if (multi2Str) {
+          loadedDb = JSON.parse(multi2Str);
         } else {
-          // Priority 2: Fallback to nogadisima_db_v2
-          const db2Str = localStorage.getItem(STORAGE_KEYS.DB_V2);
-          if (db2Str) {
-            loadedDb = JSON.parse(db2Str);
+          // Priority 2: Check master multiverse v1 storage key
+          const multi1Str = localStorage.getItem(STORAGE_KEYS.MULTIVERSE_V1);
+          if (multi1Str) {
+            loadedDb = JSON.parse(multi1Str);
+          } else {
+            // Priority 3: Fallback to nogadisima_db_v2
+            const db2Str = localStorage.getItem(STORAGE_KEYS.DB_V2);
+            if (db2Str) {
+              loadedDb = JSON.parse(db2Str);
+            }
           }
         }
       } catch (e) {
@@ -632,71 +730,9 @@ const firebaseConfig = {
       this.db.activeYear = '2026';
     },
 
-    // 7. Active Tab Detection Helper
-    getActiveTab: function () {
-      const panels = ['presupuesto', 'inversion', 'pedidos', 'inventario'];
-      for (let i = 0; i < panels.length; i++) {
-        const el = document.getElementById(`panel-${panels[i]}`);
-        if (el && !el.classList.contains('hidden')) return panels[i];
-      }
-      return 'presupuesto';
-    },
-
-    // 8. High-Performance Debounced Persistence Architecture (Local + Cloud)
-    _saveTimer: null,
-    _pendingSave: false,
-
-    save: function (immediate = false) {
-      // 1. Immediately sync in-memory active year pointers (0ms latency for queries)
-      const year = this.getActiveYear();
-      if (this.db.years && this.db.years[year]) {
-        this.db.years[year].recipe = this.state.recipe;
-        this.db.years[year].investments = this.state.investments;
-        this.db.years[year].orders = this.state.orders;
-        this.db.years[year].profitDraws = this.state.profitDraws;
-        this.db.years[year].inventory = this.state.inventory;
-        this.db.years[year].cutoffDay = this.state.cutoffDay;
-        this.db.years[year].pricingTiers = this.state.pricingTiers;
-      }
-
-      this._pendingSave = true;
-
-      if (immediate) {
-        this._flushSave();
-      } else if (!this._saveTimer) {
-        // Batch multiple rapid keystrokes/actions into a single non-blocking disk flush (250ms)
-        this._saveTimer = setTimeout(() => {
-          this._saveTimer = null;
-          this._flushSave();
-        }, 250);
-      }
-
-      // 2. Multi-user cloud write (Firebase Realtime Database) with 300ms debounce
-      if (!this._isReceivingRemoteSync) {
-        this._scheduleCloudSave(immediate);
-      }
-    },
-
-    _flushSave: function () {
-      if (!this._pendingSave) return;
-      this._pendingSave = false;
-      if (this._saveTimer) {
-        clearTimeout(this._saveTimer);
-        this._saveTimer = null;
-      }
-
+    _persistLegacyMirrors: function () {
       try {
         const year = this.getActiveYear();
-        const serializedDb = JSON.stringify(this.db);
-
-        // Persist primary multiverse root database
-        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, serializedDb);
-        localStorage.setItem(STORAGE_KEYS.ACTIVE_YEAR, year);
-
-        // Keep nogadisima_db_v2 synced for backward compatibility
-        localStorage.setItem(STORAGE_KEYS.DB_V2, serializedDb);
-
-        // Keep 2026 legacy keys mirrored for 100% historical data preservation
         if (year === '2026') {
           if (this.state.recipe) {
             localStorage.setItem(STORAGE_KEYS.RECIPE_LEGACY, JSON.stringify(this.state.recipe));
@@ -718,8 +754,87 @@ const firebaseConfig = {
           }
         }
       } catch (e) {
+        console.warn('NogaStore: Error updating legacy mirrors:', e);
+      }
+    },
+
+    _persistLocalMirrors: function () {
+      try {
+        const year = this.getActiveYear();
+        const serialized = JSON.stringify(this.db);
+        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V2, serialized);
+        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, serialized);
+        localStorage.setItem(STORAGE_KEYS.DB_V2, serialized);
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_YEAR, year);
+        this._persistLegacyMirrors();
+      } catch (e) {
         console.error('NogaStore: Error persisting database to localStorage:', e);
       }
+    },
+
+    // 7. Active Tab Detection Helper
+    getActiveTab: function () {
+      const panels = ['presupuesto', 'inversion', 'pedidos', 'inventario'];
+      for (let i = 0; i < panels.length; i++) {
+        const el = document.getElementById(`panel-${panels[i]}`);
+        if (el && !el.classList.contains('hidden')) return panels[i];
+      }
+      return 'presupuesto';
+    },
+
+    // 8. High-Performance Debounced Persistence Architecture (Local + Cloud)
+    _saveTimer: null,
+    _pendingSave: false,
+
+    persistState: function (immediate = false) {
+      this.save(immediate);
+    },
+
+    save: function (immediate = false) {
+      // 1. Immediately sync in-memory active year pointers (0ms latency for queries)
+      const year = this.getActiveYear();
+      if (this.db.years && this.db.years[year]) {
+        this.db.years[year].recipe = this.state.recipe;
+        this.db.years[year].investments = this.state.investments;
+        this.db.years[year].orders = this.state.orders;
+        this.db.years[year].profitDraws = this.state.profitDraws;
+        this.db.years[year].inventory = this.state.inventory;
+        this.db.years[year].cutoffDay = this.state.cutoffDay;
+        this.db.years[year].pricingTiers = this.state.pricingTiers;
+      }
+
+      this.db.lastUpdated = Date.now();
+      this._pendingSave = true;
+
+      if (immediate) {
+        this._flushSave();
+      } else if (!this._saveTimer) {
+        // Batch multiple rapid keystrokes/actions into a single non-blocking disk flush (250ms)
+        this._saveTimer = setTimeout(() => {
+          this._saveTimer = null;
+          this._flushSave();
+        }, 250);
+      }
+
+      // 2. Multi-user cloud write (Firebase Realtime Database) with 300ms debounce
+      // Strict guard: ONLY schedule if already cloud-hydrated and not receiving remote sync
+      if (!this._isReceivingRemoteSync) {
+        if (!this.isCloudHydrated) {
+          console.warn("Outbound sync blocked: Waiting for initial cloud hydration.");
+          return;
+        }
+        this._scheduleCloudSave(immediate);
+      }
+    },
+
+    _flushSave: function () {
+      if (!this._pendingSave) return;
+      this._pendingSave = false;
+      if (this._saveTimer) {
+        clearTimeout(this._saveTimer);
+        this._saveTimer = null;
+      }
+      this._persistLocalMirrors();
     },
 
     // 9. Reactive State Accessors (Year-Scoped)
@@ -984,7 +1099,11 @@ const firebaseConfig = {
       return firebaseConfig;
     },
 
-    _initFirebase: function () {
+    _initFirebase: function (forceReinit = false) {
+      if (this._isFirebaseInitialized && !forceReinit) {
+        return;
+      }
+
       if (typeof window.firebase === 'undefined' || !window.firebase.initializeApp) {
         console.warn('NogaStore: Firebase SDK no cargado vía CDN. Ejecutando en modo local.');
         this.updateConnectionStatus('offline');
@@ -1005,42 +1124,62 @@ const firebaseConfig = {
       }
 
       try {
-        if (!firebase.apps || firebase.apps.length === 0) {
-          this._firebaseApp = firebase.initializeApp(activeConfig);
-        } else {
-          this._firebaseApp = firebase.apps[0];
+        const fb = window.firebase || (typeof firebase !== 'undefined' ? firebase : null);
+        if (!fb) {
+          throw new Error('Firebase SDK reference not found on window or scope.');
         }
 
-        this._firebaseDb = firebase.database();
+        if (!fb.apps || fb.apps.length === 0) {
+          this._firebaseApp = fb.initializeApp(activeConfig);
+        } else {
+          this._firebaseApp = fb.apps[0];
+        }
+
+        this._firebaseDb = fb.database();
         this._dbRef = this._firebaseDb.ref('nogadisima_crm');
         this._connectedRef = this._firebaseDb.ref('.info/connected');
+        this._isFirebaseInitialized = true;
+
+        // Show discreet connecting pulse during initial startup
+        this.updateConnectionStatus('connecting', 'Conectando...');
 
         // 1. Connection health monitor
         this._connectedRef.on('value', (snap) => {
           const isConnected = (snap.val() === true);
           if (isConnected) {
-            this.updateConnectionStatus('connected');
-            if (this._hasUnsyncedLocalChanges) {
-              this._scheduleCloudSave(true);
+            if (this.isCloudHydrated) {
+              this.updateConnectionStatus('connected');
+              if (this._hasUnsyncedLocalChanges) {
+                this._scheduleCloudSave(true);
+              }
+            } else {
+              this.updateConnectionStatus('connecting', 'Conectando...');
             }
           } else {
             this.updateConnectionStatus('offline');
           }
         });
 
-        // 2. Real-time root database listener (Two-way sync)
+        // 2. Real-time root database listener (Cloud-First SSOT Handshake)
         this._dbRef.on('value', (snapshot) => {
           const remoteVal = snapshot.val();
-          this._handleRemoteCloudSync(remoteVal);
+          this._handleRemoteCloudSync(remoteVal, snapshot.exists());
         }, (error) => {
           console.warn('NogaStore: Error en listener de Firebase Realtime Database:', error);
           this.updateConnectionStatus('offline');
         });
 
+        // Fallback safety timeout: if after 5 seconds neither connected nor snapshot received
+        setTimeout(() => {
+          if (!this.isCloudHydrated && this._connectionStatus === 'connecting') {
+            this.updateConnectionStatus('offline');
+          }
+        }, 5000);
+
         // 3. Optional Analytics initialization
-        if (typeof firebase.analytics === 'function') {
+        if (typeof fb.analytics === 'function') {
           try {
-            firebase.analytics();
+            fb.analytics();
           } catch (e) {}
         }
 
@@ -1051,107 +1190,211 @@ const firebaseConfig = {
       }
     },
 
-    _handleRemoteCloudSync: function (remoteData) {
+    _handleRemoteCloudSync: function (remoteVal, snapshotExists = true) {
+      // 1. Echo preventer: ignore self-originated writes
       if (this._isPerformingCloudSave) {
-        // Echo preventer from local outgoing save
+        return;
+      }
+      if (remoteVal && remoteVal.updatedBy === this._clientId && remoteVal.lastUpdated === this._lastWrittenTimestamp) {
         return;
       }
 
-      if (!remoteData || !remoteData.years) {
-        // Database is newly created: seed it with local verified dataset
-        console.log('NogaStore: Base de datos en la nube vacía. Subiendo datos maestros verificados...');
-        this._scheduleCloudSave(true);
-        return;
-      }
+      const hasValidCloudData = Boolean(
+        snapshotExists &&
+        remoteVal &&
+        remoteVal.years &&
+        typeof remoteVal.years === 'object' &&
+        (remoteVal.years['2026'] || Object.keys(remoteVal.years).length > 0)
+      );
 
-      this._isReceivingRemoteSync = true;
-      this._lastSyncTime = new Date();
-
-      try {
-        const activeYear = this.getActiveYear();
-        const prevYearData = (this.db && this.db.years) ? this.db.years[activeYear] : null;
-        const newYearData = remoteData.years ? remoteData.years[activeYear] : null;
-
-        // Apply remote database
-        this.db = remoteData;
-        this._syncStatePointer();
-
-        // Keep local mirror storage synchronized
-        const serialized = JSON.stringify(this.db);
-        localStorage.setItem(STORAGE_KEYS.MULTIVERSE_V1, serialized);
-        localStorage.setItem(STORAGE_KEYS.DB_V2, serialized);
-
-        // Targeted DOM Patching (0 FPS stutter, avoid blanket innerHTML resets on unchanged rows)
-        if (prevYearData && newYearData) {
-          // A. Orders patching
-          if (window.OrdersApp) {
-            const oldOrders = prevYearData.orders || [];
-            const newOrders = newYearData.orders || [];
-            window.OrdersApp.orders = newOrders;
-            window.OrdersApp.profitExpenses = newYearData.profitDraws || [];
-            window.OrdersApp.pricingTiers = newYearData.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
-
-            if (oldOrders.length === newOrders.length && typeof window.OrdersApp.patchOrderRow === 'function') {
-              for (let i = 0; i < newOrders.length; i++) {
-                if (JSON.stringify(oldOrders[i]) !== JSON.stringify(newOrders[i])) {
-                  window.OrdersApp.patchOrderRow(newOrders[i].id);
-                }
-              }
-              window.OrdersApp.renderKpiCards();
-              window.OrdersApp.renderPipelinePills();
-            } else {
-              window.OrdersApp.render();
-            }
-          }
-
-          // B. Investments patching
-          if (window.InvestmentApp) {
-            const oldInv = prevYearData.investments || [];
-            const newInv = newYearData.investments || [];
-            window.InvestmentApp.items = newInv;
-            window.InvestmentApp.cutoffDay = newYearData.cutoffDay || 30;
-
-            if (oldInv.length === newInv.length && typeof window.InvestmentApp.patchExpenseRow === 'function') {
-              for (let i = 0; i < newInv.length; i++) {
-                if (JSON.stringify(oldInv[i]) !== JSON.stringify(newInv[i])) {
-                  window.InvestmentApp.patchExpenseRow(newInv[i].id);
-                }
-              }
-              window.InvestmentApp.renderKpiCards();
-            } else {
-              window.InvestmentApp.render();
-            }
-          }
-
-          // C. Inventory patching
-          if (window.InventoryApp) {
-            window.InventoryApp.items = newYearData.inventory || [];
-            window.InventoryApp.render();
-          }
-
-          // D. Recipe patching
-          if (window.RecipeApp && newYearData.recipe) {
-            window.RecipeApp.data = newYearData.recipe;
-            if (typeof window.renderRecipeCards === 'function') {
-              window.renderRecipeCards();
-            }
-          }
-        } else {
+      // Case 2: Cloud is Completely Empty (First-time deployment only)
+      if (!hasValidCloudData) {
+        if (!this.isCloudHydrated) {
+          console.info('NogaStore: Cloud root is empty. Initializing and pushing verified historical seed data...');
+          this.seedVerifiedHistoricalData();
+          isCloudHydrated = true;
+          window.isCloudHydrated = true;
+          this.isCloudHydrated = true;
+          this.saveToFirebase(this.db);
           this._pushStateToModules();
           this._reRenderAllModules();
+          this.updateConnectionStatus('connected');
+          this._lastSyncTime = new Date();
+          this.emit('cloud:synced', { timestamp: this._lastSyncTime, type: 'initial-seed' });
         }
-
-        this.updateConnectionStatus('connected');
-        this.emit('cloud:synced', { timestamp: this._lastSyncTime });
-      } catch (err) {
-        console.error('NogaStore: Error procesando sincronización remota:', err);
-      } finally {
-        this._isReceivingRemoteSync = false;
+        return;
       }
+
+      // Case 1: Cloud Data Exists
+      const remoteTime = Number(remoteVal.lastUpdated) || 0;
+      const localTime = Number(this.db.lastUpdated) || 0;
+
+      // Only accept if remote is newer, or if this is the initial hydration
+      if (!this.isCloudHydrated || remoteTime >= localTime || !localTime) {
+        this._isReceivingRemoteSync = true;
+        this._lastSyncTime = new Date();
+
+        try {
+          const activeYear = this.getActiveYear();
+          const prevYearData = (this.db && this.db.years) ? this.db.years[activeYear] : null;
+
+          // Replace in-memory database entirely with cloud snapshot
+          const activeYearToRetain = this.getActiveYear();
+          this.db = remoteVal;
+          if (!this.db.activeYear || !SUPPORTED_YEARS.includes(this.db.activeYear)) {
+            this.db.activeYear = activeYearToRetain;
+          }
+
+          // Ensure all supported rolling horizon years are structurally present
+          SUPPORTED_YEARS.forEach(y => {
+            if (!this.db.years[y]) {
+              this.db.years[y] = {
+                recipe: null,
+                investments: [],
+                orders: [],
+                profitDraws: [],
+                inventory: [],
+                cutoffDay: 30,
+                pricingTiers: { single: 280, pack2: 540, pack4: 1050 }
+              };
+            }
+          });
+
+          // Release the outbound write lock
+          isCloudHydrated = true;
+          window.isCloudHydrated = true;
+          this.isCloudHydrated = true;
+
+          // Update local cache in background (without echo write)
+          this._syncStatePointer();
+          this._persistLocalMirrors();
+
+          const newYearData = (this.db.years) ? this.db.years[this.getActiveYear()] : null;
+
+          // Targeted DOM Patching (0 FPS stutter, avoid blanket innerHTML resets on unchanged rows)
+          if (prevYearData && newYearData) {
+            this._patchModulesWithRemoteData(prevYearData, newYearData);
+          } else {
+            this._pushStateToModules();
+            this._reRenderAllModules();
+          }
+
+          this.updateConnectionStatus('connected');
+          this.emit('cloud:synced', { timestamp: this._lastSyncTime, type: 'remote-update' });
+        } catch (err) {
+          console.error('NogaStore: Error procesando sincronización remota:', err);
+        } finally {
+          this._isReceivingRemoteSync = false;
+        }
+      }
+    },
+
+    _patchModulesWithRemoteData: function (prevYearData, newYearData) {
+      // A. Orders patching
+      if (window.OrdersApp) {
+        const oldOrders = prevYearData.orders || [];
+        const newOrders = newYearData.orders || [];
+        window.OrdersApp.orders = newOrders;
+        window.OrdersApp.profitExpenses = newYearData.profitDraws || [];
+        window.OrdersApp.pricingTiers = newYearData.pricingTiers || { single: 280, pack2: 540, pack4: 1050 };
+
+        if (oldOrders.length === newOrders.length && typeof window.OrdersApp.patchOrderRow === 'function') {
+          for (let i = 0; i < newOrders.length; i++) {
+            if (JSON.stringify(oldOrders[i]) !== JSON.stringify(newOrders[i])) {
+              window.OrdersApp.patchOrderRow(newOrders[i].id);
+            }
+          }
+          window.OrdersApp.renderKpiCards();
+          window.OrdersApp.renderPipelinePills();
+        } else {
+          window.OrdersApp.render();
+        }
+      }
+
+      // B. Investments patching
+      if (window.InvestmentApp) {
+        const oldInv = prevYearData.investments || [];
+        const newInv = newYearData.investments || [];
+        window.InvestmentApp.items = newInv;
+        window.InvestmentApp.cutoffDay = newYearData.cutoffDay || 30;
+
+        if (oldInv.length === newInv.length && typeof window.InvestmentApp.patchExpenseRow === 'function') {
+          for (let i = 0; i < newInv.length; i++) {
+            if (JSON.stringify(oldInv[i]) !== JSON.stringify(newInv[i])) {
+              window.InvestmentApp.patchExpenseRow(newInv[i].id);
+            }
+          }
+          window.InvestmentApp.renderKpiCards();
+        } else {
+          window.InvestmentApp.render();
+        }
+      }
+
+      // C. Inventory patching
+      if (window.InventoryApp) {
+        window.InventoryApp.items = newYearData.inventory || [];
+        window.InventoryApp.render();
+      }
+
+      // D. Recipe patching
+      if (window.RecipeApp && newYearData.recipe) {
+        window.RecipeApp.data = newYearData.recipe;
+        if (typeof window.renderRecipeCards === 'function') {
+          window.renderRecipeCards();
+        }
+      }
+    },
+
+    saveToFirebase: function (state) {
+      // Strict rule: ABORT any cloud push if the initial cloud fetch has NOT resolved yet
+      if (!this.isCloudHydrated) {
+        console.warn("Outbound sync blocked: Waiting for initial cloud hydration.");
+        return Promise.reject(new Error("Outbound sync blocked: Waiting for initial cloud hydration."));
+      }
+
+      if (!this._dbRef) {
+        this._hasUnsyncedLocalChanges = true;
+        console.warn("Outbound sync blocked: No Firebase database reference.");
+        return Promise.resolve();
+      }
+
+      const currentState = state || this.db;
+      const now = Date.now();
+      this.db.lastUpdated = now;
+      this._lastWrittenTimestamp = now;
+      this._isPerformingCloudSave = true;
+
+      // Attach an atomic timestamp & client author to every write
+      const payload = {
+        ...JSON.parse(JSON.stringify(currentState)),
+        lastUpdated: now,
+        updatedBy: this._clientId
+      };
+
+      this.updateConnectionStatus('syncing');
+
+      return this._dbRef.set(payload)
+        .then(() => {
+          this._isPerformingCloudSave = false;
+          this._hasUnsyncedLocalChanges = false;
+          this._lastSyncTime = new Date();
+          this.updateConnectionStatus('connected');
+        })
+        .catch((err) => {
+          this._isPerformingCloudSave = false;
+          this._hasUnsyncedLocalChanges = true;
+          console.error("Firebase write error:", err);
+          this.updateConnectionStatus('offline');
+        });
     },
 
     _scheduleCloudSave: function (immediate = false) {
       if (this._isReceivingRemoteSync) return;
+
+      if (!this.isCloudHydrated) {
+        console.warn("Outbound sync blocked: Waiting for initial cloud hydration.");
+        return;
+      }
 
       if (!this._dbRef) {
         this._hasUnsyncedLocalChanges = true;
@@ -1162,7 +1405,12 @@ const firebaseConfig = {
       this.updateConnectionStatus('syncing');
 
       if (immediate) {
-        this._performCloudSave();
+        if (this._cloudSaveTimer) {
+          clearTimeout(this._cloudSaveTimer);
+          this._cloudSaveTimer = null;
+        }
+        this._pendingCloudSave = false;
+        this.saveToFirebase(this.db);
         return;
       }
 
@@ -1172,34 +1420,19 @@ const firebaseConfig = {
       }
       this._cloudSaveTimer = setTimeout(() => {
         this._cloudSaveTimer = null;
-        this._performCloudSave();
+        if (this._pendingCloudSave) {
+          this._pendingCloudSave = false;
+          this.saveToFirebase(this.db);
+        }
       }, 300);
     },
 
     _performCloudSave: function () {
-      if (!this._pendingCloudSave || !this._dbRef) return;
-      this._pendingCloudSave = false;
-      if (this._cloudSaveTimer) {
-        clearTimeout(this._cloudSaveTimer);
-        this._cloudSaveTimer = null;
+      if (!this.isCloudHydrated) {
+        console.warn("Outbound sync blocked: Waiting for initial cloud hydration.");
+        return;
       }
-
-      this._isPerformingCloudSave = true;
-      const payload = JSON.parse(JSON.stringify(this.db));
-
-      this._dbRef.set(payload)
-        .then(() => {
-          this._isPerformingCloudSave = false;
-          this._hasUnsyncedLocalChanges = false;
-          this._lastSyncTime = new Date();
-          this.updateConnectionStatus('connected');
-        })
-        .catch((err) => {
-          this._isPerformingCloudSave = false;
-          this._hasUnsyncedLocalChanges = true;
-          console.warn('NogaStore: Error al guardar en Firebase. Cambios respaldados localmente:', err);
-          this.updateConnectionStatus('offline');
-        });
+      this.saveToFirebase(this.db);
     },
 
     updateConnectionStatus: function (status, customLabel) {
@@ -1221,29 +1454,29 @@ const firebaseConfig = {
           dot.className = 'liquid-status-jewel status-connected animate-glass-pulse';
         }
         if (badge) {
-          badge.setAttribute('title', 'Conectado a Firebase Realtime Database: Sincronización en vivo');
+          badge.setAttribute('title', 'Firebase Realtime Database: En vivo (Sincronizado)');
           badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50/80 hover:bg-emerald-50 text-emerald-800 border border-emerald-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
-          const innerDot = modalBadge.querySelector('span:first-child');
+          const innerDot = modalBadge.querySelector ? modalBadge.querySelector('span:first-child') : null;
           if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600';
         }
         if (modalDot) {
           modalDot.className = 'liquid-status-jewel status-connected animate-glass-pulse';
         }
-      } else if (status === 'syncing') {
-        labelText = customLabel || 'Sincronizando...';
+      } else if (status === 'syncing' || status === 'connecting') {
+        labelText = customLabel || (status === 'connecting' || !this.isCloudHydrated ? 'Conectando...' : 'Sincronizando...');
         if (dot) {
           dot.className = 'liquid-status-jewel status-syncing animate-pulse';
         }
         if (badge) {
-          badge.setAttribute('title', 'Sincronizando cambios en la nube...');
+          badge.setAttribute('title', 'Sincronizando con la nube...');
           badge.className = 'hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-50/80 hover:bg-amber-50 text-amber-800 border border-amber-300/80 shadow-xs backdrop-blur-md text-xs font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer active:scale-98';
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
-          const innerDot = modalBadge.querySelector('span:first-child');
+          const innerDot = modalBadge.querySelector ? modalBadge.querySelector('span:first-child') : null;
           if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
         }
         if (modalDot) {
@@ -1260,7 +1493,7 @@ const firebaseConfig = {
         }
         if (modalBadge) {
           modalBadge.className = 'inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300';
-          const innerDot = modalBadge.querySelector('span:first-child');
+          const innerDot = modalBadge.querySelector ? modalBadge.querySelector('span:first-child') : null;
           if (innerDot) innerDot.className = 'w-1.5 h-1.5 rounded-full bg-slate-400';
         }
         if (modalDot) {
@@ -1287,7 +1520,7 @@ const firebaseConfig = {
       window.addEventListener('storage', (e) => {
         if (!e.key) return;
 
-        if (e.key === STORAGE_KEYS.MULTIVERSE_V1 || e.key === STORAGE_KEYS.DB_V2) {
+        if (e.key === STORAGE_KEYS.MULTIVERSE_V2 || e.key === STORAGE_KEYS.MULTIVERSE_V1 || e.key === STORAGE_KEYS.DB_V2) {
           try {
             const remoteDb = JSON.parse(e.newValue || '{}');
             if (remoteDb && remoteDb.years) {
@@ -1319,7 +1552,7 @@ const firebaseConfig = {
       });
 
       window.addEventListener('online', () => {
-        if (this._hasUnsyncedLocalChanges && this._dbRef) {
+        if (this._hasUnsyncedLocalChanges && this._dbRef && this.isCloudHydrated) {
           this._scheduleCloudSave(true);
         }
       });
@@ -1328,6 +1561,13 @@ const firebaseConfig = {
 
   // Expose to window and initialize immediately
   window.NogaStore = NogaStore;
+  window.isCloudHydrated = false;
+  window.saveToFirebase = function (state) {
+    return NogaStore.saveToFirebase(state);
+  };
+  window.persistState = function (immediate) {
+    return NogaStore.save(immediate);
+  };
 
   // Cloud Sync Modal Global Handlers
   window.openCloudSyncModal = function () {
@@ -1373,17 +1613,14 @@ const firebaseConfig = {
 
     localStorage.setItem(STORAGE_KEYS.FIREBASE_CUSTOM_CONFIG, JSON.stringify(customCfg));
     if (window.showToast) window.showToast('Configuración guardada. Conectando a Firebase...', 'info');
-    NogaStore._initFirebase();
-    window.closeCloudSyncModal();
-  };
 
-  window.handleForceCloudSync = function () {
-    if (NogaStore._dbRef) {
-      NogaStore._scheduleCloudSave(true);
-      if (window.showToast) window.showToast('Sincronización forzada a la nube enviada', 'info');
-    } else {
-      if (window.showToast) window.showToast('Modo local: no hay conexión de Firebase activa', 'warning');
-    }
+    // Reset hydration state on new project credentials
+    isCloudHydrated = false;
+    window.isCloudHydrated = false;
+    NogaStore.isCloudHydrated = false;
+    NogaStore._isFirebaseInitialized = false;
+    NogaStore._initFirebase(true);
+    window.closeCloudSyncModal();
   };
 
   NogaStore.init();
